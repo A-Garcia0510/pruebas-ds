@@ -61,7 +61,7 @@ $categorias = $productObj->getAllCategories();
                 const nombre_imagen = producto.nombre_producto.toLowerCase().replace(/ /g, '_') + '.jpg';
                 productosDiv.innerHTML += `
                     <div class='producto'>
-                        <img src='../imagenes/${nombre_imagen}' alt='${producto.nombre_producto}' />
+                        <img src='../IMG/${nombre_imagen}' alt='${producto.nombre_producto}' />
                         <div>
                             <h2>${producto.nombre_producto}</h2>
                             <p class="precio">Precio: $${parseFloat(producto.precio).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>

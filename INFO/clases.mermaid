@@ -1,0 +1,68 @@
+classDiagram
+    class Database {
+        -instance: Database
+        -conn: mysqli
+        -servidor: string
+        -user: string
+        -password: string
+        -basedato: string
+        -__construct()
+        +getInstance() Database
+        +getConnection() mysqli
+        +prepare(sql) mysqli_stmt
+        +query(sql) mysqli_result
+        +close()
+    }
+
+    class User {
+        -db: Database
+        +__construct()
+        +login(correo, contraseña) bool
+        +register(nombre, apellidos, correo, contraseña) array
+        +emailExists(correo) bool
+        +getUserData(correo) array
+        +logout()
+    }
+
+    class Product {
+        -db: Database
+        +__construct()
+        +getAllProducts() array
+        +getProductsByCategory(categoria) array
+        +getAllCategories() array
+        +updateStock(productoID, cantidad) bool
+        +getProductById(productoID) array
+    }
+
+    class Cart {
+        -db: Database
+        -user: User
+        -product: Product
+        +__construct()
+        +getCartItems(correo) array
+        +addToCart(correo, productoID, cantidad) array
+        +removeFromCart(correo, productoID) array
+        +clearCart(correo) bool
+        +isCartEmpty(correo) bool
+        -getUserIdByEmail(correo) int
+    }
+
+    class Purchase {
+        -db: Database
+        -cart: Cart
+        -product: Product
+        +__construct()
+        +createPurchase(correo) array
+        +getPurchaseHistory(correo) array
+        +getPurchaseDetails(compraID) array
+        -getUserIdByEmail(correo) int
+    }
+
+    Database <-- User : usa
+    Database <-- Product : usa
+    Database <-- Cart : usa
+    Database <-- Purchase : usa
+    User <-- Cart : usa
+    Product <-- Cart : usa
+    Cart <-- Purchase : usa
+    Product <-- Purchase : usa

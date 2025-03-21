@@ -26,6 +26,11 @@ if (!isset($_SESSION['correo'])) {
     <button id="finalizarCompra" onclick="finalizarCompra()">Finalizar Compra</button>
 
     <script>
+        // Función para formatear números en formato CLP (con punto como separador de miles)
+        function formatearPrecioCLP(numero) {
+            return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
         // Función para obtener el carrito del usuario
         function obtenerCarrito() {
             fetch('obtener_carro.php')
@@ -63,9 +68,9 @@ if (!isset($_SESSION['correo'])) {
 
                 carritoDiv.innerHTML += `
                     <div class="producto">
-                        <img src="../imagenes/${nombre_imagen}" alt="${producto.nombre_producto}" width="100" />
+                        <img src="../IMG/${nombre_imagen}" alt="${producto.nombre_producto}" width="100" />
                         <h2>${producto.nombre_producto}</h2>
-                        <p>Precio: $${producto.precio}</p>
+                        <p>Precio: $${formatearPrecioCLP(producto.precio)}</p>
                         <p>Cantidad: ${producto.cantidad}</p>
                         <button onclick="eliminarDelCarrito(${producto.producto_ID})">Eliminar</button>
                     </div>
@@ -76,9 +81,9 @@ if (!isset($_SESSION['correo'])) {
             const totalConIVA = total + iva;
 
             document.getElementById('total').innerHTML = `
-                Subtotal: $${total.toFixed(0)}<br>
-                IVA (19%): $${iva.toFixed(0)}<br>
-                Total: $${totalConIVA.toFixed(0)}
+                Subtotal: $${formatearPrecioCLP(total)}<br>
+                IVA (19%): $${formatearPrecioCLP(iva)}<br>
+                Total: $${formatearPrecioCLP(totalConIVA)}
             `;
         }
 
