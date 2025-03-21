@@ -1,11 +1,6 @@
 <?php
-session_start(); 
-
-include '../conexion/conexion.inc'; 
-
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
-}
+session_start();
+require_once '../classes/Product.php';
 
 // Verificar si el usuario está logueado
 if (!isset($_SESSION['correo'])) {
@@ -16,14 +11,11 @@ if (!isset($_SESSION['correo'])) {
     exit();
 }
 
-$categoriaSql = "SELECT DISTINCT categoria FROM Producto";
-$categoriaResult = $conn->query($categoriaSql);
-$categorias = [];
-if ($categoriaResult->num_rows > 0) {
-    while($cat = $categoriaResult->fetch_assoc()) {
-        $categorias[] = $cat['categoria'];
-    }
-}
+// Crear instancia de la clase Product
+$productObj = new Product();
+
+// Obtener todas las categorías
+$categorias = $productObj->getAllCategories();
 ?>
 
 <!DOCTYPE html>
@@ -52,17 +44,8 @@ if ($categoriaResult->num_rows > 0) {
     </button>
 
     <script>
-        const productos = <?php
-            $sql = "SELECT * FROM Producto";
-            $result = $conn->query($sql);
-            $productosArray = [];
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    $productosArray[] = $row;
-                }
-            }
-            echo json_encode($productosArray);
-        ?>;
+        // Obtener todos los productos desde el servidor
+        const productos = <?php echo json_encode($productObj->getAllProducts()); ?>;
 
         function mostrarProductos(categoria) {
             const productosDiv = document.getElementById('productos');
@@ -110,6 +93,7 @@ if ($categoriaResult->num_rows > 0) {
             .catch(error => console.error('Error:', error));
         }
 
+        // Mostrar todos los productos al cargar la página
         mostrarProductos('todos');
     </script>
 </body>

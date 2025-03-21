@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../conexion/conexion.inc';
+require_once '../classes/Cart.php';
 
 if (!isset($_SESSION['correo'])) {
     echo json_encode(['success' => false, 'message' => 'Usuario no logueado.']);
@@ -9,19 +9,13 @@ if (!isset($_SESSION['correo'])) {
 
 $correoUsuario = $_SESSION['correo'];
 
-$sql = "SELECT u.usuario_ID, p.producto_ID, p.nombre_producto, p.precio, c.cantidad
-        FROM Carro c
-        JOIN Usuario u ON c.usuario_ID = u.usuario_ID
-        JOIN Producto p ON c.producto_ID = p.producto_ID
-        WHERE u.correo = '$correoUsuario'";
+// Crear instancia de la clase Cart
+$cartObj = new Cart();
 
-$result = $conn->query($sql);
-$carrito = [];
+// Obtener los productos del carrito
+$carrito = $cartObj->getCartItems($correoUsuario);
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $carrito[] = $row;
-    }
+if (!empty($carrito)) {
     echo json_encode(['success' => true, 'carrito' => $carrito]);
 } else {
     echo json_encode(['success' => false, 'message' => 'El carrito está vacío.']);
