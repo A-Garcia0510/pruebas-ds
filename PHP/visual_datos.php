@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('../conexion/conexion.inc');
+require_once '../classes/User.php';
 
 if (!isset($_SESSION['correo'])) {
     header("Location: ../login.html");
@@ -8,19 +8,16 @@ if (!isset($_SESSION['correo'])) {
 }
 
 $correo = $_SESSION['correo'];
+$user = new User();
+$userData = $user->getUserData($correo);
 
-$stmt = $conn->prepare("SELECT nombre, apellidos FROM Usuario WHERE correo = ?");
-if (!$stmt) {
-    die("Error en la preparación de la consulta: " . $conn->error);
+if (!$userData) {
+    echo "Error: No se pudieron recuperar los datos del usuario.";
+    exit();
 }
 
-$stmt->bind_param("s", $correo);
-$stmt->execute();
-$stmt->bind_result($nombre, $apellidos); 
-$stmt->fetch();
-
-$stmt->close();
-$conn->close();
+$nombre = $userData['nombre'];
+$apellidos = $userData['apellidos'];
 ?>
 
 <!DOCTYPE html>

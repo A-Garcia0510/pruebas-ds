@@ -4,24 +4,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include('../conexion/conexion.inc');
+require_once '../classes/User.php';
 
-$email = $_POST['correo'];
-$password = $_POST['contra'];
-
-// Consulta para verificar el usuario
-$sql = "SELECT * FROM Usuario WHERE correo = ?";
-$stmt =$conn->prepare($sql);
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $user = $result->fetch_assoc();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['correo'];
+    $password = $_POST['contra'];
     
-    if ($password === $user['contraseña']) { 
-        $_SESSION['correo'] = $email;
-        $_SESSION['mensaje'] = "Inicio de sesión exitoso.";
+    $user = new User();
+    $loginSuccess = $user->login($email, $password);
+    
+    if ($loginSuccess) {
         header("Location:../PHP/visual_datos.php");
         exit();
     } else {
@@ -30,13 +22,5 @@ if ($result->num_rows > 0) {
                 window.location.href='../login.html';
                 </script>";
     }
-} else {
-    echo "<script>
-            alert('Datos incorrectos. Por favor, inténtalo de nuevo.'); 
-            window.location.href='../login.html';
-            </script>";
 }
-
-$stmt->close();
-$conn->close();
 ?>

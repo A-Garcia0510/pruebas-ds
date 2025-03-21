@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include('../conexion/conexion.inc');
+require_once '../classes/User.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Recoger datos del formulario y sanitizar
@@ -11,40 +11,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $apellidos = trim($_POST['apellidos']);
     $correo = trim($_POST['correo']);
     $contra = $_POST['contra'];
-
-    if (strlen($contra) < 8) {
-        echo "<script>alert('La contraseña debe tener al menos 8 caracteres.'); window.history.back();</script>";
+    
+    $user = new User();
+    $resultado = $user->register($nombre, $apellidos, $correo, $contra);
+    
+    if ($resultado['success']) {
+        echo "<script>
+                alert('{$resultado['message']}');
+                window.location.href='../login.html';
+             </script>";
         exit();
-    }
-
-    // Verificar si el correo ya está registrado
-    $stmt =$conn->prepare("SELECT * FROM Usuario WHERE correo = ?");
-    $stmt->bind_param("s", $correo);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows > 0) {
-        echo "<script>alert('El correo ya está registrado.');</script>";
     } else {
-        $stmt->close();
-
-        $stmt =$conn->prepare("INSERT INTO Usuario (nombre, apellidos, correo, contraseña) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $nombre, $apellidos, $correo, $contra);
-
-        if ($stmt->execute()) {
-            echo "<script>alert('Registro exitoso. Puedes iniciar sesión ahora.');</script>";
-
-            header("Location: ../login.html");
-            exit();
-        } else {
-            echo "<script>alert('Error al registrar: " . $stmt->error . "');</script>";
-        }
+        echo "<script>
+                alert('{$resultado['message']}');
+                window.history.back();
+             </script>";
     }
-
-    // Cerrar la consulta
-    $stmt->close();
 }
-
-// Cerrar conexión
-$conn->close();
 ?>
