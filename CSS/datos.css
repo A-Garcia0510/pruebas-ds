@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  background-image: url(../menu.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff; 
+  margin: 0; 
+  padding: 20px; 
+  min-height: 100vh; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centrar el contenido verticalmente */
+}
+
+header {
+  padding: 15px 0; /* Más espacio para que el header se vea más elegante */
+}
+
+h1 {
+  color: #ffffff; 
+  font-size: 32px; /* Aumento del tamaño para hacerlo más prominente */
+  font-weight: bold; 
+  text-transform: uppercase; /* Para darle un toque más elegante */
+  letter-spacing: 1.5px; /* Añadir un poco de espacio entre letras */
+  margin-bottom: 20px; /* Espacio debajo del título */
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px; /* Añadí un poco más de espacio dentro de la caja */
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo un poco más oscuro para mayor contraste */
+  border-radius: 10px; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Agregar una sombra sutil */
+}
+
+table {
+  width: 100%; 
+  border-collapse: collapse; 
+  margin-top: 20px; 
+}
+
+th, td {
+  padding: 12px; /* Más espacio en las celdas */
+  text-align: left; 
+  border-bottom: 1px solid #ddd; 
+  font-size: 1.1em; /* Un poco más grande para mejor lectura */
+}
+
+th {
+  background-color: rgba(255, 255, 255, 0.2); 
+  color: orangered; 
+  font-weight: bold; /* Hacer el texto de los encabezados más fuerte */
+}
+
+.logout .button {
+  background-color: orangered; 
+  color: white; 
+  padding: 12px 24px; /* Aumenté el tamaño del botón */
+  text-decoration: none; 
+  border-radius: 8px; 
+  font-size: 1.1em; /* Hacer el texto más grande para mayor visibilidad */
+  display: inline-block; /* Asegurar que el botón no se expanda demasiado */
+  margin-top: 20px; /* Añadir algo de espacio encima */
+  transition: background-color 0.3s, transform 0.2s ease-in-out; /* Transición más suave */
+}
+
+.logout .button:hover {
+  background-color: rgb(255, 70, 70); 
+  transform: scale(1.05); /* Agrandar ligeramente el botón */
+}
+
+footer {
+  margin-top: 30px; 
+  padding: 15px 0;
+  background: rgba(253, 143, 0, 0.5); 
+  border-radius: 5px; 
+  font-size: 1em; /* Aumenté un poco el tamaño de la fuente */
+  color: white;
+}
+
+footer p {
+  margin: 0;
+}
+

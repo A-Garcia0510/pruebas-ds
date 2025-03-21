@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+/* Establece una imagen de fondo */
+body {
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  height: 620px;
+  width: 620px;
+  background-image: url(../img01.jpg);
+  background-size: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff; 
+  zoom: 100%; 
+}
+/* Estilo para el contenedor de logotipo (clase .logo-container) */
+.logo-container {
+  height: 50%;
+}
+/* Estilo para encabezados h1 */
+h1 {
+  color: orangered; 
+  font-family: 'Poppins', sans-serif; 
+  padding: 10px;
+  text-align:left;
+  font-size: 24px;
+}
+/* Estilo para encabezados h2 */
+h2 {
+  color: rgb(89, 89, 90); 
+  font-family: 'Poppins', sans-serif; 
+}
+/* Estilo para enlaces cuando se encuentran en estado "hover" */
+a:hover {
+  color: rgb(82, 87, 82); 
+}
+/* Estilo del encabezado */
+#header {
+  color: #ffffff;
+  padding: 5px 0;
+}
+/* Ajuste de tamaño de los productos */
+.producto {
+  width: calc(33.33% - 20px); 
+  margin: 0 10px 20px 0%;
+  padding: 10px;
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  background-color: #ccc;
+  color: #6b6767;
+  box-sizing: border-box;
+  text-align: center;
+  transition: background-color 0.3s;
+  max-width: 100%; 
+}
+
+#background-video {
+  position: fixed;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -1; /* Para que el video esté detrás del contenido */
+  object-fit: cover;
+  zoom: 1%;
+  right: 100px;
+  margin: 0 auto;
+  left: 0;
+}
+
+
+/* Estilos para imágenes dentro de elementos con la clase "producto" */
+.producto img {
+  width: 100%; 
+  max-width: 100px;
+  height: auto;
+}
+/* Estilos cuando se hace hover sobre elementos con la clase "producto" */
+.producto:hover {
+  background-color: #e9eef0; 
+}
+/* Estilos para elementos con la clase "titulo" */
+.titulo {
+  position: absolute;
+  top: 95px;
+  left: 10px;
+  color: orangered;
+  font-size: 24px;
+}
+/* Estilos para elementos con la clase "descripcion" */
+.descripcion {
+  height: 60px; 
+  overflow: hidden;
+}
+/* Estilos para elementos con la clase "titulo-separador" */
+.titulo-separador {
+  position: relative;
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  font-size: 24px;
+  color: orangered;
+}
+/* Estilos para elementos con la clase "titulo-separador-motorola" */
+.titulo-separador-motorola {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  font-size: 24px;
+  color: orangered;
+}
+/* Estilos para elementos con la clase "titulo-separador-samsung" */
+.titulo-separador-samsung {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  font-size: 24px;
+  color: orangered;
+}
+/* Estilos para elementos con la clase "titulo-separador-huawei" */
+.titulo-separador-huawei {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  font-size: 24px;
+  color: orangered;
+}
+/* Estilos para elementos con la clase "lista-productos" */
+.lista-productos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; 
+  max-width: 100%; 
+  justify-content: space-between; 
+}
+/* Estilos para el elemento "footer" */
+footer {
+  width: 220%;
+  max-width: 1330px ;
+  position: relative;
+  margin: 10px 0px;
+  padding: 8px 0; 
+  background: #46454488;
+  padding-left: 10px;
+  padding-right: 10px; 
+  bottom: -512px;
+  border-radius: 50px;
+  margin-left: 2%;
+}

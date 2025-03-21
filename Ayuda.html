@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Contacto</title>
+    <link rel="stylesheet" href="CSS/estilos.css">
+    <!------------ Icono-Fondo ------------>
+    <script src="https://kit.fontawesome.com/eb496ab1a0.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container-form">
+        <div class="info-form">
+            <h2>CONTÁCTANOS</h2>
+            <p><b>¿Estás enfrentando algún contratiempo en nuestra página web?</b>
+                Descuida, estamos a tú servicio en Casino-Express.</p>
+            <a href="#"><i class="fa fa-phone"></i> 45 2 692458</a>
+            <a href="#"><i class="fa fa-envelope"></i> casinoexpress@gmail.com</a>
+            <a href="#"><i class="fa fa-map-marked"></i> Temuco, Chile</a>
+        </div>
+            <form id="contact-form">
+                <input type="text" name="nombre" placeholder="Nombre" class="campo">
+                <input type="email" name="email" placeholder="Correo electrónico" class="campo">
+                <textarea name="mensaje" placeholder="Escriba algo..."></textarea>
+                <input type="submit" name="enviar" value="Enviar" class="btn-enviar">
+            </form>
+        <div id="mensaje-confirmacion" class="mensaje-confirmacion">
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="JavaScript/js.js"></script>
+    </div>
+</body>
+</html>

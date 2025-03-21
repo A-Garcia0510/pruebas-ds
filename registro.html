@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="CSS/registro.css">
+    <title>Registro</title>
+</head>
+<body>
+    <form id="registroForm" action="PHP/registro.php" method="POST">
+        <h2>Registro</h2>
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="text" name="apellidos" placeholder="Apellidos" required>
+        <input type="email" name="correo" id="correo" placeholder="Correo" required>
+        <input type="password" name="contra" placeholder="Contraseña" required>
+        <button type="submit">Registrar</button>
+        <div class="extra-buttons">
+            <a href="login.html" class="boton-secundario">Inicia sesión</a>
+            <a href="index.php" class="boton-secundario">Pagina Principal</a>
+        </div>
+    </form>
+    
+
+    <script src="JavaScript/validacion.js"></script>
+
+</body>
+</html>

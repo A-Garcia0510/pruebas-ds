@@ -1,0 +1,112 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+#carrito {
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 700px; /* Incrementa el ancho */
+}
+
+.producto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eaeaea;
+    padding: 15px 0; /* Aumenta el padding */
+}
+
+.producto:last-child {
+    border-bottom: none;
+}
+
+.info {
+    flex-grow: 1;
+}
+
+.info p {
+    margin: 5px 0;
+    color: #777; /* Color de texto sutil */
+}
+
+.eliminar-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.eliminar-button:hover {
+    background-color: #c0392b;
+    transform: scale(1.05); /* Añade un pequeño zoom al pasar */
+}
+
+.total {
+    margin-top: 20px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: right;
+    font-size: 1.1em;
+}
+
+#volver,
+#finalizarCompra {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 25px; /* Mejora el tamaño de los botones */
+    font-size: 1em;
+    cursor: pointer;
+    display: block;
+    margin: 15px auto; /* Mejora el espaciado */
+    transition: background 0.3s, transform 0.2s;
+}
+
+#finalizarCompra {
+    background-color: #27ae60;
+}
+
+#finalizarCompra:hover {
+    background-color: #219653;
+    transform: scale(1.05); /* Añade un pequeño zoom al pasar */
+}
+
+#volver:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+.producto img {
+    width: 90px; /* Ajusta el tamaño */
+    height: 90px;
+    object-fit: cover;
+    margin-left: 20px;
+    border-radius: 10px;
+}
+
+/* Estilo para mensaje cuando el carrito está vacío */
+#carrito p {
+    text-align: center;
+    color: #888;
+    font-size: 1.1em;
+    padding: 20px 0;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
