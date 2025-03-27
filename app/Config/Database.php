@@ -1,22 +1,30 @@
 <?php
-namespace Config;
+namespace App\Config;
 
+use App\Interfaces\DatabaseInterface;
 use mysqli;
 
-class Database {
-    private static $instance = null;
-    private $conn;
+class Database implements DatabaseInterface {
+    private static ?self $instance = null;
+    private mysqli $connection;
     
-    private $host = "mysql.inf.uct.cl";
-    private $user = "agarcia";
-    private $password = "chuMKZ3EdhJvje706";
-    private $database = "A2024_agarcia";
+    private string $host = "mysql.inf.uct.cl";
+    private string $user = "agarcia";
+    private string $password = "chuMKZ3EdhJvje706";
+    private string $database = "A2024_agarcia";
     
     private function __construct() {
-        $this->conn = new mysqli($this->host, $this->user, $this->password, $this->database);
+        $this->connection = new mysqli(
+            $this->host, 
+            $this->user, 
+            $this->password, 
+            $this->database
+        );
         
-        if ($this->conn->connect_error) {
-            throw new \Exception("Conexión fallida: " . $this->conn->connect_error);
+        if ($this->connection->connect_error) {
+            throw new \RuntimeException(
+                "Conexión fallida: " . $this->connection->connect_error
+            );
         }
     }
     
@@ -28,6 +36,18 @@ class Database {
     }
     
     public function getConnection(): mysqli {
-        return $this->conn;
+        return $this->connection;
+    }
+    
+    public function prepare(string $sql): \mysqli_stmt {
+        return $this->connection->prepare($sql);
+    }
+    
+    public function query(string $sql): \mysqli_result {
+        return $this->connection->query($sql);
+    }
+    
+    public function close(): void {
+        $this->connection->close();
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Interfaces;
+namespace App\Interfaces;
 
 interface DatabaseInterface {
     public static function getInstance(): self;
