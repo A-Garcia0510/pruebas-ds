@@ -3,29 +3,17 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once '../classes/Database.php';
-require_once '../classes/Repositories/UserRepository.php';
-require_once '../classes/Validators/UserValidator.php';
-require_once '../classes/SessionManagers/PHPSessionManager.php';
-require_once '../classes/Services/UserService.php';
+require_once '../classes/User.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Recoger datos del formulario y sanitizar
-    $userData = [
-        'nombre' => trim($_POST['nombre']),
-        'apellidos' => trim($_POST['apellidos']),
-        'correo' => trim($_POST['correo']),
-        'contraseña' => $_POST['contra']
-    ];
+    $nombre = trim($_POST['nombre']);
+    $apellidos = trim($_POST['apellidos']);
+    $correo = trim($_POST['correo']);
+    $contra = $_POST['contra'];
     
-    $db = Database::getInstance();
-    $userRepository = new UserRepository($db);
-    $userValidator = new UserValidator();
-    $sessionManager = new PHPSessionManager();
-    
-    $userService = new UserService($userRepository, $userValidator, $sessionManager);
-    
-    $resultado = $userService->register($userData);
+    $user = new User();
+    $resultado = $user->register($nombre, $apellidos, $correo, $contra);
     
     if ($resultado['success']) {
         echo "<script>

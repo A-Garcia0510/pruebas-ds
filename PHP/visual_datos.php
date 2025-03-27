@@ -1,10 +1,6 @@
 <?php
 session_start();
-require_once '../classes/Database.php';
-require_once '../classes/Repositories/UserRepository.php';
-require_once '../classes/Services/UserService.php';
-require_once '../classes/Validators/UserValidator.php';
-require_once '../classes/SessionManagers/PHPSessionManager.php';
+require_once '../classes/User.php';
 
 if (!isset($_SESSION['correo'])) {
     header("Location: ../login.html");
@@ -12,15 +8,8 @@ if (!isset($_SESSION['correo'])) {
 }
 
 $correo = $_SESSION['correo'];
-
-$db = Database::getInstance();
-$userRepository = new UserRepository($db);
-$userValidator = new UserValidator();
-$sessionManager = new PHPSessionManager();
-
-$userService = new UserService($userRepository, $userValidator, $sessionManager);
-
-$userData = $userService->getUserData($correo);
+$user = new User();
+$userData = $user->getUserData($correo);
 
 if (!$userData) {
     echo "Error: No se pudieron recuperar los datos del usuario.";
