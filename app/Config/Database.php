@@ -1,53 +1,63 @@
 <?php
 namespace App\Config;
 
-use App\Interfaces\DatabaseInterface;
+use PDO;
 use mysqli;
 
-class Database implements DatabaseInterface {
+class Database {
     private static ?self $instance = null;
-    private mysqli $connection;
-    
-    private string $host = "mysql.inf.uct.cl";
-    private string $user = "agarcia";
-    private string $password = "chuMKZ3EdhJvje706";
-    private string $database = "A2024_agarcia";
-    
-    private function __construct() {
-        $this->connection = new mysqli(
-            $this->host, 
-            $this->user, 
-            $this->password, 
-            $this->database
-        );
-        
-        if ($this->connection->connect_error) {
-            throw new \RuntimeException(
-                "Conexión fallida: " . $this->connection->connect_error
-            );
-        }
+    private array $config;
+
+    private function __construct(array $config = []) {
+        $this->config = $config + [
+            'host' => 'mysql.inf.uct.cl',
+            'user' => 'agarcia',
+            'password' => 'chuMKZ3EdhJvje706',
+            'database' => 'A2024_agarcia',
+            'driver' => 'mysql'
+        ];
     }
-    
-    public static function getInstance(): self {
+
+    public static function getInstance(array $config = []): self {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new self($config);
         }
         return self::$instance;
     }
-    
-    public function getConnection(): mysqli {
-        return $this->connection;
+
+    public function getMySQLConnection(): mysqli {
+        $connection = new mysqli(
+            $this->config['host'], 
+            $this->config['user'], 
+            $this->config['password'], 
+            $this->config['database']
+        );
+        
+        if ($connection->connect_error) {
+            throw new \RuntimeException(
+                "Conexión fallida: " . $connection->connect_error
+            );
+        }
+        
+        return $connection;
     }
-    
-    public function prepare(string $sql): \mysqli_stmt {
-        return $this->connection->prepare($sql);
+
+    public function getPDOConnection(): PDO {
+        try {
+            $dsn = "{$this->config['driver']}:host={$this->config['host']};dbname={$this->config['database']};charset=utf8mb4";
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ];
+            
+            return new PDO($dsn, $this->config['user'], $this->config['password'], $options);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Error de conexión: " . $e->getMessage());
+        }
     }
-    
-    public function query(string $sql): \mysqli_result {
-        return $this->connection->query($sql);
-    }
-    
+
     public function close(): void {
-        $this->connection->close();
+        // Método para cerrar conexiones si es necesario
     }
 }

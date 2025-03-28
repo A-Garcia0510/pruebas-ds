@@ -30,20 +30,20 @@ Análisis de Aplicación de Principios SOLID:
 Propuesta de Estructura:
 📁 Nuevo Directorio: app/
 * 📁 Interfaces/
-   * UserInterface.php(HECHO-DESCARTAR)
-   * ProductInterface.php(HECHO-DESCARTAR)
-   * CartInterface.php(HECHO-DESCARTAR)
-   * PurchaseInterface.php(HECHO-DESCARTAR)
-   * DatabaseInterface.php(HECHO-DESCARTAR)
+   * UserInterface.php
+   * ProductInterface.php
+   * CartInterface.php
+   * PurchaseInterface.php
+   * DatabaseInterface.php
 * 📁 Services/
-   * UserService.php(HECHO-DESCARTAR)
-   * ProductService.php(HECHO-DESCARTAR)
-   * CartService.php(HECHO-DESCARTAR)
-   * PurchaseService.php(HECHO-DESCARTAR)
+   * UserService.php
+   * ProductService.php
+   * CartService.php
+   * PurchaseService.php
 * 📁 Repositories/
-   * UserRepository.php(HECHO-DESCARTAR)
-   * ProductRepository.php(HECHO-DESCARTAR)
-   * CartRepository.php(HECHO-DESCARTAR)
+   * UserRepository.php
+   * ProductRepository.php
+   * CartRepository.php
    * PurchaseRepository.php
 * 📁 Models/
    * User.php
@@ -51,11 +51,11 @@ Propuesta de Estructura:
    * Cart.php
    * Purchase.php
 * 📁 Exceptions/
-   * UserException.php(HECHO-DESCARTAR)
-   * ProductException.php(HECHO-DESCARTAR)
-   * CartException.php(HECHO-DESCARTAR)
+   * UserException.php
+   * ProductException.php
+   * CartException.php
 * 📁 Config/
-   * Database.php(HECHO-DESCARTAR)
+   * Database.php
 📝 Cambios Principales:
 1. Separar responsabilidades
 2. Crear interfaces para cada componente
@@ -69,3 +69,4 @@ Pasos de Implementación:
 4. Crear repositorios
 5. Usar inyección de dependencias
 6. Manejar errores con excepciones personalizadas
+
