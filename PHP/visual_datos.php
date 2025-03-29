@@ -1,23 +1,51 @@
 <?php
-session_start();
-require_once '../classes/User.php';
+require_once 'autoload.php';
 
-if (!isset($_SESSION['correo'])) {
-    header("Location: ../login.html");
+use App\Auth\AuthFactory;
+use App\Core\Database\DatabaseConfiguration;
+use App\Core\Database\MySQLDatabase;
+
+// Cargar configuración
+$config = require_once '../src/Config/config.php';
+$dbConfig = new DatabaseConfiguration(
+    $config['database']['host'],
+    $config['database']['username'],
+    $config['database']['password'],
+    $config['database']['database']
+);
+
+try {
+    // Crear conexión a la base de datos
+    $database = new MySQLDatabase($dbConfig);
+    
+    // Crear el autenticador
+    $authenticator = AuthFactory::createAuthenticator($database);
+    
+    // Verificar si el usuario está autenticado
+    if (!$authenticator->isAuthenticated()) {
+        header("Location: ../login.html");
+        exit();
+    }
+    
+    // Obtener email del usuario actual
+    $correo = $authenticator->getCurrentUserEmail();
+    
+    // Obtener los datos del usuario
+    $userRepository = AuthFactory::createUserRepository($database);
+    $user = $userRepository->findByEmail($correo);
+    
+    if (!$user) {
+        echo "Error: No se pudieron recuperar los datos del usuario.";
+        exit();
+    }
+    
+    $nombre = $user->getNombre();
+    $apellidos = $user->getApellidos();
+    
+} catch (Exception $e) {
+    echo "Error en el sistema: " . $e->getMessage();
     exit();
 }
-
-$correo = $_SESSION['correo'];
-$user = new User();
-$userData = $user->getUserData($correo);
-
-if (!$userData) {
-    echo "Error: No se pudieron recuperar los datos del usuario.";
-    exit();
-}
-
-$nombre = $userData['nombre'];
-$apellidos = $userData['apellidos'];
 ?>
 
 <!DOCTYPE html>

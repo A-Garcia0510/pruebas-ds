@@ -1,5 +1,4 @@
 <?php
-// PHP/cerrar_sesion.php
 require_once 'autoload.php';
 
 use App\Auth\AuthFactory;
@@ -25,14 +24,12 @@ try {
     // Cerrar sesión
     $authenticator->logout();
     
-    echo "<script>
-              alert('Sesion Cerrada.');
-              window.location.href='../login.html';
-          </script>";
+    // Redireccionar al login
+    header("Location: ../login.html");
     exit();
 } catch (Exception $e) {
     echo "<script>
             alert('Error al cerrar sesión: " . $e->getMessage() . "'); 
-            window.location.href='../login.html';
+            window.location.href='visual_datos.php';
           </script>";
 }
