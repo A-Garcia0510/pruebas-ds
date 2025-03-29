@@ -10,12 +10,12 @@ class DatabaseConfiguration
     private $database;
     
     /**
-     * Constructor de la configuración de base de datos
+     * Constructor para la configuración de la base de datos
      * 
-     * @param string $host     El host de la base de datos
-     * @param string $username El nombre de usuario
-     * @param string $password La contraseña
-     * @param string $database El nombre de la base de datos
+     * @param string $host
+     * @param string $username
+     * @param string $password
+     * @param string $database
      */
     public function __construct(string $host, string $username, string $password, string $database)
     {
@@ -26,7 +26,9 @@ class DatabaseConfiguration
     }
     
     /**
-     * @return string El host de la base de datos
+     * Obtiene el host
+     * 
+     * @return string
      */
     public function getHost(): string
     {
@@ -34,7 +36,9 @@ class DatabaseConfiguration
     }
     
     /**
-     * @return string El nombre de usuario
+     * Obtiene el nombre de usuario
+     * 
+     * @return string
      */
     public function getUsername(): string
     {
@@ -42,7 +46,9 @@ class DatabaseConfiguration
     }
     
     /**
-     * @return string La contraseña
+     * Obtiene la contraseña
+     * 
+     * @return string
      */
     public function getPassword(): string
     {
@@ -50,7 +56,9 @@ class DatabaseConfiguration
     }
     
     /**
-     * @return string El nombre de la base de datos
+     * Obtiene el nombre de la base de datos
+     * 
+     * @return string
      */
     public function getDatabase(): string
     {
