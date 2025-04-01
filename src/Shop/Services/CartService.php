@@ -36,19 +36,19 @@ class CartService implements CartInterface
             throw new InsufficientStockException("No hay stock suficiente");
         }
         
-        // Verificar si el producto ya está en el carrito
-        $stmt = $conn->prepare("SELECT * FROM Carrito WHERE usuario_email = ? AND producto_ID = ?");
+        // Verificar si el producto ya está en el carro
+        $stmt = $conn->prepare("SELECT * FROM carro WHERE usuario_email = ? AND producto_ID = ?");
         $stmt->bind_param("si", $userId, $productId);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
             // Actualizar cantidad
-            $stmt = $conn->prepare("UPDATE Carrito SET cantidad = cantidad + ? WHERE usuario_email = ? AND producto_ID = ?");
+            $stmt = $conn->prepare("UPDATE carro SET cantidad = cantidad + ? WHERE usuario_email = ? AND producto_ID = ?");
             $stmt->bind_param("isi", $quantity, $userId, $productId);
         } else {
             // Insertar nuevo item
-            $stmt = $conn->prepare("INSERT INTO Carrito (usuario_email, producto_ID, cantidad) VALUES (?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO carro (usuario_email, producto_ID, cantidad) VALUES (?, ?, ?)");
             $stmt->bind_param("sii", $userId, $productId, $quantity);
         }
         
@@ -58,7 +58,7 @@ class CartService implements CartInterface
     public function removeItem(string $userId, int $productId): bool
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("DELETE FROM Carrito WHERE usuario_email = ? AND producto_ID = ?");
+        $stmt = $conn->prepare("DELETE FROM carro WHERE usuario_email = ? AND producto_ID = ?");
         $stmt->bind_param("si", $userId, $productId);
         
         return $stmt->execute();
@@ -69,7 +69,7 @@ class CartService implements CartInterface
         $conn = $this->db->getConnection();
         $stmt = $conn->prepare("
             SELECT c.*, p.nombre_producto, p.precio 
-            FROM Carrito c
+            FROM carro c
             JOIN Producto p ON c.producto_ID = p.producto_ID
             WHERE c.usuario_email = ?
         ");
@@ -94,7 +94,7 @@ class CartService implements CartInterface
     public function clear(string $userId): bool
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("DELETE FROM Carrito WHERE usuario_email = ?");
+        $stmt = $conn->prepare("DELETE FROM carro WHERE usuario_email = ?");
         $stmt->bind_param("s", $userId);
         
         return $stmt->execute();

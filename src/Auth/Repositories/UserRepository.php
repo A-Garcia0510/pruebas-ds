@@ -18,7 +18,7 @@ class UserRepository implements UserRepositoryInterface
     public function findByEmail(string $email): ?User
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM Usuario WHERE correo = ?");
+        $stmt = $conn->prepare("SELECT * FROM usuario WHERE correo = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -41,7 +41,7 @@ class UserRepository implements UserRepositoryInterface
     public function findById(int $id): ?User
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM Usuario WHERE usuario_ID = ?");
+        $stmt = $conn->prepare("SELECT * FROM usuario WHERE usuario_ID = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -67,7 +67,7 @@ class UserRepository implements UserRepositoryInterface
         
         // Si el usuario ya tiene ID, actualizamos
         if ($user->getId()) {
-            $stmt = $conn->prepare("UPDATE Usuario SET nombre = ?, apellidos = ?, correo = ?, contraseña = ? WHERE usuario_ID = ?");
+            $stmt = $conn->prepare("UPDATE usuario SET nombre = ?, apellidos = ?, correo = ?, contraseña = ? WHERE usuario_ID = ?");
             $nombre = $user->getNombre();
             $apellidos = $user->getApellidos();
             $email = $user->getEmail();
@@ -78,7 +78,7 @@ class UserRepository implements UserRepositoryInterface
         }
         
         // Si no tiene ID, creamos un nuevo usuario
-        $stmt = $conn->prepare("INSERT INTO Usuario (nombre, apellidos, correo, contraseña) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO usuario (nombre, apellidos, correo, contraseña) VALUES (?, ?, ?, ?)");
         $nombre = $user->getNombre();
         $apellidos = $user->getApellidos();
         $email = $user->getEmail();
@@ -96,7 +96,7 @@ class UserRepository implements UserRepositoryInterface
     public function emailExists(string $email): bool
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Usuario WHERE correo = ?");
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM usuario WHERE correo = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
