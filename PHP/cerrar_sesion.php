@@ -6,7 +6,7 @@ use App\Core\Database\DatabaseConfiguration;
 use App\Core\Database\MySQLDatabase;
 
 // Cargar configuración
-$config = require_once '../src/Config/config.php';
+$config = require_once '../src/Config/Config.php';
 $dbConfig = new DatabaseConfiguration(
     $config['database']['host'],
     $config['database']['username'],

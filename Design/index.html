@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Ethos Coffee</title>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <div class="logo">
+        <img src="logo.svg" alt="Ethos Coffee">
+      </div>
+      <button class="menu-toggle" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#menu">Menú</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#ubicacion">Ubicación</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="Café artesanal">
+      </div>
+      <div class="hero-content">
+        <h2>Bienvenidos a Ethos Coffee</h2>
+        <p>Donde cada taza cuenta una historia</p>
+        <a href="#menu" class="cta-button">Ver Menú</a>
+      </div>
+    </section>
+
+    <section id="destacados" class="featured">
+      <h2>Nuestros Destacados</h2>
+      <div class="featured-grid">
+        <div class="featured-item">
+          <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Café Espresso">
+          <h3>Espresso Artesanal</h3>
+          <p>Granos seleccionados, tostados a la perfección</p>
+        </div>
+        <div class="featured-item">
+          <img src="https://images.unsplash.com/photo-1534766555764-ce878a5e3a2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Pasteles">
+          <h3>Repostería Fresca</h3>
+          <p>Horneado diariamente en nuestra cocina</p>
+        </div>
+        <div class="featured-item">
+          <img src="https://images.unsplash.com/photo-1497636577773-f1231844b336?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Café Especial">
+          <h3>Métodos Alternativos</h3>
+          <p>Chemex, V60, Aeropress y más</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <div class="about-content">
+        <h2>Nuestra Historia</h2>
+        <p>En Ethos Coffee, creemos que el café es más que una bebida - es una experiencia que une a las personas. Desde 2020, nos hemos dedicado a servir el mejor café de especialidad, cuidadosamente seleccionado y preparado con pasión.</p>
+        <div class="values">
+          <div class="value-item">
+            <h3>Calidad</h3>
+            <p>Solo los mejores granos</p>
+          </div>
+          <div class="value-item">
+            <h3>Sostenibilidad</h3>
+            <p>Comercio justo y eco-friendly</p>
+          </div>
+          <div class="value-item">
+            <h3>Comunidad</h3>
+            <p>Creando conexiones locales</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Horario</h3>
+        <p>Lunes a Viernes: 7:00 - 20:00</p>
+        <p>Sábados y Domingos: 8:00 - 18:00</p>
+      </div>
+      <div class="footer-section">
+        <h3>Contacto</h3>
+        <p>Tel: (123) 456-7890</p>
+        <p>Email: hola@ethoscoffee.com</p>
+      </div>
+      <div class="footer-section">
+        <h3>Ubicación</h3>
+        <p>Calle Principal #123</p>
+        <p>Ciudad, Estado CP 12345</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Ethos Coffee. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      document.querySelector('.nav-links').classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

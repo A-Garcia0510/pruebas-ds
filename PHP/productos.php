@@ -1,6 +1,13 @@
 <?php
 session_start();
-require_once '../classes/Product.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+require_once 'autoload.php';
+
+// Importar clases necesarias
+use App\Core\Database\MySQLDatabase;
+use App\Shop\Repositories\ProductRepository;
 
 // Verificar si el usuario está logueado
 if (!isset($_SESSION['correo'])) {
@@ -11,11 +18,33 @@ if (!isset($_SESSION['correo'])) {
     exit();
 }
 
-// Crear instancia de la clase Product
-$productObj = new Product();
+// Cargar configuración
+$config = require_once '../src/Config/Config.php';
+
+// Crear instancia de la base de datos
+$db = new MySQLDatabase($config['database']);
+
+// Crear instancia del repositorio de productos
+$productRepository = new ProductRepository($db);
 
 // Obtener todas las categorías
-$categorias = $productObj->getAllCategories();
+$categorias = $productRepository->getAllCategories();
+
+// Obtener todos los productos para usar en JavaScript
+$productos = $productRepository->findAll();
+
+// Convertir objetos Product a arrays para JSON
+$productosArray = [];
+foreach ($productos as $producto) {
+    $productosArray[] = [
+        'producto_ID' => $producto->getId(),
+        'nombre_producto' => $producto->getName(),
+        'descripcion' => $producto->getDescription(),
+        'precio' => $producto->getPrice(),
+        'cantidad' => $producto->getStock(),
+        'categoria' => $producto->getCategory()
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +74,7 @@ $categorias = $productObj->getAllCategories();
 
     <script>
         // Obtener todos los productos desde el servidor
-        const productos = <?php echo json_encode($productObj->getAllProducts()); ?>;
+        const productos = <?php echo json_encode($productosArray); ?>;
 
         function mostrarProductos(categoria) {
             const productosDiv = document.getElementById('productos');
