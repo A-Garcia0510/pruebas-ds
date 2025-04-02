@@ -98,7 +98,7 @@ $userEmail = $_SESSION['correo'];
 
                 carritoDiv.innerHTML += `
                     <div class="producto">
-                        <img src="../IMG/${nombre_imagen}" alt="${producto.nombre_producto}" width="100" />
+                        <img src="../IMG-P/${nombre_imagen}" alt="${producto.nombre_producto}" width="100" />
                         <h2>${producto.nombre_producto}</h2>
                         <p>Precio: $${formatearPrecioCLP(producto.precio)}</p>
                         <p>Cantidad: ${producto.cantidad}</p>

@@ -31,13 +31,12 @@ class PurchaseRepository
         
         try {
             // Insertar la compra
-            $stmt = $conn->prepare("INSERT INTO Pedido (usuario_email, total, fecha, estado) VALUES (?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO Compra (usuario_ID, fecha_compra, total) VALUES (?, ?, ?)");
             $userId = $purchase->getUserId();
             $total = $purchase->getTotal();
             $date = $purchase->getDate()->format('Y-m-d H:i:s');
-            $status = $purchase->getStatus();
             
-            $stmt->bind_param("sdss", $userId, $total, $date, $status);
+            $stmt->bind_param("isd", $userId, $date, $total);
             
             if (!$stmt->execute()) {
                 throw new \Exception("Error al crear la compra");
@@ -50,13 +49,12 @@ class PurchaseRepository
             foreach ($purchase->getDetails() as $detail) {
                 $detail->setPurchaseId($purchaseId);
                 
-                $stmt = $conn->prepare("INSERT INTO DetallePedido (pedido_ID, producto_ID, nombre_producto, cantidad, precio) VALUES (?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("INSERT INTO Detalle_Compra (compra_ID, producto_ID, cantidad, precio_unitario) VALUES (?, ?, ?, ?)");
                 $productId = $detail->getProductId();
-                $productName = $detail->getProductName();
                 $quantity = $detail->getQuantity();
                 $price = $detail->getPrice();
                 
-                $stmt->bind_param("iisid", $purchaseId, $productId, $productName, $quantity, $price);
+                $stmt->bind_param("iiid", $purchaseId, $productId, $quantity, $price);
                 
                 if (!$stmt->execute()) {
                     throw new \Exception("Error al crear el detalle de la compra");
@@ -83,24 +81,24 @@ class PurchaseRepository
     public function findByUserId(string $userId): array
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM Pedido WHERE usuario_email = ? ORDER BY fecha DESC");
-        $stmt->bind_param("s", $userId);
+        $stmt = $conn->prepare("SELECT * FROM Compra WHERE usuario_ID = ? ORDER BY fecha_compra DESC");
+        $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         
         $purchases = [];
         while ($data = $result->fetch_assoc()) {
-            $date = new DateTime($data['fecha']);
+            $date = new DateTime($data['fecha_compra']);
             $purchase = new Purchase(
-                $data['pedido_ID'],
-                $data['usuario_email'],
+                $data['compra_ID'],
+                $data['usuario_ID'],
                 $data['total'],
                 $date,
-                $data['estado']
+                $data['compra_ID'] ? Purchase::STATUS_COMPLETED : Purchase::STATUS_PENDING
             );
             
             // Obtener los detalles de la compra
-            $details = $this->findDetailsByPurchaseId($data['pedido_ID']);
+            $details = $this->findDetailsByPurchaseId($data['compra_ID']);
             $purchase->setDetails($details);
             
             $purchases[] = $purchase;
@@ -118,7 +116,7 @@ class PurchaseRepository
     public function findById(int $id): ?Purchase
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM Pedido WHERE pedido_ID = ?");
+        $stmt = $conn->prepare("SELECT * FROM Compra WHERE compra_ID = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -128,13 +126,13 @@ class PurchaseRepository
         }
         
         $data = $result->fetch_assoc();
-        $date = new DateTime($data['fecha']);
+        $date = new DateTime($data['fecha_compra']);
         $purchase = new Purchase(
-            $data['pedido_ID'],
-            $data['usuario_email'],
+            $data['compra_ID'],
+            $data['usuario_ID'],
             $data['total'],
             $date,
-            $data['estado']
+            $data['compra_ID'] ? Purchase::STATUS_COMPLETED : Purchase::STATUS_PENDING
         );
         
         // Obtener los detalles de la compra
@@ -153,7 +151,12 @@ class PurchaseRepository
     private function findDetailsByPurchaseId(int $purchaseId): array
     {
         $conn = $this->db->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM DetallePedido WHERE pedido_ID = ?");
+        $stmt = $conn->prepare("
+            SELECT dc.*, p.nombre_producto 
+            FROM Detalle_Compra dc
+            JOIN Producto p ON dc.producto_ID = p.producto_ID
+            WHERE dc.compra_ID = ?
+        ");
         $stmt->bind_param("i", $purchaseId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -161,12 +164,12 @@ class PurchaseRepository
         $details = [];
         while ($data = $result->fetch_assoc()) {
             $details[] = new PurchaseDetail(
-                $data['detalle_ID'],
-                $data['pedido_ID'],
+                $data['detalle_compra_ID'],
+                $data['compra_ID'],
                 $data['producto_ID'],
-                $data['nombre_producto'],
+                $data['nombre_producto'], // Obtenido del JOIN con la tabla Producto
                 $data['cantidad'],
-                $data['precio']
+                $data['precio_unitario']
             );
         }
         
