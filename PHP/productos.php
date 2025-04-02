@@ -7,6 +7,7 @@ require_once 'autoload.php';
 
 // Importar clases necesarias
 use App\Core\Database\MySQLDatabase;
+use App\Core\Database\DatabaseConfiguration;
 use App\Shop\Repositories\ProductRepository;
 
 // Verificar si el usuario está logueado
@@ -21,8 +22,16 @@ if (!isset($_SESSION['correo'])) {
 // Cargar configuración
 $config = require_once '../src/Config/Config.php';
 
+// Crear objeto de configuración de base de datos
+$dbConfig = new DatabaseConfiguration(
+    $config['database']['host'],
+    $config['database']['username'],
+    $config['database']['password'],
+    $config['database']['database']
+);
+
 // Crear instancia de la base de datos
-$db = new MySQLDatabase($config['database']);
+$db = new MySQLDatabase($dbConfig);
 
 // Crear instancia del repositorio de productos
 $productRepository = new ProductRepository($db);
@@ -90,7 +99,7 @@ foreach ($productos as $producto) {
                 const nombre_imagen = producto.nombre_producto.toLowerCase().replace(/ /g, '_') + '.jpg';
                 productosDiv.innerHTML += `
                     <div class='producto'>
-                        <img src='../IMG/${nombre_imagen}' alt='${producto.nombre_producto}' />
+                        <img src='../IMG-P/${nombre_imagen}' alt='${producto.nombre_producto}' />
                         <div>
                             <h2>${producto.nombre_producto}</h2>
                             <p class="precio">Precio: $${parseFloat(producto.precio).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
