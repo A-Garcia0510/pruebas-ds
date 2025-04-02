@@ -1,5 +1,8 @@
 <?php
 session_start();
+require_once 'autoload.php'; // Asegúrate de tener un autoloader configurado
+
+// Si no hay sesión iniciada, redirigir al login
 if (!isset($_SESSION['correo'])) {
     echo "<script>
             alert('Debes iniciar sesión para acceder al carrito.');
@@ -7,6 +10,33 @@ if (!isset($_SESSION['correo'])) {
           </script>";
     exit();
 }
+
+// Inicializar dependencias
+use App\Core\Database\DatabaseConfiguration;
+use App\Core\Database\MySQLDatabase;
+use App\Shop\Repositories\ProductRepository;
+use App\Shop\Services\CartService;
+use App\Shop\Repositories\PurchaseRepository;
+use App\Shop\Services\PurchaseService;
+
+// Obtener configuración
+$config = require_once('../src/Config/Config.php');
+$dbConfig = new DatabaseConfiguration(
+    $config['database']['host'],
+    $config['database']['username'],
+    $config['database']['password'],
+    $config['database']['database']
+);
+
+// Inicializar servicios
+$db = new MySQLDatabase($dbConfig);
+$productRepository = new ProductRepository($db);
+$cartService = new CartService($db, $productRepository);
+$purchaseRepository = new PurchaseRepository($db);
+$purchaseService = new PurchaseService($db, $cartService, $productRepository, $purchaseRepository);
+
+// Obtener el correo del usuario desde la sesión
+$userEmail = $_SESSION['correo'];
 ?>
 
 <!DOCTYPE html>
@@ -99,7 +129,7 @@ if (!isset($_SESSION['correo'])) {
                 if (data.success) {
                     obtenerCarrito(); // Recargar el carrito después de eliminar
                 } else {
-                    alert('Error al eliminar el producto del carrito.');
+                    alert('Error al eliminar el producto del carrito: ' + data.message);
                 }
             })
             .catch(error => {
@@ -112,7 +142,7 @@ if (!isset($_SESSION['correo'])) {
         function finalizarCompra() {
             // Verifica si el carrito está vacío
             const carrito = document.getElementById('carrito').children.length;
-            if (carrito === 0) {
+            if (carrito === 0 || (document.getElementById('carrito').children[0].tagName === 'P' && document.getElementById('carrito').children[0].textContent === 'No hay productos en el carrito.')) {
                 alert('No puedes finalizar la compra porque el carrito está vacío.');
                 return; // Detenemos la ejecución si el carrito está vacío
             }
