@@ -1,68 +1,92 @@
 classDiagram
-    class Database {
-        -instance: Database
-        -conn: mysqli
-        -servidor: string
-        -user: string
-        -password: string
-        -basedato: string
-        -__construct()
-        +getInstance() Database
-        +getConnection() mysqli
-        +prepare(sql) mysqli_stmt
-        +query(sql) mysqli_result
-        +close()
+    %% Clases principales en src
+    class DatabaseInterface {
+        <<interface>>
+        +getConnection()
     }
 
-    class User {
+    class MySQLDatabase {
+        -connection
+        -config
+        +__construct(DatabaseConfiguration config)
+        +getConnection()
+    }
+
+    class DatabaseConfiguration {
+        +getHost()
+        +getUsername()
+        +getPassword()
+        +getDatabase()
+    }
+
+    class PurchaseServiceInterface {
+        <<interface>>
+        +createPurchase(userId: string): bool
+        +getUserPurchases(userId: string): array
+        +getPurchaseDetails(purchaseId: int): array
+    }
+
+    class PurchaseService {
+        -db: DatabaseInterface
+        -cartService: CartInterface
+        -productRepository: ProductRepositoryInterface
+        -purchaseRepository: PurchaseRepository
+        +createPurchase(userId: string): bool
+        +getUserPurchases(userId: string): array
+        +getPurchaseDetails(purchaseId: int): array
+    }
+
+    class PurchaseRepository {
+        -db: DatabaseInterface
+        +save(purchase: Purchase): bool
+        +findDetailsByPurchaseId(purchaseId: int): array
+    }
+
+    class Purchase {
+        -details: array
+        -total: float
+        +addDetail(detail: PurchaseDetail): self
+        +calculateTotal(): float
+    }
+
+    class PurchaseDetail {
+        -productId: int
+        -quantity: int
+        -price: float
+        +getSubtotal(): float
+    }
+
+    %% Clases principales en PHP
+    class Cart {
         -db: Database
-        +__construct()
-        +login(correo, contraseña) bool
-        +register(nombre, apellidos, correo, contraseña) array
-        +emailExists(correo) bool
-        +getUserData(correo) array
-        +logout()
+        +addToCart(correo: string, productoID: int, cantidad: int): array
+        +removeFromCart(correo: string, productoID: int): array
+        +clearCart(correo: string): array
     }
 
     class Product {
         -db: Database
-        +__construct()
-        +getAllProducts() array
-        +getProductsByCategory(categoria) array
-        +getAllCategories() array
-        +updateStock(productoID, cantidad) bool
-        +getProductById(productoID) array
+        +getAllProducts(): array
+        +getProductsByCategory(categoria: string): array
+        +updateStock(productoID: int, cantidad: int): bool
     }
 
-    class Cart {
+    class User {
         -db: Database
-        -user: User
-        -product: Product
-        +__construct()
-        +getCartItems(correo) array
-        +addToCart(correo, productoID, cantidad) array
-        +removeFromCart(correo, productoID) array
-        +clearCart(correo) bool
-        +isCartEmpty(correo) bool
-        -getUserIdByEmail(correo) int
+        +login(correo: string, contraseña: string): bool
+        +register(nombre: string, apellidos: string, correo: string, contraseña: string): array
+        +logout()
     }
 
-    class Purchase {
-        -db: Database
-        -cart: Cart
-        -product: Product
-        +__construct()
-        +createPurchase(correo) array
-        +getPurchaseHistory(correo) array
-        +getPurchaseDetails(compraID) array
-        -getUserIdByEmail(correo) int
-    }
-
-    Database <-- User : usa
-    Database <-- Product : usa
-    Database <-- Cart : usa
-    Database <-- Purchase : usa
-    User <-- Cart : usa
-    Product <-- Cart : usa
-    Cart <-- Purchase : usa
-    Product <-- Purchase : usa
+    %% Relaciones entre clases
+    MySQLDatabase --> DatabaseInterface
+    PurchaseService --> PurchaseServiceInterface
+    PurchaseService --> PurchaseRepository
+    PurchaseService --> Cart
+    PurchaseService --> Product
+    PurchaseRepository --> DatabaseInterface
+    Purchase --> PurchaseDetail
+    Cart --> Product
+    Cart --> User
+    Product --> Database
+    User --> Database

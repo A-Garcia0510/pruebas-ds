@@ -1,0 +1,46 @@
+### **Tutorial: Cómo configurar tu entorno de XAMPP para usar PHP con una base de datos local**
+
+#### **Paso 1: Verificar que MySQL esté activo en XAMPP**
+
+1. **Abrir XAMPP Control Panel**:
+   - Busca y abre el **XAMPP Control Panel** en tu computadora.
+   - Este panel te permitirá gestionar los servicios de XAMPP, como Apache y MySQL.
+
+2. **Iniciar los servicios**:
+   - En el panel, verás dos botones principales: **Start** y **Stop**.
+   - Haz clic en el botón **Start** junto a **Apache** para iniciar el servidor web.
+   - Haz clic en el botón **Start** junto a **MySQL** para iniciar la base de datos MySQL.
+
+3. **Verificar que Apache y MySQL estén corriendo**:
+   - Si ambos botones cambian a **"Running"**, significa que el servidor web y la base de datos están funcionando correctamente.
+   - Si hay un error, revisa que los puertos no estén siendo bloqueados por otro programa (generalmente el puerto 80 para Apache y el puerto 3306 para MySQL).
+
+> **Nota**: Apache y MySQL deben estar activos para que puedas usar tu base de datos local en tu página PHP.
+
+---
+
+#### **Paso 4: Colocar tu proyecto en la carpeta correcta de XAMPP**
+
+1. **Acceder a la carpeta `htdocs`**:
+   - La carpeta `htdocs` es donde debes colocar todos los archivos de tu proyecto web.
+   - Abre el explorador de archivos y navega a la siguiente ruta en tu computadora (dependiendo de la instalación de XAMPP):
+     - En **Windows**: `C:\xampp\htdocs\`
+     - En **Mac** o **Linux**: `/Applications/XAMPP/htdocs/`
+
+2. **Crear una carpeta para tu proyecto**:
+   - Dentro de la carpeta `htdocs`, crea una nueva carpeta para tu proyecto PHP. Por ejemplo, puedes llamarla `mi_proyecto`.
+
+3. **Colocar los archivos de tu proyecto**:
+   - Mueve todos los archivos de tu página web (HTML, PHP, CSS, JS, imágenes, etc.) dentro de la carpeta que acabas de crear.
+   - Asegúrate de que tu archivo PHP de conexión (`Conex.php`) también esté en esa misma carpeta.
+
+4. **Acceder a tu proyecto desde el navegador**:
+   - Una vez que los archivos estén en la carpeta adecuada, abre tu navegador y escribe la siguiente URL:
+     ```
+     http://localhost/mi_proyecto/
+     ```
+   - Si tu archivo principal es, por ejemplo, `index.php`, lo verás en el navegador al acceder a esa URL.
+
+> **Nota**: Si tu página no se carga correctamente, verifica que los archivos estén bien ubicados en la carpeta `htdocs` y que Apache y MySQL estén ejecutándose.
+
+---
