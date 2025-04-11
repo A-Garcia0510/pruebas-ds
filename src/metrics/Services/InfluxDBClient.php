@@ -2,25 +2,31 @@
 // src/Metrics/Services/InfluxDBClient.php
 namespace Metrics\Services;
 
-use InfluxDB\Client;
-use InfluxDB\Database;
 use Metrics\InfluxDBConfiguration;
 use Metrics\Interfaces\InfluxDBClientInterface;
 
 class InfluxDBClient implements InfluxDBClientInterface {
-    private Client $client;
-    private Database $database;
+    private $client;
+    private $database;
     private InfluxDBConfiguration $config;
+    private bool $connected = false;
 
     public function __construct(InfluxDBConfiguration $config) {
         $this->config = $config;
-        $this->client = new Client(
-            $config->getHost(),
-            $config->getPort(),
-            $config->getUsername(),
-            $config->getPassword()
-        );
-        $this->database = $this->client->selectDB($config->getDatabase());
+        try {
+            // Para InfluxDB v1
+            $this->client = new \InfluxDB\Client(
+                parse_url($config->getUrl(), PHP_URL_HOST),
+                parse_url($config->getUrl(), PHP_URL_PORT) ?: 8086,
+                $config->getOrg(),  // En v1 esto funcionaría como username
+                $config->getToken() // En v1 esto funcionaría como password
+            );
+            $this->database = $this->client->selectDB($config->getBucket()); // En v1 el bucket es equivalente a database
+            $this->connected = true;
+        } catch (\Exception $e) {
+            error_log("Error conectando a InfluxDB: " . $e->getMessage());
+            $this->connected = false;
+        }
     }
 
     /**
@@ -32,6 +38,8 @@ class InfluxDBClient implements InfluxDBClientInterface {
      * @return bool
      */
     public function writeData(string $measurement, array $fields, array $tags = []): bool {
+        if (!$this->connected) return false;
+        
         try {
             $point = new \InfluxDB\Point(
                 $measurement, // Nombre de la medición
@@ -41,10 +49,8 @@ class InfluxDBClient implements InfluxDBClientInterface {
                 time()        // Timestamp
             );
 
-            $this->database->writePoints([$point], \InfluxDB\Database::PRECISION_SECONDS);
-            return true;
+            return $this->database->writePoints([$point], \InfluxDB\Database::PRECISION_SECONDS);
         } catch (\Exception $e) {
-            // Manejo de errores
             error_log("Error escribiendo en InfluxDB: " . $e->getMessage());
             return false;
         }
@@ -57,6 +63,8 @@ class InfluxDBClient implements InfluxDBClientInterface {
      * @return array Resultados de la consulta
      */
     public function query(string $query): array {
+        if (!$this->connected) return [];
+        
         try {
             $result = $this->database->query($query);
             return $result->getPoints();
@@ -72,6 +80,8 @@ class InfluxDBClient implements InfluxDBClientInterface {
      * @return bool
      */
     public function isConnected(): bool {
+        if (!$this->connected) return false;
+        
         try {
             return $this->database->exists();
         } catch (\Exception $e) {
