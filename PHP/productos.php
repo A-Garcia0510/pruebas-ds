@@ -96,20 +96,22 @@ foreach ($productos as $producto) {
             }
 
             productosFiltrados.forEach(producto => {
-                const nombre_imagen = producto.nombre_producto.toLowerCase().replace(/ /g, '_') + '.jpg';
                 productosDiv.innerHTML += `
-                    <div class='producto'>
-                        <img src='../IMG-P/${nombre_imagen}' alt='${producto.nombre_producto}' />
-                        <div>
-                            <h2>${producto.nombre_producto}</h2>
-                            <p class="precio">Precio: $${parseFloat(producto.precio).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-                            <p>Cantidad: ${producto.cantidad}</p>
-                            <p>Ingredientes: ${producto.descripcion}</p>
-                            <button class="agregar" onclick="agregarAlCarrito(${producto.producto_ID}, 1)">Agregar al Carrito</button>
+                    <div class='producto-tarjeta'>
+                        <h2>${producto.nombre_producto}</h2>
+                        <p class="precio">$${parseFloat(producto.precio).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                        <p class="stock">Disponible: ${producto.cantidad} unidades</p>
+                        <div class="acciones">
+                            <button class="ver-detalle" onclick="verDetalle(${producto.producto_ID})">Ver Detalle</button>
+                            <button class="agregar" onclick="agregarAlCarrito(${producto.producto_ID}, 1)">Agregar</button>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function verDetalle(productoID) {
+            window.location.href = `productoDetalle.php?id=${productoID}`;
         }
 
         function agregarAlCarrito(productoID, cantidad) {
