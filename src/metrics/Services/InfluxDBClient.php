@@ -40,7 +40,7 @@ class InfluxDBClient implements InfluxDBClientInterface {
         try {
             // Consulta muy sencilla que debería funcionar si hay conexión
             $query = 'SHOW DATABASES';
-            $this->client->query($query);
+            $this->client->query($query, $this->config->getBucket());
             return true;
         } catch (\Exception $e) {
             error_log("Error haciendo ping a InfluxDB: " . $e->getMessage());
@@ -85,7 +85,7 @@ class InfluxDBClient implements InfluxDBClientInterface {
         if (!$this->connected) return [];
         
         try {
-            $result = $this->database->query($query);
+            $result = $this->client->query($query, $this->config->getBucket());
             return $result->getPoints();
         } catch (\Exception $e) {
             error_log("Error consultando InfluxDB: " . $e->getMessage());
