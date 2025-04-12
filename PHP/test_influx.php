@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h1>Prueba de conexión a InfluxDB</h1>";
+echo "<h1>Prueba de conexión a InfluxDB v2</h1>";
 echo "<p>Versión de PHP: " . phpversion() . "</p>";
 
 try {
@@ -19,53 +19,53 @@ try {
     echo "<p>Cliente creado, verificando conexión...</p>";
     
     if ($influxClient->isConnected()) {
-        echo "<h2 style='color: green;'>¡Conexión exitosa a InfluxDB!</h2>";
+        echo "<h2 style='color: green;'>¡Conexión exitosa a InfluxDB v2!</h2>";
         
-        // Comprobar si la base de datos existe
-        echo "<p>Verificando si la base de datos existe...</p>";
+        // Comprobar si el bucket existe
+        echo "<p>Verificando buckets disponibles...</p>";
         
         try {
-            $databases = $influxClient->query('SHOW DATABASES');
+            $buckets = $influxClient->query('SHOW DATABASES');
             
-            if (empty($databases)) {
-                echo "<p style='color: orange;'>No se pudieron obtener las bases de datos o la lista está vacía.</p>";
+            if (empty($buckets)) {
+                echo "<p style='color: orange;'>No se pudieron obtener los buckets o la lista está vacía.</p>";
                 echo "<p>Mensaje: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
                 
-                // Intentar crear la base de datos directamente
-                echo "<p>Intentando crear la base de datos directamente...</p>";
-                $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredDB());
+                // Intentar crear el bucket directamente
+                echo "<p>Intentando crear el bucket directamente...</p>";
+                $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredBucket());
                 if (!empty($createResult) && isset($createResult[0]['success']) && $createResult[0]['success']) {
-                    echo "<p style='color: green;'>✓ Base de datos creada correctamente.</p>";
+                    echo "<p style='color: green;'>✓ Bucket creado correctamente.</p>";
                 } else {
-                    echo "<p style='color: orange;'>⚠ No se pudo confirmar la creación de la base de datos.</p>";
+                    echo "<p style='color: orange;'>⚠ No se pudo confirmar la creación del bucket.</p>";
                 }
             } else {
-                echo "<p>Bases de datos disponibles:</p>";
+                echo "<p>Buckets disponibles:</p>";
                 echo "<ul>";
-                $dbExists = false;
-                foreach ($databases as $db) {
-                    if (isset($db['name'])) {
-                        echo "<li>" . htmlspecialchars($db['name']) . "</li>";
-                        if ($db['name'] === MetricsFactory::getConfiguredDB()) {
-                            $dbExists = true;
+                $bucketExists = false;
+                foreach ($buckets as $bucket) {
+                    if (isset($bucket['name'])) {
+                        echo "<li>" . htmlspecialchars($bucket['name']) . "</li>";
+                        if ($bucket['name'] === MetricsFactory::getConfiguredBucket()) {
+                            $bucketExists = true;
                         }
                     }
                 }
                 echo "</ul>";
                 
-                if (!$dbExists) {
-                    echo "<p style='color: orange;'>⚠ La base de datos '" . htmlspecialchars(MetricsFactory::getConfiguredDB()) . "' no existe. Esto podría ser la causa del error.</p>";
-                    echo "<p>Intentando crear la base de datos...</p>";
-                    $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredDB());
+                if (!$bucketExists) {
+                    echo "<p style='color: orange;'>⚠ El bucket '" . htmlspecialchars(MetricsFactory::getConfiguredBucket()) . "' no existe. Esto podría ser la causa del error.</p>";
+                    echo "<p>Intentando crear el bucket...</p>";
+                    $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredBucket());
                     if (!empty($createResult) && isset($createResult[0]['success']) && $createResult[0]['success']) {
-                        echo "<p style='color: green;'>✓ Base de datos creada correctamente.</p>";
+                        echo "<p style='color: green;'>✓ Bucket creado correctamente.</p>";
                     } else {
-                        echo "<p style='color: orange;'>⚠ No se pudo confirmar la creación de la base de datos.</p>";
+                        echo "<p style='color: orange;'>⚠ No se pudo confirmar la creación del bucket.</p>";
                     }
                 }
             }
         } catch (Exception $dbError) {
-            echo "<p style='color: orange;'>Error al consultar bases de datos: " . htmlspecialchars($dbError->getMessage()) . "</p>";
+            echo "<p style='color: orange;'>Error al consultar buckets: " . htmlspecialchars($dbError->getMessage()) . "</p>";
             echo "<p>Intentando continuar con la operación de escritura...</p>";
         }
         
@@ -80,10 +80,14 @@ try {
         if ($result) {
             echo "<p style='color: green;'>✓ Se ha escrito un dato de prueba correctamente.</p>";
             
-            // Verificar que el dato se escribió correctamente
+            // Verificar que el dato se escribió correctamente con Flux
             echo "<p>Verificando que el dato se ha escrito correctamente...</p>";
-            $query = 'SELECT * FROM test_measurement WHERE source=\'test_script\' ORDER BY time DESC LIMIT 1';
-            $data = $influxClient->query($query);
+            $fluxQuery = 'from(bucket: "' . MetricsFactory::getConfiguredBucket() . '")
+                |> range(start: -1h)
+                |> filter(fn: (r) => r._measurement == "test_measurement")
+                |> filter(fn: (r) => r.source == "test_script")
+                |> limit(n: 1)';
+            $data = $influxClient->query($fluxQuery);
             
             if (!empty($data)) {
                 echo "<p style='color: green;'>✓ Dato verificado correctamente:</p>";
@@ -91,29 +95,29 @@ try {
             } else {
                 echo "<p style='color: orange;'>⚠ No se pudo verificar el dato.</p>";
                 echo "<p>Error: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
-                echo "<p>Esto puede deberse a que la consulta es incorrecta o la base de datos no contiene los datos aún.</p>";
+                echo "<p>Esto puede deberse a que la consulta es incorrecta o el bucket no contiene los datos aún.</p>";
             }
         } else {
             echo "<p style='color: orange;'>⚠ Conexión establecida pero error al escribir datos.</p>";
             echo "<p>Error: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
             
             // Comprobar permisos del usuario
-            echo "<p>Verificando permisos del usuario...</p>";
-            echo "<p>Este error puede ocurrir si el usuario '" . htmlspecialchars(MetricsFactory::getConfiguredUser()) . "' no tiene permisos para escribir en la base de datos '" . htmlspecialchars(MetricsFactory::getConfiguredDB()) . "'.</p>";
+            echo "<p>Verificando permisos del token...</p>";
+            echo "<p>Este error puede ocurrir si el token proporcionado no tiene permisos para escribir en el bucket '" . htmlspecialchars(MetricsFactory::getConfiguredBucket()) . "'.</p>";
         }
     } else {
-        echo "<h2 style='color: red;'>❌ No se pudo conectar a InfluxDB.</h2>";
+        echo "<h2 style='color: red;'>❌ No se pudo conectar a InfluxDB v2.</h2>";
         echo "<p>Error: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
-        echo "<p>Verifica que InfluxDB esté funcionando en la URL configurada y que las credenciales sean correctas.</p>";
+        echo "<p>Verifica que InfluxDB esté funcionando en la URL configurada y que el token sea válido.</p>";
         
         // Mostrar información de la configuración para depuración
         echo "<h3>Información de configuración:</h3>";
         echo "<ul>";
         echo "<li>URL: " . htmlspecialchars(MetricsFactory::getConfiguredUrl()) . "</li>";
-        echo "<li>Usuario: " . htmlspecialchars(MetricsFactory::getConfiguredUser()) . "</li>";
-        echo "<li>Base de datos: " . htmlspecialchars(MetricsFactory::getConfiguredDB()) . "</li>";
+        echo "<li>Organización: " . htmlspecialchars(MetricsFactory::getConfiguredOrg()) . "</li>";
+        echo "<li>Bucket: " . htmlspecialchars(MetricsFactory::getConfiguredBucket()) . "</li>";
         echo "</ul>";
-        echo "<p>Nota: Las contraseñas no se muestran por seguridad</p>";
+        echo "<p>Nota: El token no se muestra por seguridad</p>";
     }
 } catch (Exception $e) {
     echo "<h2 style='color: red;'>❌ Error: " . htmlspecialchars($e->getMessage()) . "</h2>";
