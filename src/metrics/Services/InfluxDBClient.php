@@ -27,7 +27,9 @@ class InfluxDBClient implements InfluxDBClientInterface {
      */
     private function testConnection(): bool {
         try {
-            $url = $this->config->getUrl() . '/api/v2/health';
+            // Endpoint correcto para verificar la salud en InfluxDB v2
+            $url = $this->config->getUrl() . '/api/v2/ping';
+            
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -36,12 +38,19 @@ class InfluxDBClient implements InfluxDBClientInterface {
             
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
             curl_close($ch);
             
             if ($httpCode >= 200 && $httpCode < 300) {
                 return true;
             } else {
                 $this->lastError = "Error de conexión a InfluxDB v2. Código HTTP: " . $httpCode;
+                if (!empty($curlError)) {
+                    $this->lastError .= ", Error cURL: " . $curlError;
+                }
+                if (!empty($response)) {
+                    $this->lastError .= ", Respuesta: " . $response;
+                }
                 return false;
             }
         } catch (\Exception $e) {
@@ -49,7 +58,6 @@ class InfluxDBClient implements InfluxDBClientInterface {
             return false;
         }
     }
-
     /**
      * Escribe datos en InfluxDB v2 usando la API de línea
      * 
