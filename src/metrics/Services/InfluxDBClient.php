@@ -61,16 +61,20 @@ class InfluxDBClient implements InfluxDBClientInterface {
         
         try {
             $point = new \InfluxDB\Point(
-                $measurement, // Nombre de la medición
-                null,         // Valor (puede ser null si solo usas campos)
-                $tags,        // Tags
-                $fields,      // Campos
-                time()        // Timestamp
+                $measurement,
+                null,
+                $tags,
+                $fields,
+                time()
             );
-
-            return $this->database->writePoints([$point], \InfluxDB\Database::PRECISION_SECONDS);
+    
+            $result = $this->database->writePoints([$point], \InfluxDB\Database::PRECISION_SECONDS);
+            if (!$result) {
+                error_log("No se pudo escribir en InfluxDB - Resultado falso");
+            }
+            return $result;
         } catch (\Exception $e) {
-            error_log("Error escribiendo en InfluxDB: " . $e->getMessage());
+            error_log("Error escribiendo en InfluxDB: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return false;
         }
     }
