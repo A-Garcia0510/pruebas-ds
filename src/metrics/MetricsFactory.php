@@ -15,9 +15,9 @@ class MetricsFactory {
         // En producción, estas credenciales deberían estar en un archivo de configuración seguro
         $config = new InfluxDBConfiguration(
             "http://localhost:8086", // URL de tu servidor InfluxDB
-            "username",             // Usuario en InfluxDB v1
-            "password",             // Contraseña en InfluxDB v1
-            "metrics_database"      // Nombre de la base de datos
+            "Anthony",             // Usuario en InfluxDB v1
+            "Anto0410",             // Contraseña en InfluxDB v1
+            "metricas_carga"      // Nombre de la base de datos
         );
         
         return new InfluxDBClient($config);
