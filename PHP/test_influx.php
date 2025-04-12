@@ -1,6 +1,7 @@
 <?php
 // test_influx.php
-require_once __DIR__ . '/PHP/autoload.php';
+require_once __DIR__ . '/../PHP/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Metrics\MetricsFactory;
 
