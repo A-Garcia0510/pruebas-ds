@@ -21,11 +21,30 @@ class InfluxDBClient implements InfluxDBClientInterface {
                 $config->getOrg(),  // En v1 esto funcionaría como username
                 $config->getToken() // En v1 esto funcionaría como password
             );
-            $this->database = $this->client->selectDB($config->getBucket()); // En v1 el bucket es equivalente a database
-            $this->connected = true;
+            
+            // Simplemente seleccionamos la base de datos, sin verificar si existe todavía
+            $this->database = $this->client->selectDB($config->getBucket());
+            
+            // Hacemos una consulta simple para verificar la conexión
+            $this->connected = $this->pingDatabase();
         } catch (\Exception $e) {
             error_log("Error conectando a InfluxDB: " . $e->getMessage());
             $this->connected = false;
+        }
+    }
+
+    /**
+     * Método privado para probar la conexión con una consulta sencilla
+     */
+    private function pingDatabase(): bool {
+        try {
+            // Consulta muy sencilla que debería funcionar si hay conexión
+            $query = 'SHOW DATABASES';
+            $this->client->query($query);
+            return true;
+        } catch (\Exception $e) {
+            error_log("Error haciendo ping a InfluxDB: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -80,12 +99,6 @@ class InfluxDBClient implements InfluxDBClientInterface {
      * @return bool
      */
     public function isConnected(): bool {
-        if (!$this->connected) return false;
-        
-        try {
-            return $this->database->exists();
-        } catch (\Exception $e) {
-            return false;
-        }
+        return $this->connected;
     }
 }
