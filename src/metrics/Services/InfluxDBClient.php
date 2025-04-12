@@ -27,8 +27,8 @@ class InfluxDBClient implements InfluxDBClientInterface {
      */
     private function testConnection(): bool {
         try {
-            // Endpoint correcto para verificar la salud en InfluxDB v2
-            $url = $this->config->getUrl() . '/api/v2/ping';
+            // Cambiar esta línea
+            $url = $this->config->getUrl() . '/health';
             
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
