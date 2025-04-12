@@ -10,7 +10,7 @@ class InfluxDBClient implements InfluxDBClientInterface {
     private $database;
     private InfluxDBConfiguration $config;
     private bool $connected = false;
-    private $lastError = ''; // Nueva propiedad para almacenar el último error
+    private $lastError = ''; // Propiedad para almacenar el último error
 
     public function __construct(InfluxDBConfiguration $config) {
         $this->config = $config;
@@ -40,14 +40,19 @@ class InfluxDBClient implements InfluxDBClientInterface {
      */
     private function pingDatabase(): bool {
         try {
-            // Consulta muy sencilla que debería funcionar si hay conexión
-            $query = 'SHOW DATABASES';
-            $this->client->query($query, $this->config->getBucket());
+            // Intentamos usar un método más directo y seguro
+            $databases = $this->client->listDatabases();
             return true;
         } catch (\Exception $e) {
-            $this->lastError = $e->getMessage();
-            error_log("Error haciendo ping a InfluxDB: " . $e->getMessage());
-            return false;
+            try {
+                // Intentamos como alternativa un ping simple
+                $this->client->ping();
+                return true;
+            } catch (\Exception $innerEx) {
+                $this->lastError = $innerEx->getMessage();
+                error_log("Error haciendo ping a InfluxDB: " . $innerEx->getMessage());
+                return false;
+            }
         }
     }
 
@@ -88,7 +93,7 @@ class InfluxDBClient implements InfluxDBClientInterface {
     }
 
     /**
-     * Ejecuta una consulta en InfluxDB
+     * Ejecuta una consulta en InfluxDB de manera segura
      * 
      * @param string $query Consulta en lenguaje InfluxQL
      * @return array Resultados de la consulta
@@ -100,8 +105,46 @@ class InfluxDBClient implements InfluxDBClientInterface {
         }
         
         try {
+            // Manejo especial para comandos específicos
+            if (strtoupper(substr(trim($query), 0, 14)) === 'SHOW DATABASES') {
+                try {
+                    $databases = $this->client->listDatabases();
+                    $result = [];
+                    foreach ($databases as $dbName) {
+                        $result[] = ['name' => $dbName];
+                    }
+                    return $result;
+                } catch (\Exception $e) {
+                    $this->lastError = "Error al listar bases de datos: " . $e->getMessage();
+                    return [];
+                }
+            } else if (strtoupper(substr(trim($query), 0, 15)) === 'CREATE DATABASE') {
+                // Extraer el nombre de la base de datos
+                $dbName = trim(substr(trim($query), 15));
+                try {
+                    $this->client->createDatabase($dbName);
+                    return [['success' => true]];
+                } catch (\Exception $e) {
+                    $this->lastError = "Error al crear la base de datos: " . $e->getMessage();
+                    return [];
+                }
+            }
+            
+            // Para otras consultas, usar el método normal
             $result = $this->client->query($query, $this->config->getBucket());
-            return $result->getPoints();
+            
+            // Verificar si el resultado es válido
+            if ($result) {
+                try {
+                    return $result->getPoints();
+                } catch (\Exception $e) {
+                    $this->lastError = "Error al obtener puntos: " . $e->getMessage();
+                    return [];
+                }
+            } else {
+                $this->lastError = "La consulta no devolvió resultados";
+                return [];
+            }
         } catch (\Exception $e) {
             $this->lastError = $e->getMessage();
             error_log("Error consultando InfluxDB: " . $e->getMessage());

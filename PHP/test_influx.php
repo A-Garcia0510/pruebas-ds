@@ -23,24 +23,50 @@ try {
         
         // Comprobar si la base de datos existe
         echo "<p>Verificando si la base de datos existe...</p>";
-        $databases = $influxClient->query('SHOW DATABASES');
-        $dbExists = false;
         
-        echo "<p>Bases de datos disponibles:</p>";
-        echo "<ul>";
-        foreach ($databases as $db) {
-            echo "<li>" . htmlspecialchars($db['name']) . "</li>";
-            if ($db['name'] === MetricsFactory::getConfiguredDB()) {
-                $dbExists = true;
+        try {
+            $databases = $influxClient->query('SHOW DATABASES');
+            
+            if (empty($databases)) {
+                echo "<p style='color: orange;'>No se pudieron obtener las bases de datos o la lista está vacía.</p>";
+                echo "<p>Mensaje: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
+                
+                // Intentar crear la base de datos directamente
+                echo "<p>Intentando crear la base de datos directamente...</p>";
+                $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredDB());
+                if (!empty($createResult) && isset($createResult[0]['success']) && $createResult[0]['success']) {
+                    echo "<p style='color: green;'>✓ Base de datos creada correctamente.</p>";
+                } else {
+                    echo "<p style='color: orange;'>⚠ No se pudo confirmar la creación de la base de datos.</p>";
+                }
+            } else {
+                echo "<p>Bases de datos disponibles:</p>";
+                echo "<ul>";
+                $dbExists = false;
+                foreach ($databases as $db) {
+                    if (isset($db['name'])) {
+                        echo "<li>" . htmlspecialchars($db['name']) . "</li>";
+                        if ($db['name'] === MetricsFactory::getConfiguredDB()) {
+                            $dbExists = true;
+                        }
+                    }
+                }
+                echo "</ul>";
+                
+                if (!$dbExists) {
+                    echo "<p style='color: orange;'>⚠ La base de datos '" . htmlspecialchars(MetricsFactory::getConfiguredDB()) . "' no existe. Esto podría ser la causa del error.</p>";
+                    echo "<p>Intentando crear la base de datos...</p>";
+                    $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredDB());
+                    if (!empty($createResult) && isset($createResult[0]['success']) && $createResult[0]['success']) {
+                        echo "<p style='color: green;'>✓ Base de datos creada correctamente.</p>";
+                    } else {
+                        echo "<p style='color: orange;'>⚠ No se pudo confirmar la creación de la base de datos.</p>";
+                    }
+                }
             }
-        }
-        echo "</ul>";
-        
-        if (!$dbExists) {
-            echo "<p style='color: orange;'>⚠ La base de datos '" . htmlspecialchars(MetricsFactory::getConfiguredDB()) . "' no existe. Esto podría ser la causa del error.</p>";
-            echo "<p>Intentando crear la base de datos...</p>";
-            $createResult = $influxClient->query('CREATE DATABASE ' . MetricsFactory::getConfiguredDB());
-            echo "<p>Resultado de creación: " . ($createResult ? "Exitoso" : "Fallido - " . htmlspecialchars($influxClient->getLastError())) . "</p>";
+        } catch (Exception $dbError) {
+            echo "<p style='color: orange;'>Error al consultar bases de datos: " . htmlspecialchars($dbError->getMessage()) . "</p>";
+            echo "<p>Intentando continuar con la operación de escritura...</p>";
         }
         
         // Intenta escribir un dato de prueba
@@ -63,7 +89,9 @@ try {
                 echo "<p style='color: green;'>✓ Dato verificado correctamente:</p>";
                 echo "<pre>" . print_r($data[0], true) . "</pre>";
             } else {
-                echo "<p style='color: orange;'>⚠ No se pudo verificar el dato. Error: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
+                echo "<p style='color: orange;'>⚠ No se pudo verificar el dato.</p>";
+                echo "<p>Error: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
+                echo "<p>Esto puede deberse a que la consulta es incorrecta o la base de datos no contiene los datos aún.</p>";
             }
         } else {
             echo "<p style='color: orange;'>⚠ Conexión establecida pero error al escribir datos.</p>";
@@ -78,7 +106,7 @@ try {
         echo "<p>Error: " . htmlspecialchars($influxClient->getLastError()) . "</p>";
         echo "<p>Verifica que InfluxDB esté funcionando en la URL configurada y que las credenciales sean correctas.</p>";
         
-        // Mostrar información de la configuración para depuración (quita esto en producción)
+        // Mostrar información de la configuración para depuración
         echo "<h3>Información de configuración:</h3>";
         echo "<ul>";
         echo "<li>URL: " . htmlspecialchars(MetricsFactory::getConfiguredUrl()) . "</li>";
