@@ -66,6 +66,14 @@ class InfluxDBClient implements InfluxDBClientInterface {
      * @param array $tags Tags asociados (metadata)
      * @return bool
      */
+    /**
+ * Obtiene el nombre del bucket configurado
+ * 
+ * @return string
+ */
+    public function getBucket(): string {
+        return $this->config->getBucket();
+    }
     public function writeData(string $measurement, array $fields, array $tags = []): bool {
         if (!$this->connected) {
             $this->lastError = "No hay conexión con InfluxDB";
