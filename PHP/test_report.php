@@ -18,17 +18,18 @@ if (!$influxClient->isConnected()) {
     die("Error: No se pudo conectar a InfluxDB para recuperar los datos de la prueba.");
 }
 
-// Obtener los datos generales de la prueba
-$testQuery = <<<FLUX
+// Consulta para obtener los datos generales de la prueba (inicio y fin)
+$testStartQuery = <<<FLUX
 from(bucket: "{$influxClient->getBucket()}")
   |> range(start: -7d)
   |> filter(fn: (r) => r._measurement == "load_test")
   |> filter(fn: (r) => r.test_id == "{$testId}")
+  |> filter(fn: (r) => r.test_type == "start" or r.test_type == "end")
 FLUX;
 
-$testData = $influxClient->query($testQuery);
+$testData = $influxClient->query($testStartQuery);
 
-// Obtener las métricas de cada solicitud
+// Consulta para obtener las métricas de cada solicitud
 $requestsQuery = <<<FLUX
 from(bucket: "{$influxClient->getBucket()}")
   |> range(start: -7d)
@@ -39,7 +40,7 @@ FLUX;
 $requestsData = $influxClient->query($requestsQuery);
 
 // Verificar si tenemos datos
-if (empty($testData) || empty($requestsData)) {
+if (empty($testData)) {
     die("Error: No se encontraron datos para el ID de prueba especificado.");
 }
 
@@ -47,31 +48,52 @@ if (empty($testData) || empty($requestsData)) {
 $testInfo = [];
 $requestsInfo = [];
 
+// Procesar los datos de la prueba
 foreach ($testData as $point) {
-    if (!isset($point['_field']) || !isset($point['_value'])) continue;
-    $testInfo[$point['_field']] = $point['_value'];
-    // Capturar metadata
+    if (!isset($point['_field']) || !isset($point['_value'])) {
+        continue;
+    }
+    
+    $field = $point['_field'];
+    $value = $point['_value'];
+    
+    // Almacenar valores en $testInfo
+    $testInfo[$field] = $value;
+    
+    // Capturar metadatos importantes
     if (isset($point['target_url']) && !isset($testInfo['target_url'])) {
         $testInfo['target_url'] = $point['target_url'];
     }
+    
     if (isset($point['test_type']) && $point['test_type'] === 'start' && isset($point['_time'])) {
         $testInfo['start_time'] = $point['_time'];
     }
 }
 
+// Procesar los datos de las solicitudes
 foreach ($requestsData as $point) {
-    if (!isset($point['_field']) || !isset($point['_value']) || !isset($point['request_id'])) continue;
+    if (!isset($point['_field']) || !isset($point['_value']) || !isset($point['request_id'])) {
+        continue;
+    }
     
     $requestId = $point['request_id'];
+    $field = $point['_field'];
+    $value = $point['_value'];
+    
     if (!isset($requestsInfo[$requestId])) {
         $requestsInfo[$requestId] = [];
     }
     
-    $requestsInfo[$requestId][$point['_field']] = $point['_value'];
+    $requestsInfo[$requestId][$field] = $value;
+    
     if (isset($point['_time'])) {
         $requestsInfo[$requestId]['time'] = $point['_time'];
     }
 }
+
+// Debug: Mostrar estructura de datos
+// echo "<pre>Test Info: " . print_r($testInfo, true) . "</pre>";
+// echo "<pre>Request Info: " . print_r($requestsInfo, true) . "</pre>";
 
 // Preparar datos para gráficos
 $responseTimesData = [];
@@ -81,16 +103,25 @@ foreach ($requestsInfo as $id => $request) {
     if (isset($request['response_time_ms'])) {
         $responseTimesData[] = [
             'id' => $id,
-            'time' => $request['response_time_ms']
+            'time' => (float)$request['response_time_ms']
         ];
     }
     
     if (isset($request['success'])) {
         $successRateData[] = [
             'id' => $id,
-            'success' => $request['success']
+            'success' => (bool)$request['success']
         ];
     }
+}
+
+// Si no hay datos de solicitudes, inicializarlos para evitar errores en los gráficos
+if (empty($responseTimesData)) {
+    $responseTimesData = [['id' => '0', 'time' => 0]];
+}
+
+if (empty($successRateData)) {
+    $successRateData = [['id' => '0', 'success' => true]];
 }
 ?>
 <!DOCTYPE html>

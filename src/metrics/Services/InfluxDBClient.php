@@ -326,7 +326,6 @@ class InfluxDBClient implements InfluxDBClientInterface {
         $lines = explode("\n", $csvData);
         $header = null;
         $result = [];
-        $dataFound = false;
         
         foreach ($lines as $line) {
             $line = trim($line);
@@ -341,7 +340,7 @@ class InfluxDBClient implements InfluxDBClientInterface {
                 continue;
             }
             
-            // Verificar si es una línea de datos
+            // Asegurarse de que tenemos valores para todos los encabezados
             if (count($values) >= count($header)) {
                 $row = [];
                 foreach ($header as $i => $key) {
@@ -350,13 +349,8 @@ class InfluxDBClient implements InfluxDBClientInterface {
                     }
                 }
                 
-                // Solo agregar filas que tengan un valor "_value"
-                if (isset($row['_value'])) {
-                    $dataFound = true;
-                    // Transformar la fila para que sea compatible con el formato anterior
-                    $transformedRow = $this->transformRow($row);
-                    $result[] = $transformedRow;
-                }
+                // Añadir la fila al resultado
+                $result[] = $row;
             }
         }
         
