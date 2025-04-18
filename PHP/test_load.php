@@ -9,7 +9,7 @@ use Metrics\MetricsFactory;
 $numRequests = isset($_GET['requests']) ? (int)$_GET['requests'] : 100;
 $concurrency = isset($_GET['concurrency']) ? (int)$_GET['concurrency'] : 10;
 $intervalMs = isset($_GET['interval']) ? (int)$_GET['interval'] : 100;
-$targetUrl = isset($_GET['url']) ? $_GET['url'] : 'http://localhost/index.php';
+$targetUrl = isset($_GET['url']) ? $_GET['url'] : 'http://localhost/pruebas-ds/index.php';
 $testId = uniqid('loadtest_');
 
 // Validación básica

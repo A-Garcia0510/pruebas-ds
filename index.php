@@ -1,11 +1,18 @@
 <?php
-session_start(); // Iniciar la sesión
+// Iniciar el monitor antes de todo
+require_once __DIR__ . '/PHP/load_monitor.php';
+$monitor = new LoadMonitor();
+
+// Iniciar la sesión
+session_start();
 
 // Verificar si el usuario ya está logueado
 if (isset($_SESSION['correo'])) {
     // Si está logueado, no redirigir a login
     // Puedes incluir un mensaje de bienvenida o similar si lo deseas
 }
+
+// Resto del código index.php original...
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -106,3 +113,17 @@ if (isset($_SESSION['correo'])) {
   </script>
 </body>
 </html>
+<?php
+// Finalizar el monitoreo al terminar la página
+$monitor->finalize(http_response_code());
+
+// Si estamos en modo de prueba, mostrar las métricas (solo para desarrollo)
+if (isset($_GET['debug_metrics']) && $_GET['debug_metrics'] === 'true') {
+    echo '<div style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin-top: 20px;">';
+    echo '<h3>Métricas de Carga (Solo Debug)</h3>';
+    echo '<pre>';
+    print_r($monitor->getMetrics());
+    echo '</pre>';
+    echo '</div>';
+}
+?>
