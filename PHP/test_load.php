@@ -1,220 +1,241 @@
 <?php
-// PHP/test_load.php
+// PHP/test_load.php - Versión optimizada sin monitoreo de servidor
 require_once __DIR__ . '/../PHP/autoload.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Metrics\MetricsFactory;
 
-// Configuración de la prueba
-$numRequests = isset($_GET['requests']) ? (int)$_GET['requests'] : 100;
-$concurrency = isset($_GET['concurrency']) ? (int)$_GET['concurrency'] : 10;
-$intervalMs = isset($_GET['interval']) ? (int)$_GET['interval'] : 100;
-$targetUrl = isset($_GET['url']) ? $_GET['url'] : 'http://localhost/pruebas-ds/index.php';
+// Configuración de ejecución
+set_time_limit(0);
+ignore_user_abort(true);
+
+// Control del formulario
+$runTest = isset($_POST['submit']);
+$formSubmitted = isset($_POST['submitted']) && $_POST['submitted'] === 'true';
+
+// Parámetros de la prueba con sanitización
+$config = [
+    'requests' => filter_var(
+        $formSubmitted 
+            ? $_POST['requests'] 
+            : (isset($_GET['requests']) ? $_GET['requests'] : 100), 
+        FILTER_VALIDATE_INT, 
+        ['options' => ['min_range' => 1, 'max_range' => 50000, 'default' => 100]]
+    ),
+    'concurrency' => filter_var(
+        $formSubmitted 
+            ? $_POST['concurrency'] 
+            : (isset($_GET['concurrency']) ? $_GET['concurrency'] : 10), 
+        FILTER_VALIDATE_INT, 
+        ['options' => ['min_range' => 1, 'max_range' => 500, 'default' => 10]]
+    ),
+    'interval' => filter_var(
+        $formSubmitted 
+            ? $_POST['interval'] 
+            : (isset($_GET['interval']) ? $_GET['interval'] : 100), 
+        FILTER_VALIDATE_INT, 
+        ['options' => ['min_range' => 5, 'max_range' => 5000, 'default' => 100]]
+    ),
+    'url' => filter_var(
+        $formSubmitted 
+            ? $_POST['url'] 
+            : (isset($_GET['url']) ? $_GET['url'] : 'http://localhost/pruebas-ds/index.php'), 
+        FILTER_VALIDATE_URL
+    )
+];
+
 $testId = uniqid('loadtest_');
 
-// Validación básica
-if ($numRequests < 1) $numRequests = 1;
-if ($concurrency < 1) $concurrency = 1;
-if ($concurrency > 50) $concurrency = 50; // Límite de concurrencia para proteger el servidor
-if ($intervalMs < 10) $intervalMs = 10;
+// Plantilla HTML
+$htmlTemplate = <<<HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba de Carga Rápida</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        .panel { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .progress-bar { height: 25px; background: #28a745; transition: width 0.3s ease; border-radius: 4px; }
+        .form-group { margin-bottom: 15px; }
+        input[type="number"] { width: 120px; padding: 5px; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Prueba de Carga</h1>
+    {%form%}
+    {%results%}
+</body>
+</html>
+HTML;
 
-// Preparar el cliente InfluxDB para métricas de la prueba
-$influxClient = MetricsFactory::createInfluxDBClient();
-if (!$influxClient->isConnected()) {
-    die("Error: No se pudo conectar a InfluxDB para registrar la prueba.");
-}
+// Mostrar formulario o resultados
+if (!$runTest) {
+    $formContent = <<<FORM
+    <div class="panel">
+        <form method="post">
+            <input type="hidden" name="submitted" value="true">
+            
+            <div class="form-group">
+                <label>URL Objetivo:</label>
+                <input type="url" name="url" value="{$config['url']}" required style="width:100%; padding:8px;">
+            </div>
 
-// Iniciar la prueba y registrar el inicio
-$startTime = microtime(true);
+            <div class="form-group">
+                <label>Solicitudes Totales:</label>
+                <input type="number" name="requests" value="{$config['requests']}" min="1" max="50000" required>
+            </div>
 
-echo "<h1>Prueba de Carga</h1>";
-echo "<p>Iniciando prueba con el ID: <strong>{$testId}</strong></p>";
-echo "<p>URL objetivo: <strong>{$targetUrl}</strong></p>";
-echo "<p>Solicitudes totales: <strong>{$numRequests}</strong></p>";
-echo "<p>Concurrencia: <strong>{$concurrency}</strong></p>";
-echo "<p>Intervalo entre solicitudes: <strong>{$intervalMs}ms</strong></p>";
+            <div class="form-group">
+                <label>Concurrencia:</label>
+                <input type="number" name="concurrency" value="{$config['concurrency']}" min="1" max="500" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Intervalo (ms):</label>
+                <input type="number" name="interval" value="{$config['interval']}" min="5" max="5000" required>
+            </div>
 
-// Registrar inicio de la prueba
-$influxClient->writeData(
-    'load_test', 
-    [
-        'status' => 1,
-        'total_requests' => $numRequests,
-        'concurrency' => $concurrency,
-        'interval_ms' => $intervalMs
-    ],
-    [
-        'test_id' => $testId,
-        'test_type' => 'start',
-        'target_url' => $targetUrl
-    ]
-);
+            <button type="submit" name="submit" class="btn">Iniciar Prueba</button>
+        </form>
+    </div>
+FORM;
 
-// Función para realizar una solicitud HTTP
-function makeRequest($url, $testId, $requestId) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HEADER, true);
-    // Agregamos un parámetro para identificar que es una prueba de carga
-    curl_setopt($ch, CURLOPT_URL, $url . (strpos($url, '?') === false ? '?' : '&') . "loadtest={$testId}&request={$requestId}");
+    echo str_replace('{%form%}', $formContent, $htmlTemplate);
+} else {
+    // Inicializar prueba
+    $influxClient = MetricsFactory::createInfluxDBClient();
     
-    // Medir el tiempo de respuesta
-    $start = microtime(true);
-    $response = curl_exec($ch);
-    $end = microtime(true);
-    
-    // Obtener info de la respuesta
-    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
-    $contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-    
-    curl_close($ch);
-    
-    // Extraer cuerpo de la respuesta
-    $body = substr($response, $header_size);
-    
-    return [
-        'request_id' => $requestId,
-        'http_code' => $httpCode,
-        'response_time' => ($end - $start) * 1000, // en ms
-        'curl_time' => $totalTime * 1000, // en ms
-        'content_length' => $contentLength,
-        'success' => ($httpCode >= 200 && $httpCode < 300)
+    // Contenido inicial de resultados
+    $resultsContent = <<<RESULTS
+    <div class="panel">
+        <h2>🚀 Prueba en Progreso</h2>
+        <div><strong>ID:</strong> $testId</div>
+        <div><strong>URL:</strong> {$config['url']}</div>
+        <div style="margin:15px 0;">
+            <div class="progress-bar" style="width:0%" id="progressBar">0%</div>
+        </div>
+        <div id="liveStats" class="stats"></div>
+    </div>
+RESULTS;
+
+    echo str_replace(['{%form%', '{%results%}'], ['', $resultsContent], $htmlTemplate);
+    flush();
+
+    // Función optimizada para requests
+    $makeRequest = function($url, $testId, $requestId) {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => "$url?loadtest=$testId&request=$requestId",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3
+        ]);
+        
+        $start = microtime(true);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        return [
+            'time' => round((microtime(true) - $start) * 1000, 2),
+            'success' => $httpCode >= 200 && $httpCode < 300,
+            'code' => $httpCode
+        ];
+    };
+
+    // Ejecución de la prueba
+    $stats = [
+        'total' => 0,
+        'success' => 0,
+        'times' => [],
+        'codes' => []
     ];
-}
 
-// Iniciar la prueba
-$results = [];
-$totalSuccess = 0;
-$totalFailure = 0;
-$totalTime = 0;
-
-echo "<div id='progress' style='height: 30px; background-color: #f3f3f3; border-radius: 5px; margin: 20px 0;'>";
-echo "<div id='progress-bar' style='height: 100%; width: 0%; background-color: #4CAF50; border-radius: 5px; text-align: center; line-height: 30px; color: white;'>0%</div>";
-echo "</div>";
-
-echo "<script>
-function updateProgress(percent) {
-    document.getElementById('progress-bar').style.width = percent + '%';
-    document.getElementById('progress-bar').innerText = percent + '%';
-}
-</script>";
-
-flush();
-
-// Loop principal de la prueba
-for ($i = 0; $i < $numRequests; $i += $concurrency) {
-    $batch = [];
-    $batchSize = min($concurrency, $numRequests - $i);
-    
-    // Crear lotes de solicitudes para simular concurrencia
-    for ($j = 0; $j < $batchSize; $j++) {
-        $requestId = $i + $j + 1;
-        $batch[] = makeRequest($targetUrl, $testId, $requestId);
+    for ($i = 0; $i < $config['requests']; $i += $config['concurrency']) {
+        $batchSize = min($config['concurrency'], $config['requests'] - $i);
+        $batch = [];
         
-        // Procesar y registrar los resultados
-        $lastResult = end($batch);
-        $results[] = $lastResult;
-        
-        if ($lastResult['success']) {
-            $totalSuccess++;
-        } else {
-            $totalFailure++;
+        // Ejecutar batch
+        for ($j = 0; $j < $batchSize; $j++) {
+            $batch[] = $makeRequest($config['url'], $testId, $i + $j + 1);
         }
-        $totalTime += $lastResult['response_time'];
         
-        // Registrar cada solicitud en InfluxDB
-        $influxClient->writeData(
-            'request_metrics',
-            [
-                'response_time_ms' => $lastResult['response_time'],
-                'curl_time_ms' => $lastResult['curl_time'],
-                'http_code' => $lastResult['http_code'],
-                'content_length' => $lastResult['content_length'],
-                'success' => $lastResult['success'] ? 1 : 0
-            ],
-            [
-                'test_id' => $testId,
-                'request_id' => (string)$lastResult['request_id'],
-                'target_url' => $targetUrl
-            ]
-        );
+        // Procesar resultados
+        foreach ($batch as $result) {
+            $stats['total']++;
+            if ($result['success']) $stats['success']++;
+            $stats['times'][] = $result['time'];
+            @$stats['codes'][$result['code']]++;
+        }
         
-        // Actualizar progreso
-        $progress = round(($i + $j + 1) / $numRequests * 100);
-        echo "<script>updateProgress($progress);</script>";
+        // Actualizar interfaz
+        $progress = round(($i + $batchSize) / $config['requests'] * 100);
+        $avgTime = round(array_sum($stats['times']) / count($stats['times']) ?? 0);
+        $rps = round(count($stats['times']) / (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']), 1);
+        
+        $liveStats = <<<JS
+        <script>
+            document.getElementById('progressBar').style.width = '$progress%';
+            document.getElementById('progressBar').innerHTML = '$progress%';
+            document.getElementById('liveStats').innerHTML = `
+                <div class="panel">
+                    <div>📊 Progreso: $progress%</div>
+                    <div>⏱ Tiempo Promedio: {$avgTime}ms</div>
+                    <div>⚡ Velocidad: {$rps} req/s</div>
+                    <div>✅ Éxitos: {$stats['success']}/{$stats['total']}</div>
+                </div>
+            `;
+        </script>
+JS;
+        
+        echo $liveStats;
         flush();
+        
+        // Intervalo entre batches
+        usleep($config['interval'] * 1000);
     }
+
+    // Resultados finales
+    $successRate = round(($stats['success'] / $config['requests']) * 100, 1);
+    $codeDistribution = array_map(function($code, $count) use ($config) {
+        return "<div>Código $code: $count (" . round(($count / $config['requests']) * 100, 1) . "%)</div>";
+    }, array_keys($stats['codes']), $stats['codes']);
     
-    // Pausa para controlar la tasa de solicitudes
-    if ($i + $batchSize < $numRequests) {
-        usleep($intervalMs * 1000); // convertir ms a microsegundos
-    }
+    $codeDistributionString = implode('', $codeDistribution);
+    $avgTime = round(array_sum($stats['times']) / count($stats['times']));
+
+    $finalResults = <<<FINAL
+    <div class="panel">
+        <h2>📊 Resultados Finales</h2>
+        <div class="stats">
+            <div class="panel">
+                <h3>General</h3>
+                <div>🔢 Total de Solicitudes: {$config['requests']}</div>
+                <div>✅ Tasa de Éxito: $successRate%</div>
+                <div>⏱ Tiempo Promedio: {$avgTime}ms</div>
+            </div>
+            
+            <div class="panel">
+                <h3>Códigos HTTP</h3>
+                {$codeDistributionString}
+            </div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <a href="test_report.php?test_id=$testId" class="btn" style="background:#28a745;margin-right:10px;">Ver Reporte Detallado</a>
+            <a href="test_load.php" class="btn">Nueva Prueba</a>
+        </div>
+        
+        <div style="margin-top:20px;">
+            <a href="test_load.php" class="btn">Nueva Prueba</a>
+        </div>
+    </div>
+FINAL;
+
+    echo $finalResults;
 }
-
-// Calcular estadísticas
-$endTime = microtime(true);
-$testDuration = $endTime - $startTime;
-$avgResponseTime = $totalTime / count($results);
-
-// Ordenar resultados por tiempo de respuesta para calcular percentiles
-usort($results, function($a, $b) {
-    return $a['response_time'] <=> $b['response_time'];
-});
-
-$p50Index = floor(count($results) * 0.5);
-$p90Index = floor(count($results) * 0.9);
-$p95Index = floor(count($results) * 0.95);
-$p99Index = floor(count($results) * 0.99);
-
-$p50 = $results[$p50Index]['response_time'];
-$p90 = $results[$p90Index]['response_time'];
-$p95 = $results[$p95Index]['response_time'];
-$p99 = $results[$p99Index]['response_time'];
-
-// Registrar resultados finales en InfluxDB
-$influxClient->writeData(
-    'load_test', 
-    [
-        'status' => 2,
-        'total_requests' => $numRequests,
-        'successful_requests' => $totalSuccess,
-        'failed_requests' => $totalFailure,
-        'test_duration_sec' => $testDuration,
-        'avg_response_time_ms' => $avgResponseTime,
-        'p50_response_time_ms' => $p50,
-        'p90_response_time_ms' => $p90,
-        'p95_response_time_ms' => $p95,
-        'p99_response_time_ms' => $p99
-    ],
-    [
-        'test_id' => $testId,
-        'test_type' => 'end',
-        'target_url' => $targetUrl
-    ]
-);
-
-// Mostrar resultados
-echo "<h2>Resultados de la Prueba</h2>";
-echo "<div style='background-color: #f9f9f9; padding: 20px; border-radius: 5px;'>";
-echo "<p><strong>Test ID:</strong> {$testId}</p>";
-echo "<p><strong>Duración total:</strong> " . number_format($testDuration, 2) . " segundos</p>";
-echo "<p><strong>Solicitudes exitosas:</strong> {$totalSuccess} de {$numRequests} (" . number_format(($totalSuccess / $numRequests) * 100, 2) . "%)</p>";
-echo "<p><strong>Solicitudes fallidas:</strong> {$totalFailure}</p>";
-echo "<p><strong>Tiempo promedio de respuesta:</strong> " . number_format($avgResponseTime, 2) . " ms</p>";
-echo "<h3>Percentiles de Tiempo de Respuesta:</h3>";
-echo "<ul>";
-echo "<li><strong>P50 (Mediana):</strong> " . number_format($p50, 2) . " ms</li>";
-echo "<li><strong>P90:</strong> " . number_format($p90, 2) . " ms</li>";
-echo "<li><strong>P95:</strong> " . number_format($p95, 2) . " ms</li>";
-echo "<li><strong>P99:</strong> " . number_format($p99, 2) . " ms</li>";
-echo "</ul>";
-echo "</div>";
-
-// Enlace para ver gráficos
-echo "<h2>Visualización de Métricas</h2>";
-echo "<p>Las métricas de esta prueba de carga se han registrado en InfluxDB con el ID <strong>{$testId}</strong>.</p>";
-echo "<p>Puedes visualizar estos datos en la interfaz de InfluxDB o mediante herramientas de visualización como Grafana.</p>";
-echo "<p><a href='test_report.php?test_id={$testId}' target='_blank' style='background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;'>Ver Informe Detallado</a></p>";
