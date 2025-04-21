@@ -1,48 +1,65 @@
 <?php
-// PHP/test_report.php
+// PHP/test_report.php - Versión optimizada con mejor manejo de errores
 require_once __DIR__ . '/../PHP/autoload.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Metrics\MetricsFactory;
 
+// Configurar tiempo de espera largo para procesamiento
+set_time_limit(300);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Obtener el ID de prueba desde la URL
 $testId = isset($_GET['test_id']) ? $_GET['test_id'] : null;
 
 if (!$testId) {
-    die("Error: Se requiere un ID de prueba válido");
+    die("<h1>Error: Se requiere un ID de prueba válido</h1>");
 }
 
-// Preparar el cliente InfluxDB
+// Variables para información de depuración
+$debug = isset($_GET['debug']) ? true : false;
+$debugInfo = [];
+
+// Crear cliente InfluxDB
 $influxClient = MetricsFactory::createInfluxDBClient();
+
+// Verificar conexión
 if (!$influxClient->isConnected()) {
-    die("Error: No se pudo conectar a InfluxDB para recuperar los datos de la prueba.");
+    die("<h1>Error de conexión a InfluxDB</h1>
+         <p>Detalles: " . htmlspecialchars($influxClient->getLastError()) . "</p>
+         <p>Verifique que InfluxDB esté funcionando en: " . htmlspecialchars(MetricsFactory::getConfiguredUrl()) . "</p>");
 }
 
-// Consulta para obtener los datos generales de la prueba (inicio y fin)
-$testStartQuery = <<<FLUX
+// Preparar información de la consulta para debugging
+$debugInfo['bucket'] = $influxClient->getBucket();
+$debugInfo['org'] = MetricsFactory::getConfiguredOrg();
+$debugInfo['url'] = MetricsFactory::getConfiguredUrl();
+
+// Consulta para obtener los datos generales de la prueba - rango ampliado a 30 días
+$testQuery = <<<FLUX
 from(bucket: "{$influxClient->getBucket()}")
-  |> range(start: -7d)
+  |> range(start: -30d)
   |> filter(fn: (r) => r._measurement == "load_test")
   |> filter(fn: (r) => r.test_id == "{$testId}")
-  |> filter(fn: (r) => r.test_type == "start" or r.test_type == "end")
 FLUX;
 
-$testData = $influxClient->query($testStartQuery);
+$testData = $influxClient->query($testQuery);
+$debugInfo['test_query'] = $testQuery;
+$debugInfo['test_data_count'] = count($testData);
 
-// Consulta para obtener las métricas de cada solicitud
+// Consulta para obtener las métricas de cada solicitud - rango ampliado a 30 días
 $requestsQuery = <<<FLUX
 from(bucket: "{$influxClient->getBucket()}")
-  |> range(start: -7d)
+  |> range(start: -30d)
   |> filter(fn: (r) => r._measurement == "request_metrics")
   |> filter(fn: (r) => r.test_id == "{$testId}")
 FLUX;
 
 $requestsData = $influxClient->query($requestsQuery);
-
-// Verificar si tenemos datos
-if (empty($testData)) {
-    die("Error: No se encontraron datos para el ID de prueba especificado.");
-}
+$debugInfo['requests_query'] = $requestsQuery;
+$debugInfo['requests_data_count'] = count($requestsData);
 
 // Extraer información relevante
 $testInfo = [];
@@ -91,9 +108,32 @@ foreach ($requestsData as $point) {
     }
 }
 
-// Debug: Mostrar estructura de datos
-// echo "<pre>Test Info: " . print_r($testInfo, true) . "</pre>";
-// echo "<pre>Request Info: " . print_r($requestsInfo, true) . "</pre>";
+// Generar datos simulados si no hay datos reales y es modo debug
+if (empty($testInfo) && $debug) {
+    $testInfo = [
+        'target_url' => 'http://localhost/ejemplo.php',
+        'total_requests' => 100,
+        'successful_requests' => 95,
+        'failed_requests' => 5,
+        'avg_response_time_ms' => 150.5,
+        'p50_response_time_ms' => 130.2,
+        'p90_response_time_ms' => 200.3,
+        'p95_response_time_ms' => 250.1,
+        'p99_response_time_ms' => 300.4,
+        'test_duration_sec' => 60.5
+    ];
+    
+    for ($i = 1; $i <= 100; $i++) {
+        $requestsInfo[$i] = [
+            'response_time_ms' => rand(50, 400),
+            'success' => rand(0, 100) < 95 ? 1 : 0,
+            'http_code' => rand(0, 100) < 95 ? 200 : 500,
+            'content_length' => rand(2000, 5000)
+        ];
+    }
+    
+    $debugInfo['note'] = 'Utilizando datos simulados para depuración';
+}
 
 // Preparar datos para gráficos
 $responseTimesData = [];
@@ -123,6 +163,9 @@ if (empty($responseTimesData)) {
 if (empty($successRateData)) {
     $successRateData = [['id' => '0', 'success' => true]];
 }
+
+// Determinar si tenemos datos suficientes
+$hasData = !empty($testInfo) && count($requestsInfo) > 0;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -199,11 +242,74 @@ if (empty($successRateData)) {
         .failure {
             color: red;
         }
+        .error-container {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .debug-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            overflow: auto;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>Informe de Prueba de Carga</h1>
     
+    <?php if (!$hasData): ?>
+    <div class="error-container">
+        <h2>Error: No se encontraron datos para el ID de prueba especificado</h2>
+        <p>ID de prueba: <strong><?php echo htmlspecialchars($testId); ?></strong></p>
+        <p>Posibles causas:</p>
+        <ul>
+            <li>El ID de prueba no existe o está mal escrito</li>
+            <li>Los datos han sido eliminados o no se guardaron correctamente</li>
+            <li>Problema de conexión con la base de datos InfluxDB</li>
+            <li>La prueba se interrumpió antes de completarse</li>
+        </ul>
+        
+        <h3>Opciones:</h3>
+        <p>
+            <a href="test_load.php" class="btn">Volver a la página de pruebas</a>
+            <a href="<?php echo $_SERVER['PHP_SELF']; ?>?test_id=<?php echo urlencode($testId); ?>&debug=1" class="btn">Ver detalles de depuración</a>
+        </p>
+    </div>
+    <?php endif; ?>
+    
+    <?php if ($debug): ?>
+    <div class="debug-container">
+        <h2>Información de Depuración</h2>
+        <pre><?php echo htmlspecialchars(print_r($debugInfo, true)); ?></pre>
+        
+        <h3>Datos de consulta recibidos:</h3>
+        <h4>Datos de prueba (<?php echo count($testData); ?>):</h4>
+        <pre><?php echo htmlspecialchars(print_r(array_slice($testData, 0, 5), true)) . (count($testData) > 5 ? '...' : ''); ?></pre>
+        
+        <h4>Datos de solicitudes (<?php echo count($requestsData); ?>):</h4>
+        <pre><?php echo htmlspecialchars(print_r(array_slice($requestsData, 0, 5), true)) . (count($requestsData) > 5 ? '...' : ''); ?></pre>
+        
+        <h3>Estado de la conexión:</h3>
+        <p>Cliente conectado: <?php echo $influxClient->isConnected() ? 'SÍ' : 'NO'; ?></p>
+        <p>Último error: <?php echo htmlspecialchars($influxClient->getLastError()); ?></p>
+    </div>
+    <?php endif; ?>
+    
+    <?php if ($hasData): ?>
     <div class="card">
         <h2>Información General</h2>
         <div class="metrics-grid">
@@ -312,7 +418,10 @@ if (empty($successRateData)) {
                     // Ordenar solicitudes por ID
                     ksort($requestsInfo);
                     
+                    // Limitar a 100 registros para mejor rendimiento
+                    $count = 0;
                     foreach ($requestsInfo as $requestId => $requestData): 
+                        if ($count++ >= 100) break;
                         $status = isset($requestData['success']) && $requestData['success'] ? 'Éxito' : 'Error';
                         $statusClass = isset($requestData['success']) && $requestData['success'] ? 'success' : 'failure';
                     ?>
@@ -324,6 +433,22 @@ if (empty($successRateData)) {
                         <td><?php echo isset($requestData['content_length']) ? number_format($requestData['content_length']) . ' bytes' : 'N/A'; ?></td>
                     </tr>
                     <?php endforeach; ?>
+                    
+                    <?php if (count($requestsInfo) > 100): ?>
+                    <tr>
+                        <td colspan="5" style="text-align: center; font-style: italic;">
+                            Mostrando 100 de <?php echo count($requestsInfo); ?> solicitudes. Hay <?php echo count($requestsInfo) - 100; ?> solicitudes adicionales.
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    
+                    <?php if (count($requestsInfo) === 0): ?>
+                    <tr>
+                        <td colspan="5" style="text-align: center;">
+                            No se encontraron datos de solicitudes para esta prueba.
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -367,6 +492,14 @@ if (empty($successRateData)) {
                     title: {
                         display: true,
                         text: 'ID de Solicitud'
+                    },
+                    ticks: {
+                        maxTicksLimit: 20,
+                        callback: function(value, index, values) {
+                            // Solo mostrar algunos IDs para evitar sobrecarga
+                            const skip = Math.ceil(responseTimesData.length / 20);
+                            return index % skip === 0 ? value : '';
+                        }
                     }
                 }
             }
@@ -380,7 +513,7 @@ if (empty($successRateData)) {
         const max = Math.max(...times);
         const range = max - min;
         const binCount = Math.min(20, Math.ceil(Math.sqrt(times.length)));
-        const binWidth = range / binCount;
+        const binWidth = range / binCount || 1; // Evitar división por cero
         
         const bins = Array(binCount).fill(0);
         const binLabels = [];
@@ -398,7 +531,7 @@ if (empty($successRateData)) {
                 bins[binCount - 1]++;
             } else {
                 const binIndex = Math.floor((time - min) / binWidth);
-                bins[binIndex]++;
+                bins[binIndex >= 0 ? binIndex : 0]++;
             }
         });
         
@@ -443,7 +576,6 @@ if (empty($successRateData)) {
     // Crear gráfico de tasa de éxito
     const successCount = successRateData.filter(item => item.success).length;
     const failureCount = successRateData.length - successCount;
-    const successRate = (successCount / successRateData.length) * 100;
     
     const successRateCtx = document.getElementById('successRateChart').getContext('2d');
     new Chart(successRateCtx, {
@@ -484,5 +616,10 @@ if (empty($successRateData)) {
         }
     });
     </script>
+    <?php endif; ?>
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="test_load.php" class="btn">Volver a la página de pruebas</a>
+    </div>
 </body>
 </html>
