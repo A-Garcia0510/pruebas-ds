@@ -1,4 +1,0 @@
-Tutorial Para Aplicar Pruebas de Cargas
-Instalar Docker
-Esta App Nos Permitira Instalar las Extensiones Necesarias para Guardar los Datos de Carga de la Pagina
-Instalar INFLUX DB 

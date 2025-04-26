@@ -1,0 +1,68 @@
+Directorio Actual con SOLID
+
+d:\pruebas-ds
+├── src
+│   ├── Auth
+│   │   ├── AuthFactory.php          // Crea instancias relacionadas con autenticación
+│   │   ├── Exceptions
+│   │   │   ├── InvalidCredentialsException.php  // Excepción para credenciales inválidas
+│   │   │   └── UserNotFoundException.php        // Excepción para usuario no encontrado
+│   │   ├── Interfaces
+│   │   │   ├── AuthServiceInterface.php         // Define métodos para servicios de autenticación
+│   │   │   └── UserRepositoryInterface.php      // Define métodos para repositorios de usuarios
+│   │   ├── Models
+│   │   │   └── User.php                         // Modelo que representa a un usuario
+│   │   └── Repositories
+│   │       └── UserRepository.php              // Implementación del repositorio de usuarios
+│   ├── Config
+│   │   └── Config.php                           // Configuración principal del sistema
+│   ├── core
+│   │   ├── Database
+│   │   │   ├── DatabaseConfiguration.php      // Configuración de la conexión a la base de datos
+│   │   │   ├── DatabaseConnectionException.php // Excepción para errores de conexión
+│   │   │   ├── DatabaseInterface.php          // Interfaz para clases de base de datos
+│   │   │   └── MySQLDatabase.php              // Implementación para bases de datos MySQL
+│   ├── Shop
+│   │   ├── Exceptions
+│   │   │   ├── ProductNotFoundException.php    // Excepción para producto no encontrado
+│   │   │   └── InsufficientStockException.php  // Excepción para stock insuficiente
+│   │   ├── Models
+│   │   │   ├── CartItem.php              // Modelo que representa un elemento en el carrito de compras
+│   │   │   ├── Product.php              // Modelo que representa un producto
+│   │   │   ├── Purchase.php             // Modelo que representa una compra
+│   │   │   └── PurchaseDetail.php       // Modelo que detalla los productos de una compra
+│   │   ├── Repositories
+│   │   │   ├── ProductRepository.php          // Repositorio para manejar datos de productos
+│   │   │   └── OrderRepository.php            // Repositorio para manejar datos de pedidos
+│   │   ├── Services
+│   │   │   ├── CartService.php                // Servicio para manejar la lógica del carrito
+│   │   │   ├── CheckoutService.php            // Servicio para manejar la lógica de compra
+│   │   │   └── ProductService.php             // Servicio para manejar la lógica de productos
+├── CSS
+│   ├── ayuda.css                // Estilos para la página de ayuda
+│   ├── carro.css                // Estilos para la página del carrito
+│   ├── dashboard.css            // Estilos para el panel de usuario
+│   ├── index.css                // Estilos específicos para la página principal
+│   ├── login.css                // Estilos para la página de login
+│   ├── productos.css            // Estilos para la lista de productos
+│   ├── registro.css             // Estilos para la página de registro
+│   ├── servicios.css            // Estilos para la página de servicios
+├── PHP
+│   ├── agregar_carro.php            // Agrega un producto al carrito
+│   ├── autoload.php                 // Configura el autoload de clases
+│   ├── carrito.php                  // Muestra y gestiona el carrito de compras
+│   ├── cerrar_sesion.php            // Cierra la sesión del usuario
+│   ├── conexion.php                 // Configura la conexión con la base de datos
+│   ├── eliminar_carro.php           // Elimina un producto del carrito
+│   ├── finalizar_compra.php         // Procesa la compra del carrito
+│   ├── login.php                    // Maneja el inicio de sesión
+│   ├── obtener_carro.php            // Obtiene los productos del carrito
+│   ├── productoDetalle.php          // Muestra detalles de un producto
+│   ├── productos.php                // Lista de productos disponibles
+│   ├── registro.php                 // Maneja el registro de usuarios
+├── HTML
+│   ├── login.html                   // Página HTML para el formulario de login
+│   ├── registro.html                // Página HTML para el formulario de registro
+│   ├── index.php                    // Página principal de la aplicación (PHP)
+│   ├── Servicios.html               // Página HTML para los servicios ofrecidos
+│   ├── Ayuda.html                   // Página HTML para la sección de ayuda(Contacto)
