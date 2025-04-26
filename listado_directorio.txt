@@ -1,0 +1,44 @@
+d:\pruebas-ds\
+├── Ayuda.html
+├── CSS\
+│   ├── registro.css
+│   ├── estilos.css
+├── IMG-P\
+├── IMG-2\
+├── JavaScript\
+│   ├── Java1.js
+│   ├── js1.js
+├── PHP\
+│   ├── agregar_carro.php
+│   ├── autoload.php
+│   ├── carrito.php
+│   ├── cerrar_sesion.php
+│   ├── eliminar_carro.php
+│   ├── finalizar_compra.php
+│   ├── login.php
+│   ├── obtener_carro.php
+│   ├── productos.php
+│   ├── registro.php
+│   ├── visual_datos.php
+├── README.md
+├── Servicios.html
+├── estilos\
+│   ├── barra.css
+│   ├── servicios.css
+├── index.php
+├── login.html
+├── registro.html
+├── src\
+│   ├── Config\
+│   ├── Core\
+│   ├── Shop\
+│       ├── Interfaces\
+│       │   ├── PurchaseServiceInterface.php
+│       ├── Models\
+│       ├── Repositories\
+│       │   ├── PurchaseRepository.php
+│       ├── Services\
+│           ├── CartService.php
+│           ├── PurchaseService.php
+├── INFO\
+│   ├── registros_productos.sql

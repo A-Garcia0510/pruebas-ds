@@ -56,46 +56,77 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos del Usuario</title>
-    <link rel="stylesheet" href="../CSS/datos.css">
+    <title>Café Aroma - Mi Cuenta</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
 </head>
 <body>
     <header>
-        <h1>Datos del Usuario</h1>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>Ethos<span>Coffe</span></h1>
+            </div>
+            <ul class="main-menu">
+                <li><a href="../index.php">Inicio</a></li>
+                <li><a href="productos.php">Menú</a></li>
+                <li><a href="../Servicios.html">Sobre Nosotros</a></li>
+            </ul>
+            <div class="user-actions">
+                <div class="icon">👤</div>
+                <div class="icon">❤️</div>
+                <div class="icon">🛒</div>
+            </div>
+        </nav>
     </header>
     
-    <div class="container">
-        <p class="welcome">Bienvenido, <?php echo htmlspecialchars($nombre); ?>!</p> 
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Datos</th>
-                    <th>Información</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Nombre:</td>
-                    <td><?php echo htmlspecialchars($nombre); ?></td>
-                </tr>
-                <tr>
-                    <td>Apellidos:</td>
-                    <td><?php echo htmlspecialchars($apellidos); ?></td> 
-                </tr>
-                <tr>
-                    <td>Correo:</td>
-                    <td><?php echo htmlspecialchars($correo); ?></td>
-                </tr>
-            </tbody>
-        </table>
-        <p class="logout"><a href="cerrar_sesion.php" class="button">Cerrar sesión</a></p>
-        <p class="logout"><a href="../index.php" class="button">Pagina Principal</a></p>
-        
-    </div>
+    <section class="user-data-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Mi Cuenta</h2>
+            </div>
+            <p class="welcome-message">¡Bienvenido, <?php echo htmlspecialchars($nombre); ?>!</p>
+            
+            <table class="user-data-table">
+                <thead>
+                    <tr>
+                        <th>Datos</th>
+                        <th>Información</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nombre:</td>
+                        <td><?php echo htmlspecialchars($nombre); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Apellidos:</td>
+                        <td><?php echo htmlspecialchars($apellidos); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Correo:</td>
+                        <td><?php echo htmlspecialchars($correo); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <a href="cerrar_sesion.php" class="btn secondary-btn">Cerrar sesión</a>
+                <a href="../index.php" class="btn primary-btn">Página Principal</a>
+            </div>
+        </div>
+    </section>
     
     <footer>
-        <p>&copy; 2024 Casino Express. Todos los derechos reservados.</p>
+        <div class="footer-content">
+            <div class="copyright">
+                © 2025 Café Aroma. Todos los derechos reservados.
+            </div>
+            <div class="footer-links">
+                <a href="#">Privacidad</a>
+                <a href="#">Términos</a>
+                <a href="#">Ayuda</a>
+                <a href="#">Contacto</a>
+            </div>
+        </div>
     </footer>
 </body>
 </html>

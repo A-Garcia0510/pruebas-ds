@@ -2,31 +2,169 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Formulario de Contacto</title>
-    <link rel="stylesheet" href="CSS/estilos.css">
-    <!------------ Icono-Fondo ------------>
-    <script src="https://kit.fontawesome.com/eb496ab1a0.js" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethos Coffe- Ayuda</title>
+    <link rel="stylesheet" href="CSS/ayuda.css">
 </head>
 <body>
-    <div class="container-form">
-        <div class="info-form">
-            <h2>CONTÁCTANOS</h2>
-            <p><b>¿Estás enfrentando algún contratiempo en nuestra página web?</b>
-                Descuida, estamos a tú servicio en Casino-Express.</p>
-            <a href="#"><i class="fa fa-phone"></i> 45 2 692458</a>
-            <a href="#"><i class="fa fa-envelope"></i> casinoexpress@gmail.com</a>
-            <a href="#"><i class="fa fa-map-marked"></i> Temuco, Chile</a>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>Ethos<span>Coffe</span></h1>
+            </div>
+            <ul class="main-menu">
+                <li><a href="index.php">Inicio</a></li>
+                <li><a href="PHP/productos.php">Menú</a></li>
+                <li><a href="Servicios.html">Sobre Nosotros</a></li>
+            </ul>
+            <div class="user-actions">
+                <div class="icon">👤</div>
+                <div class="icon">❤️</div>
+                <div class="icon">🛒</div>
+            </div>
+        </nav>
+    </header>
+    
+    <section class="section" id="contacto">
+        <div class="container">
+            <div class="section-title">
+                <h2>¿Cómo Podemos Ayudarte?</h2>
+            </div>
+            
+            <div class="container-form">
+                <div class="info-form">
+                    <h2>CONTÁCTANOS</h2>
+                    <p>¿Tienes alguna pregunta sobre nuestros productos o servicios? ¿Necesitas ayuda con tu pedido? Estamos aquí para asistirte con cualquier consulta que tengas.</p>
+                    <a href="#"><i>📞</i> +123 456 7890</a>
+                    <a href="#"><i>✉️</i> contacto@cafearoma.com</a>
+                    <a href="#"><i>📍</i> Av. Principal 123, Centro Histórico</a>
+                </div>
+                
+                <form id="contact-form">
+                    <input type="text" name="nombre" placeholder="Nombre" class="campo" required>
+                    <input type="email" name="email" placeholder="Correo electrónico" class="campo" required>
+                    <textarea name="mensaje" placeholder="¿En qué podemos ayudarte?" required></textarea>
+                    <input type="submit" name="enviar" value="Enviar" class="btn-enviar">
+                </form>
+            </div>
+            
+            <div id="mensaje-confirmacion" class="mensaje-confirmacion">
+                <!-- Mensaje de confirmación aparecerá aquí -->
+            </div>
         </div>
-            <form id="contact-form">
-                <input type="text" name="nombre" placeholder="Nombre" class="campo">
-                <input type="email" name="email" placeholder="Correo electrónico" class="campo">
-                <textarea name="mensaje" placeholder="Escriba algo..."></textarea>
-                <input type="submit" name="enviar" value="Enviar" class="btn-enviar">
-            </form>
-        <div id="mensaje-confirmacion" class="mensaje-confirmacion">
+    </section>
+    
+    <footer>
+        <div class="footer-main">
+            <div class="footer-column">
+                <h3><i>👤</i> Mi cuenta</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Iniciar sesión</a></li>
+                    <li><a href="#">Registrarse</a></li>
+                    <li><a href="#">Mis pedidos</a></li>
+                    <li><a href="#">Mis favoritos</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3><i>🏠</i> Nuestros Locales</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Encuentra tu café</a></li>
+                    <li><a href="#">Horarios</a></li>
+                    <li><a href="#">Servicios</a></li>
+                    <li><a href="#">Eventos</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3><i>🛒</i> Carrito</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Ver carrito</a></li>
+                    <li><a href="#">Métodos de pago</a></li>
+                    <li><a href="#">Envíos</a></li>
+                    <li><a href="#">Condiciones</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>¿Necesitas ayuda?</h3>
+                <p>Estamos aquí para ayudarte con cualquier duda o problema.</p>
+                <a href="#" class="contact-btn">Contáctanos</a>
+            </div>
         </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="JavaScript/js.js"></script>
-    </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="footer-info">
+                    <div>
+                        <h4>Corporate</h4>
+                        <ul>
+                            <li><a href="#">Sobre Nosotros</a></li>
+                            <li><a href="#">Nuestras Marcas</a></li>
+                            <li><a href="#">Afiliados</a></li>
+                            <li><a href="#">Inversores</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4>Tarjetas Regalo</h4>
+                        <ul>
+                            <li><a href="#">Comprar Tarjetas</a></li>
+                            <li><a href="#">Canjear Tarjetas</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="location-select">
+                        <img src="/api/placeholder/24/24" alt="Bandera">
+                        <select>
+                            <option>España</option>
+                            <option>México</option>
+                            <option>Argentina</option>
+                            <option>Colombia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="social-links">
+                        <a href="#"><span>IG</span></a>
+                        <a href="#"><span>FB</span></a>
+                        <a href="#"><span>YT</span></a>
+                        <a href="#"><span>TW</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#contact-form').submit(function(event) {
+                event.preventDefault();
+                
+                // Simple form validation
+                var nombre = $('input[name="nombre"]').val();
+                var email = $('input[name="email"]').val();
+                var mensaje = $('textarea[name="mensaje"]').val();
+                
+                if (nombre && email && mensaje) {
+                    // Form would be submitted to server here
+                    // For demonstration, just show success message
+                    $('#mensaje-confirmacion').html('¡Mensaje enviado correctamente! Nos pondremos en contacto contigo pronto.');
+                    $('#mensaje-confirmacion').addClass('success');
+                    $('#mensaje-confirmacion').css('display', 'block');
+                    
+                    // Reset form
+                    $('#contact-form')[0].reset();
+                    
+                    // Hide message after 5 seconds
+                    setTimeout(function() {
+                        $('#mensaje-confirmacion').css('display', 'none');
+                    }, 5000);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

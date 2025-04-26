@@ -1,147 +1,388 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
-/* Establece una imagen de fondo */
-body {
-  font-family: 'Poppins', sans-serif;
-  text-align: center;
-  height: 620px;
-  width: 620px;
-  background-image: url(../img01.jpg);
-  background-size: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #ffffff; 
-  zoom: 100%; 
+:root {
+  --primary-color: #2C3E50;
+  --secondary-color: #3498DB;
+  --light-color: #ECF0F1;
+  --accent-color: #E74C3C;
+  --text-color: #2C3E50;
+  --background-color: #F9F9F9;
 }
-/* Estilo para el contenedor de logotipo (clase .logo-container) */
-.logo-container {
-  height: 50%;
-}
-/* Estilo para encabezados h1 */
-h1 {
-  color: orangered; 
-  font-family: 'Poppins', sans-serif; 
-  padding: 10px;
-  text-align:left;
-  font-size: 24px;
-}
-/* Estilo para encabezados h2 */
-h2 {
-  color: rgb(89, 89, 90); 
-  font-family: 'Poppins', sans-serif; 
-}
-/* Estilo para enlaces cuando se encuentran en estado "hover" */
-a:hover {
-  color: rgb(82, 87, 82); 
-}
-/* Estilo del encabezado */
-#header {
-  color: #ffffff;
-  padding: 5px 0;
-}
-/* Ajuste de tamaño de los productos */
-.producto {
-  width: calc(33.33% - 20px); 
-  margin: 0 10px 20px 0%;
-  padding: 10px;
-  border: 3px solid #ccc;
-  border-radius: 5px;
-  background-color: #ccc;
-  color: #6b6767;
+
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Header & Navigation */
+header {
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo-container {
+  height: 60px;
+}
+
+.logo-container img {
+  height: 100%;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.nav-links li {
+  margin-left: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: var(--accent-color);
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  height: 80vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  transition: background-color 0.3s;
-  max-width: 100%; 
+  color: white;
 }
 
 #background-video {
-  position: fixed;
-  bottom: 0;
-  min-width: 100%;
-  min-height: 100%;
-  z-index: -1; /* Para que el video esté detrás del contenido */
-  object-fit: cover;
-  zoom: 1%;
-  right: 100px;
-  margin: 0 auto;
-  left: 0;
-}
-
-
-/* Estilos para imágenes dentro de elementos con la clase "producto" */
-.producto img {
-  width: 100%; 
-  max-width: 100px;
-  height: auto;
-}
-/* Estilos cuando se hace hover sobre elementos con la clase "producto" */
-.producto:hover {
-  background-color: #e9eef0; 
-}
-/* Estilos para elementos con la clase "titulo" */
-.titulo {
   position: absolute;
-  top: 95px;
-  left: 10px;
-  color: orangered;
-  font-size: 24px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
 }
-/* Estilos para elementos con la clase "descripcion" */
-.descripcion {
-  height: 60px; 
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+.hero-content {
+  max-width: 800px;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.hero h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Servicios Section */
+.section {
+  padding: 4rem 2rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-title h2 {
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 1rem;
+}
+
+.section-title h2::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 3px;
+  background-color: var(--accent-color);
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.service-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  padding: 2rem;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+}
+
+.service-card h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.service-card p {
+  color: #666;
+}
+
+/* Productos Destacados */
+.featured-products {
+  background-color: var(--light-color);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.product-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-img {
+  height: 200px;
   overflow: hidden;
 }
-/* Estilos para elementos con la clase "titulo-separador" */
-.titulo-separador {
-  position: relative;
-  text-align: center;
-  margin-top: 20px;
-  padding: 10px 0;
-  font-size: 24px;
-  color: orangered;
+
+.product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
 }
-/* Estilos para elementos con la clase "titulo-separador-motorola" */
-.titulo-separador-motorola {
-  text-align: center;
-  margin-top: 20px;
-  padding: 10px 0;
-  font-size: 24px;
-  color: orangered;
+
+.product-card:hover .product-img img {
+  transform: scale(1.1);
 }
-/* Estilos para elementos con la clase "titulo-separador-samsung" */
-.titulo-separador-samsung {
-  text-align: center;
-  margin-top: 20px;
-  padding: 10px 0;
-  font-size: 24px;
-  color: orangered;
+
+.product-info {
+  padding: 1.5rem;
 }
-/* Estilos para elementos con la clase "titulo-separador-huawei" */
-.titulo-separador-huawei {
-  text-align: center;
-  margin-top: 20px;
-  padding: 10px 0;
-  font-size: 24px;
-  color: orangered;
+
+.product-info h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  color: var(--primary-color);
 }
-/* Estilos para elementos con la clase "lista-productos" */
-.lista-productos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px; 
-  max-width: 100%; 
-  justify-content: space-between; 
+
+.product-info p {
+  color: #666;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
-/* Estilos para el elemento "footer" */
+
+.price {
+  font-weight: 600;
+  color: var(--accent-color);
+  font-size: 1.2rem;
+}
+
+/* Footer */
 footer {
-  width: 220%;
-  max-width: 1330px ;
-  position: relative;
-  margin: 10px 0px;
-  padding: 8px 0; 
-  background: #46454488;
-  padding-left: 10px;
-  padding-right: 10px; 
-  bottom: -512px;
-  border-radius: 50px;
-  margin-left: 2%;
+  background-color: white;
+  padding-top: 3rem;
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.footer-column h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+}
+
+.footer-column h3 i {
+  margin-right: 10px;
+  font-size: 1.5rem;
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 0.8rem;
+}
+
+.footer-links a {
+  text-decoration: none;
+  color: #666;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: var(--accent-color);
+}
+
+.contact-btn {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.6rem 1.5rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.contact-btn:hover {
+  background-color: var(--secondary-color);
+}
+
+.footer-bottom {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2rem;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+/* Estilos para los tutoriales */
+#tutorialLinks {
+  display: none;
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 1rem;
+  border-radius: 5px;
+  z-index: 100;
+}
+
+#tutorialLinks a {
+  display: block;
+  padding: 0.5rem;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+#tutorialLinks a:hover {
+  background-color: var(--light-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar {
+      flex-direction: column;
+      padding: 1rem;
+  }
+  
+  .logo-container {
+      margin-bottom: 1rem;
+  }
+  
+  .nav-links {
+      margin-bottom: 1rem;
+      flex-direction: column;
+      align-items: center;
+  }
+  
+  .nav-links li {
+      margin: 0.5rem 0;
+  }
+  
+  .hero h2 {
+      font-size: 2rem;
+  }
+}
+
+/* Mensajes de confirmación */
+#mensaje-confirmacion {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 1rem;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 1000;
 }
