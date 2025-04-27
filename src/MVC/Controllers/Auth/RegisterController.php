@@ -2,51 +2,57 @@
 // src/MVC/Controllers/Auth/RegisterController.php
 namespace App\MVC\Controllers\Auth;
 
-use App\MVC\Controllers\BaseController;
+use App\Auth\AuthFactory;
 use App\Auth\Models\User;
-use App\Auth\Interfaces\UserRepositoryInterface;
-use App\Core\Database\DatabaseInterface;
-use App\Auth\Services\Authenticator;
+use App\Core\Database\DatabaseConfiguration;
+use App\Core\Database\MySQLDatabase;
+use App\MVC\Controllers\BaseController;
 
 class RegisterController extends BaseController
 {
     private $userRepository;
+    private $authenticator;
     
     /**
      * Constructor
-     * 
-     * @param DatabaseInterface $db
-     * @param Authenticator $auth
-     * @param UserRepositoryInterface $userRepository
      */
-    public function __construct(
-        DatabaseInterface $db, 
-        Authenticator $auth,
-        UserRepositoryInterface $userRepository
-    ) {
-        parent::__construct($db, $auth);
-        $this->userRepository = $userRepository;
+    public function __construct()
+    {
+        // Cargar configuración
+        $config = require_once __DIR__ . '/../../../Config/Config.php';
+        $dbConfig = new DatabaseConfiguration(
+            $config['database']['host'],
+            $config['database']['username'],
+            $config['database']['password'],
+            $config['database']['database']
+        );
+        
+        // Crear conexión a la base de datos
+        try {
+            $database = new MySQLDatabase($dbConfig);
+            
+            // Crear el repositorio de usuarios
+            $this->userRepository = AuthFactory::createUserRepository($database);
+            
+            // Crear el autenticador
+            $this->authenticator = AuthFactory::createAuthenticator($database);
+        } catch (\Exception $e) {
+            die("Error de conexión: " . $e->getMessage());
+        }
     }
     
     /**
      * Muestra el formulario de registro
      */
-    public function showRegistrationForm(): void
+    public function showRegisterForm(): void
     {
-        // Si ya está autenticado, redirigir al inicio
-        if ($this->auth->isAuthenticated()) {
-            $this->redirect('/');
+        // Si ya está autenticado, redirigir al dashboard
+        if ($this->authenticator->isAuthenticated()) {
+            $this->redirect('/dashboard');
             return;
         }
         
-        // Pasar el mensaje de error si existe
-        $error = $_SESSION['register_error'] ?? null;
-        unset($_SESSION['register_error']);
-        
-        $this->render('Auth/register', [
-            'error' => $error,
-            'layout' => 'main'
-        ]);
+        $this->render('Auth/register');
     }
     
     /**
@@ -54,34 +60,78 @@ class RegisterController extends BaseController
      */
     public function register(): void
     {
-        $nombre = $this->post('nombre', '');
-        $apellidos = $this->post('apellidos', '');
-        $email = $this->post('correo', '');
-        $password = $this->post('contra', '');
+        // Si no es una petición POST, redirigir al formulario
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/register');
+            return;
+        }
         
-        // Validación básica
-        if (empty($nombre) || empty($apellidos) || empty($email) || empty($password)) {
-            $_SESSION['register_error'] = 'Por favor, complete todos los campos';
+        // Obtener datos del formulario
+        $nombre = $_POST['nombre'] ?? '';
+        $apellidos = $_POST['apellidos'] ?? '';
+        $email = $_POST['correo'] ?? '';
+        $password = $_POST['contra'] ?? '';
+        $terms = isset($_POST['terms']);
+        
+        // Validaciones básicas
+        $errors = [];
+        
+        if (empty($nombre)) {
+            $errors[] = 'El nombre es obligatorio';
+        }
+        
+        if (empty($apellidos)) {
+            $errors[] = 'Los apellidos son obligatorios';
+        }
+        
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'El correo electrónico es inválido';
+        }
+        
+        if (empty($password) || strlen($password) < 6) {
+            $errors[] = 'La contraseña debe tener al menos 6 caracteres';
+        }
+        
+        if (!$terms) {
+            $errors[] = 'Debes aceptar los términos y condiciones';
+        }
+        
+        // Si hay errores, volver al formulario
+        if (!empty($errors)) {
+            $_SESSION['register_errors'] = $errors;
+            $_SESSION['register_data'] = [
+                'nombre' => $nombre,
+                'apellidos' => $apellidos,
+                'correo' => $email
+            ];
             $this->redirect('/register');
             return;
         }
         
         // Verificar si el email ya existe
         if ($this->userRepository->emailExists($email)) {
-            $_SESSION['register_error'] = 'El correo electrónico ya está registrado';
+            $_SESSION['register_errors'] = ['El correo electrónico ya está registrado'];
+            $_SESSION['register_data'] = [
+                'nombre' => $nombre,
+                'apellidos' => $apellidos
+            ];
             $this->redirect('/register');
             return;
         }
         
-        // En un sistema real, se debería hashear la contraseña antes de guardarla
-        $user = new User(null, $nombre, $apellidos, $email, $password);
+        // Crear y guardar el usuario
+        $user = new User(null, $nombre, $apellidos, $email, $password); // En un sistema real, deberías hashear la contraseña
         
         if ($this->userRepository->save($user)) {
-            // Auto-login después del registro
-            $this->auth->authenticate($email, $password);
-            $this->redirect('/');
+            // Iniciar sesión automáticamente
+            if ($this->authenticator->authenticate($email, $password)) {
+                $this->redirect('/dashboard');
+            } else {
+                $_SESSION['success_message'] = 'Registro exitoso. Por favor, inicia sesión.';
+                $this->redirect('/login');
+            }
         } else {
-            $_SESSION['register_error'] = 'Error al registrar el usuario';
+            $_SESSION['register_errors'] = ['Error al registrar el usuario. Inténtalo de nuevo.'];
             $this->redirect('/register');
         }
     }

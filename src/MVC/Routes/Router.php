@@ -2,108 +2,130 @@
 // src/MVC/Routes/Router.php
 namespace App\MVC\Routes;
 
-use App\MVC\Controllers\BaseController;
-
 class Router
 {
     private $routes = [];
-    private $notFoundCallback;
-
+    
     /**
-     * Añade una ruta GET al router
+     * Añade una ruta GET
      * 
-     * @param string $path
-     * @param callable|array $callback
+     * @param string $path Ruta URL
+     * @param string|callable $handler Controlador@método o función anónima
+     * @return Router
      */
-    public function get(string $path, $callback): void
+    public function get(string $path, $handler): self
     {
-        $this->addRoute('GET', $path, $callback);
+        return $this->addRoute('GET', $path, $handler);
     }
-
+    
     /**
-     * Añade una ruta POST al router
+     * Añade una ruta POST
      * 
-     * @param string $path
-     * @param callable|array $callback
+     * @param string $path Ruta URL
+     * @param string|callable $handler Controlador@método o función anónima
+     * @return Router
      */
-    public function post(string $path, $callback): void
+    public function post(string $path, $handler): self
     {
-        $this->addRoute('POST', $path, $callback);
+        return $this->addRoute('POST', $path, $handler);
     }
-
+    
+    /**
+     * Añade una ruta para cualquier método HTTP
+     * 
+     * @param string $path Ruta URL
+     * @param string|callable $handler Controlador@método o función anónima
+     * @return Router
+     */
+    public function any(string $path, $handler): self
+    {
+        return $this->addRoute('ANY', $path, $handler);
+    }
+    
     /**
      * Añade una ruta al array de rutas
      * 
-     * @param string $method
-     * @param string $path
-     * @param callable|array $callback
+     * @param string $method Método HTTP
+     * @param string $path Ruta URL
+     * @param string|callable $handler Controlador@método o función anónima
+     * @return Router
      */
-    private function addRoute(string $method, string $path, $callback): void
+    private function addRoute(string $method, string $path, $handler): self
     {
-        // Normalizar la ruta para que siempre comience con '/'
-        if (substr($path, 0, 1) !== '/') {
-            $path = '/' . $path;
-        }
-
-        $this->routes[$method][$path] = $callback;
+        $this->routes[] = [
+            'method' => $method,
+            'path' => $path,
+            'handler' => $handler
+        ];
+        
+        return $this;
     }
-
+    
     /**
-     * Define el callback para rutas no encontradas
+     * Resuelve y ejecuta el manejador para la ruta actual
      * 
-     * @param callable $callback
-     */
-    public function setNotFoundHandler($callback): void
-    {
-        $this->notFoundCallback = $callback;
-    }
-
-    /**
-     * Resuelve la ruta actual y ejecuta el controlador correspondiente
+     * @return void
      */
     public function resolve(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'];
-        // Obtenemos la ruta desde la URL
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
-        // Buscar en las rutas definidas
-        if (isset($this->routes[$method][$path])) {
-            $callback = $this->routes[$method][$path];
-            $this->executeCallback($callback);
-            return;
+        // Eliminar trailing slash
+        $requestPath = rtrim($requestPath, '/');
+        if (empty($requestPath)) {
+            $requestPath = '/';
         }
-
-        // Si llegamos aquí, la ruta no existe
-        if ($this->notFoundCallback) {
-            call_user_func($this->notFoundCallback);
-            return;
+        
+        foreach ($this->routes as $route) {
+            // Verificar si el método coincide (o es ANY)
+            if ($route['method'] !== 'ANY' && $route['method'] !== $requestMethod) {
+                continue;
+            }
+            
+            // Comprobar si la ruta coincide exactamente
+            if ($route['path'] === $requestPath) {
+                $this->executeHandler($route['handler']);
+                return;
+            }
+            
+            // TODO: Implementar rutas con parámetros (ej: /user/{id})
         }
-
-        // Fallback si no hay controlador para rutas no encontradas
-        header("HTTP/1.0 404 Not Found");
-        echo '<h1>404 - Página no encontrada</h1>';
+        
+        // Si no se encuentra la ruta
+        http_response_code(404);
+        echo "404 - Página no encontrada";
     }
-
+    
     /**
-     * Ejecuta el callback asociado a una ruta
+     * Ejecuta el manejador de la ruta
      * 
-     * @param callable|array $callback
+     * @param string|callable $handler Controlador@método o función anónima
+     * @return void
      */
-    private function executeCallback($callback): void
+    private function executeHandler($handler): void
     {
-        if (is_callable($callback)) {
-            call_user_func($callback);
-        } elseif (is_array($callback) && count($callback) === 2) {
-            [$controller, $method] = $callback;
+        if (is_callable($handler)) {
+            // Si el manejador es una función anónima
+            call_user_func($handler);
+        } else if (is_string($handler)) {
+            // Si el manejador es un string 'Controlador@método'
+            [$controller, $method] = explode('@', $handler);
             
-            if (is_string($controller)) {
-                $controller = new $controller();
+            // Si el controlador no incluye namespace, añadir el namespace predeterminado
+            if (strpos($controller, '\\') === false) {
+                $controller = 'App\\MVC\\Controllers\\' . $controller;
             }
             
-            if ($controller instanceof BaseController) {
-                call_user_func([$controller, $method]);
+            // Instanciar el controlador y llamar al método
+            $controllerInstance = new $controller();
+            if (!method_exists($controllerInstance, $method)) {
+                throw new \Exception("El método {$method} no existe en el controlador {$controller}");
             }
+            
+            call_user_func([$controllerInstance, $method]);
+        } else {
+            throw new \Exception("Tipo de manejador no válido");
         }
     }
 }

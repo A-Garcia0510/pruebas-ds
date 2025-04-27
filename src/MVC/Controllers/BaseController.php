@@ -2,123 +2,66 @@
 // src/MVC/Controllers/BaseController.php
 namespace App\MVC\Controllers;
 
-use App\Auth\Services\Authenticator;
-use App\Core\Database\DatabaseInterface;
-
-abstract class BaseController
+class BaseController
 {
-    protected $db;
-    protected $auth;
-    
-    /**
-     * Constructor base para controladores
-     * 
-     * @param DatabaseInterface $db
-     * @param Authenticator|null $auth
-     */
-    public function __construct(DatabaseInterface $db, ?Authenticator $auth = null)
-    {
-        $this->db = $db;
-        $this->auth = $auth;
-    }
-    
     /**
      * Renderiza una vista con datos
      * 
-     * @param string $view Ruta de la vista (sin la extensión .php)
-     * @param array $data Datos a pasar a la vista
+     * @param string $view Ruta a la vista (relativa a la carpeta Views)
+     * @param array $data Datos para pasar a la vista
      * @return void
      */
     protected function render(string $view, array $data = []): void
     {
-        // Extraer los datos para hacerlos accesibles como variables en la vista
+        // Extraer los datos para que estén disponibles como variables en la vista
         extract($data);
         
-        // Construir la ruta completa a la vista
-        $viewPath = __DIR__ . '/../Views/' . $view . '.php';
+        // Ruta base para las vistas
+        $viewsBasePath = __DIR__ . '/../../MVC/Views/';
+        $viewPath = $viewsBasePath . $view . '.php';
         
-        // Verificar que la vista existe
+        // Verificar si la vista existe
         if (!file_exists($viewPath)) {
-            throw new \Exception("Vista no encontrada: $view");
+            throw new \Exception("La vista {$view} no existe");
         }
         
         // Iniciar el buffer de salida
         ob_start();
-        require $viewPath;
+        
+        // Incluir la vista
+        include $viewPath;
+        
+        // Obtener el contenido y limpiarlo
         $content = ob_get_clean();
         
-        // Si hay un layout definido, usarlo
-        if (isset($layout)) {
-            $layoutPath = __DIR__ . '/../Views/layouts/' . $layout . '.php';
-            if (file_exists($layoutPath)) {
-                require $layoutPath;
-            } else {
-                echo $content;
-            }
-        } else {
-            // Si no hay layout, mostrar el contenido directamente
-            echo $content;
-        }
+        // Mostrar el contenido
+        echo $content;
     }
     
     /**
-     * Redirige a una URL específica
+     * Redirige a una URL
      * 
-     * @param string $url
+     * @param string $url URL a la que redirigir
      * @return void
      */
     protected function redirect(string $url): void
     {
-        header("Location: $url");
-        exit;
+        header("Location: {$url}");
+        exit();
     }
     
     /**
-     * Verifica si el usuario está autenticado y redirige si es necesario
+     * Devuelve una respuesta JSON
      * 
-     * @param bool $redirect Si true, redirige al login cuando no está autenticado
-     * @return bool
+     * @param mixed $data Datos a convertir a JSON
+     * @param int $statusCode Código de estado HTTP
+     * @return void
      */
-    protected function checkAuth(bool $redirect = true): bool
+    protected function jsonResponse($data, int $statusCode = 200): void
     {
-        if (!$this->auth || !$this->auth->isAuthenticated()) {
-            if ($redirect) {
-                $this->redirect('/login');
-            }
-            return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Obtiene los datos enviados por POST
-     * 
-     * @param string|null $key Si se proporciona, devuelve solo ese valor
-     * @param mixed $default Valor por defecto si no existe la clave
-     * @return mixed
-     */
-    protected function post(?string $key = null, $default = null)
-    {
-        if ($key === null) {
-            return $_POST;
-        }
-        
-        return $_POST[$key] ?? $default;
-    }
-    
-    /**
-     * Obtiene los datos enviados por GET
-     * 
-     * @param string|null $key Si se proporciona, devuelve solo ese valor
-     * @param mixed $default Valor por defecto si no existe la clave
-     * @return mixed
-     */
-    protected function get(?string $key = null, $default = null)
-    {
-        if ($key === null) {
-            return $_GET;
-        }
-        
-        return $_GET[$key] ?? $default;
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit();
     }
 }

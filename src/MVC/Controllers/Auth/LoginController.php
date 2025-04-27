@@ -2,42 +2,52 @@
 // src/MVC/Controllers/Auth/LoginController.php
 namespace App\MVC\Controllers\Auth;
 
+use App\Auth\AuthFactory;
+use App\Core\Database\DatabaseConfiguration;
+use App\Core\Database\MySQLDatabase;
 use App\MVC\Controllers\BaseController;
-use App\Auth\Services\Authenticator;
-use App\Core\Database\DatabaseInterface;
 
 class LoginController extends BaseController
 {
+    private $authenticator;
+    
     /**
      * Constructor
-     * 
-     * @param DatabaseInterface $db
-     * @param Authenticator $auth
      */
-    public function __construct(DatabaseInterface $db, Authenticator $auth)
+    public function __construct()
     {
-        parent::__construct($db, $auth);
+        // Cargar configuración
+        $config = require_once __DIR__ . '/../../../Config/Config.php';
+        $dbConfig = new DatabaseConfiguration(
+            $config['database']['host'],
+            $config['database']['username'],
+            $config['database']['password'],
+            $config['database']['database']
+        );
+        
+        // Crear conexión a la base de datos
+        try {
+            $database = new MySQLDatabase($dbConfig);
+            
+            // Crear el autenticador
+            $this->authenticator = AuthFactory::createAuthenticator($database);
+        } catch (\Exception $e) {
+            die("Error de conexión: " . $e->getMessage());
+        }
     }
     
     /**
-     * Muestra el formulario de login
+     * Muestra la vista de login
      */
     public function showLoginForm(): void
     {
-        // Si ya está autenticado, redirigir al inicio
-        if ($this->auth->isAuthenticated()) {
-            $this->redirect('/');
+        // Si ya está autenticado, redirigir al dashboard
+        if ($this->authenticator->isAuthenticated()) {
+            $this->redirect('/dashboard');
             return;
         }
         
-        // Pasar el mensaje de error si existe
-        $error = $_SESSION['login_error'] ?? null;
-        unset($_SESSION['login_error']);
-        
-        $this->render('Auth/login', [
-            'error' => $error,
-            'layout' => 'main'
-        ]);
+        $this->render('Auth/login');
     }
     
     /**
@@ -45,20 +55,23 @@ class LoginController extends BaseController
      */
     public function login(): void
     {
-        $email = $this->post('correo', '');
-        $password = $this->post('contra', '');
-        
-        if (empty($email) || empty($password)) {
-            $_SESSION['login_error'] = 'Por favor, complete todos los campos';
+        // Si no es una petición POST, redirigir al formulario
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/login');
             return;
         }
         
-        // Intentar autenticar al usuario
-        if ($this->auth->authenticate($email, $password)) {
-            $this->redirect('/'); // Redirigir al inicio si es exitoso
+        $email = $_POST['correo'] ?? '';
+        $password = $_POST['contra'] ?? '';
+        
+        // Intentar autenticar
+        if ($this->authenticator->authenticate($email, $password)) {
+            // Éxito - redirigir al dashboard
+            $this->redirect('/dashboard');
         } else {
-            $_SESSION['login_error'] = 'Credenciales incorrectas';
+            // Falló la autenticación
+            // En un sistema más avanzado, podrías usar mensajes flash para mostrar errores
+            $_SESSION['error_message'] = 'Datos incorrectos. Por favor, inténtalo de nuevo.';
             $this->redirect('/login');
         }
     }
@@ -68,7 +81,10 @@ class LoginController extends BaseController
      */
     public function logout(): void
     {
-        $this->auth->logout();
-        $this->redirect('/');
+        if ($this->authenticator->logout()) {
+            $this->redirect('/login');
+        } else {
+            $this->redirect('/dashboard');
+        }
     }
 }
