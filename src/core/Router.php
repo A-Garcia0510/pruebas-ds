@@ -7,6 +7,13 @@ class Router {
     private $debug = false;
     // Variable para almacenar la URL base del proyecto
     private $baseUrl;
+    // Variable para almacenar las rutas personalizadas
+    private $routes = [
+        // Formato: 'ruta' => ['controlador', 'método']
+        'servicios' => ['Pages', 'servicios'],
+        'ayuda' => ['Pages', 'ayuda'],
+        // Más rutas personalizadas aquí
+    ];
     
     /**
      * Constructor de la clase Router
@@ -129,6 +136,62 @@ class Router {
             return;
         }
         
+        // Verificar si hay una ruta personalizada definida
+        $trimmedUrl = trim($requestUrl, '/');
+        
+        if (isset($this->routes[$trimmedUrl])) {
+            $route = $this->routes[$trimmedUrl];
+            $controllerName = $route[0] . 'Controller';
+            $action = $route[1];
+            
+            $this->debugLog("Ruta personalizada encontrada: $controllerName -> $action");
+            
+            // Buscar el controlador en múltiples ubicaciones posibles
+            $controllerPaths = [
+                __DIR__ . '/Controller/' . $controllerName . '.php',
+                dirname(__DIR__) . '/core/Controller/' . $controllerName . '.php',
+                dirname(dirname(__DIR__)) . '/core/Controller/' . $controllerName . '.php',
+                $_SERVER['DOCUMENT_ROOT'] . '/pruebas-ds/src/core/Controller/' . $controllerName . '.php'
+            ];
+            
+            $controllerFound = false;
+            
+            foreach ($controllerPaths as $controllerFile) {
+                $this->debugLog("Buscando controlador: " . $controllerFile);
+                
+                if(file_exists($controllerFile)) {
+                    $this->debugLog("Controlador encontrado: " . $controllerFile);
+                    require_once $controllerFile;
+                    
+                    if(class_exists($controllerName)) {
+                        $controller = new $controllerName();
+                        
+                        // Pasar la instancia del router al controlador
+                        if (method_exists($controller, 'setRouter')) {
+                            $controller->setRouter($this);
+                        }
+                        
+                        // Verificar si el método existe
+                        if(method_exists($controller, $action)) {
+                            // Llamar al método del controlador
+                            call_user_func([$controller, $action]);
+                            $controllerFound = true;
+                            break;
+                        } else {
+                            $this->debugLog("Error: El método '$action' no existe en $controllerName");
+                        }
+                    } else {
+                        $this->debugLog("Error: La clase '$controllerName' no está definida en el archivo");
+                    }
+                }
+            }
+            
+            if ($controllerFound) {
+                return;
+            }
+        }
+        
+        // Continuar con el enrutamiento normal si no hay ruta personalizada
         // Dividir la URL en segmentos
         $segments = explode('/', trim($requestUrl, '/'));
         
