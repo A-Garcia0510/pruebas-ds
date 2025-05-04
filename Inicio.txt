@@ -12,19 +12,25 @@ d:\pruebas-ds
 │   ├── Auth/                             # Mantener estructura existente
 │   ├── Config/                           # Mantener estructura existente
 │   ├── core
-│   │   ├── Database/                     # Mantener estructura existente
-│   │   ├── Controller
-│   │   │   ├── BaseController.php        # Controlador base con funcionalidad común
-│   │   │   └── HomeController.php        # Controlador específico para la página de inicio
-│   │   ├── Model
-│   │   │   └── BaseModel.php             # Modelo base con funcionalidad común
-│   │   ├── View
-│   │   │   ├── templates/                # Plantillas compartidas (header, footer, etc.)
-│   │   │   │   ├── header.php            # Encabezado común para todas las páginas
-│   │   │   │   └── footer.php            # Pie de página común
-│   │   │   ├── home/                     # Vistas específicas para la página de inicio
-│   │   │   │   └── index.php             # Vista principal de la página de inicio
-│   │   ├── Router.php                    # Enrutador para gestionar las peticiones HTTP
+│   │   ├── Controller/                     # Controladores de la aplicación
+│   │   │   ├── BaseController.php          # Controlador base con funcionalidades comunes
+│   │   │   └── HomeController.php          # Controlador para la página principal
+│   │   ├── Database/                       # Configuración y conexión a la base de datos
+│   │   ├── Model/                          # Modelos de datos de la aplicación
+│   │   ├── Router.php                      # Enrutador principal de la aplicación
+│   │   └── View/                           # Vistas de la aplicación
+│   │       ├── templates/                  # Plantillas compartidas (header, footer, etc.)
+│   │           ├── ayuda.php              # Plantilla específica para la sección de ayuda
+│   │           ├── footer.php             # Pie de página común para todas las vistas
+│   │           ├── header.php             # Encabezado común para todas las vistas
+│   │           ├── index.php              # Plantilla principal para la página de inicio
+│   │           └── servicios.php          # Plantilla específica para la sección de servicios
+│   │       ├── home/                       # Vistas específicas para la página de inicio
+│   │       │   └── index.php               # Vista principal de la página de inicio
+│   │       
+│   │      
+│   │       
+│   │           
 │   ├── Shop/                             # Mantener estructura existente
 ├── CSS/                                  # Mantener estructura existente
 ├── HTML/                                 # Mantener estructura existente
@@ -325,9 +331,6 @@ class Router {
                 <div class="features">
                     <div class="feature">
                         <h3>Productos de Alta Calidad</h3>
-                        <p>Ofrecemos una amplia gama de productos con descripciones detalladas para que conozcas exactamente lo que estás comprando.</p>
-                    </div>
-                    
                     <div class="feature">
                         <h3>Envío Rápido</h3>
                         <p>Entendemos que quieres recibir tus productos lo antes posible. Te proporcionamos estimaciones realistas de tiempo de entrega.</p>
@@ -335,10 +338,6 @@ class Router {
                     
                     <div class="feature">
                         <h3>Atención al Cliente</h3>
-                        <p>Nuestro equipo está disponible para resolver todas tus dudas y preocupaciones a través de correo electrónico o teléfono.</p>
-                    </div>
-                </div>
-                
                 <div>
                     <h2>Estamos trabajando en nuestro nuevo sitio</h2>
                     <p>Pronto tendremos disponible una experiencia de compra mejorada con nuestra nueva estructura MVC.</p>

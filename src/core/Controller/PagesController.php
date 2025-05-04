@@ -24,7 +24,8 @@ class PagesController extends BaseController {
         $data = [
             'title' => 'Ethos Coffe - Servicios',
             'isLoggedIn' => $this->isLoggedIn(),
-            'user' => $this->getLoggedInUser()
+            'user' => $this->getLoggedInUser(),
+            'pageStyles' => ['index.css', 'servicios.css'] // Agregar CSS específico
         ];
         
         // Cargar la vista de servicios
@@ -39,7 +40,8 @@ class PagesController extends BaseController {
         $data = [
             'title' => 'Ethos Coffe - Ayuda',
             'isLoggedIn' => $this->isLoggedIn(),
-            'user' => $this->getLoggedInUser()
+            'user' => $this->getLoggedInUser(),
+            'pageStyles' => ['index.css', 'ayuda.css'] // Agregar CSS específico
         ];
         
         // Cargar la vista de ayuda

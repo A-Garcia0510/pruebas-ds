@@ -5,6 +5,7 @@
  * @var string $baseUrl URL base del proyecto, proporcionada por el controlador
  * @var string $title Título de la página, proporcionado por el controlador
  * @var bool $isLoggedIn Indica si el usuario está autenticado
+ * @var array $pageStyles Array con los estilos CSS a cargar
  */
 ?>
 <!DOCTYPE html>
@@ -14,8 +15,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($title) ? $title : 'Ethos Coffe'; ?></title>
     
-    <!-- Cargar los estilos con la URL base correcta -->
-    <link rel="stylesheet" type="text/css" href="<?php echo $baseUrl; ?>/CSS/index.css">
+    <!-- Cargar los estilos CSS específicos de la página -->
+    <?php if (isset($pageStyles) && is_array($pageStyles)): ?>
+        <?php foreach ($pageStyles as $cssFile): ?>
+            <link rel="stylesheet" type="text/css" href="<?php echo $baseUrl; ?>/CSS/<?php echo $cssFile; ?>">
+        <?php endforeach; ?>
+    <?php else: ?>
+        <!-- Cargar CSS por defecto si no se especifican estilos -->
+        <link rel="stylesheet" type="text/css" href="<?php echo $baseUrl; ?>/CSS/index.css">
+    <?php endif; ?>
     
     <!-- Debug CSS - Solo para desarrollo -->
     <style>
@@ -72,7 +80,7 @@
     <div class="debug-info">
         <h4>Debug Info</h4>
         <p><strong>Base URL:</strong> <?php echo $baseUrl; ?></p>
-        <p><strong>CSS Path:</strong> <?php echo $baseUrl; ?>/CSS/index.css</p>
+        <p><strong>CSS Files:</strong> <?php echo isset($pageStyles) ? implode(', ', $pageStyles) : 'index.css'; ?></p>
         <p><strong>Script Name:</strong> <?php echo $_SERVER['SCRIPT_NAME']; ?></p>
         <p><strong>Document Root:</strong> <?php echo $_SERVER['DOCUMENT_ROOT']; ?></p>
     </div>
