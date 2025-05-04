@@ -53,9 +53,9 @@
             </div>
             <ul class="nav-links">
                 <li><a href="<?php echo $baseUrl; ?>/"><b>Inicio</b></a></li>
-                <li><a href="<?php echo $baseUrl; ?>/Servicios.html"><b>Servicios</b></a></li>
+                <li><a href="<?php echo $baseUrl; ?>/servicios"><b>Servicios</b></a></li>
                 <li><a href="<?php echo $baseUrl; ?>/PHP/productos.php"><b>Productos</b></a></li>
-                <li><a href="<?php echo $baseUrl; ?>/Ayuda.html"><b>Ayuda</b></a></li>
+                <li><a href="<?php echo $baseUrl; ?>/ayuda"><b>Ayuda</b></a></li>
                 <li>
                     <?php if (isset($isLoggedIn) && $isLoggedIn): ?>
                         <a href="<?php echo $baseUrl; ?>/PHP/visual_datos.php"><b>Perfil</b></a>

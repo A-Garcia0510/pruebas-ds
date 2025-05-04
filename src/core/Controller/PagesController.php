@@ -28,7 +28,7 @@ class PagesController extends BaseController {
         ];
         
         // Cargar la vista de servicios
-        $this->view('pages/servicios', $data);
+        $this->view('templates/servicios', $data);
     }
     
     /**
@@ -43,6 +43,6 @@ class PagesController extends BaseController {
         ];
         
         // Cargar la vista de ayuda
-        $this->view('pages/ayuda', $data);
+        $this->view('templates/ayuda', $data);
     }
 }
