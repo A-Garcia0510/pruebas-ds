@@ -4,7 +4,8 @@ spl_autoload_register(function ($class) {
     // Convertir namespace a ruta de archivo
     $prefixes = [
         'App\\' => __DIR__ . '/../src/',
-        'Metrics\\' => __DIR__ . '/../src/metrics/'
+        'Metrics\\' => __DIR__ . '/../src/metrics/',
+        'PHP\\Commands\\' => __DIR__ . '/Commands/'
     ];
     
     // Buscar en cada prefijo registrado
