@@ -1,50 +1,37 @@
 <?php
 /**
- * Punto de entrada principal de la aplicación
+ * Punto de entrada de la aplicación
  */
 
-// Definir el directorio raíz de la aplicación
-define('APP_ROOT', dirname(__DIR__));
+// Mostrar errores en desarrollo
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Cargar el autoloader de Composer
-require_once APP_ROOT . '/vendor/autoload.php';
-
-// Iniciar sesión
-session_start();
+// Cargar el autoloader
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // Cargar la configuración
-$config = require_once APP_ROOT . '/app/config/config.php';
+$config = require_once __DIR__ . '/../app/config/config.php';
 
 // Inicializar la aplicación
 $app = new \App\Core\App($config);
 
 // Definir rutas
-$router = $app->router;
+// --- Rutas de autenticación ---
+$app->router->get('/login', [\App\Controllers\AuthController::class, 'showLoginForm']);
+$app->router->post('/login', [\App\Controllers\AuthController::class, 'login']);
+$app->router->get('/registro', [\App\Controllers\AuthController::class, 'showRegisterForm']);
+$app->router->post('/registro', [\App\Controllers\AuthController::class, 'register']);
+$app->router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
 
-// Ruta para la página de inicio
-$router->get('/', [\App\Controllers\PageController::class, 'index']);
+// --- Rutas del dashboard (protegidas) ---
+$app->router->get('/dashboard', [\App\Controllers\DashboardController::class, 'index']);
 
-// Ruta para la página de productos
-$router->get('/productos', [\App\Controllers\ProductController::class, 'index']);
+// --- Rutas de páginas ---
+$app->router->get('/', [\App\Controllers\PageController::class, 'index']);
 
-// Ruta para detalles de producto
-$router->get('/producto/{id}', [\App\Controllers\ProductController::class, 'show']);
-
-// Rutas para servicios
-$router->get('/servicios', [\App\Controllers\PageController::class, 'services']);
-
-// Rutas para ayuda
-$router->get('/ayuda', [\App\Controllers\PageController::class, 'help']);
-
-// Rutas de autenticación
-$router->get('/login', [\App\Controllers\AuthController::class, 'showLoginForm']);
-$router->post('/login', [\App\Controllers\AuthController::class, 'login']);
-$router->get('/registro', [\App\Controllers\AuthController::class, 'showRegisterForm']);
-$router->post('/registro', [\App\Controllers\AuthController::class, 'register']);
-$router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
-
-// Rutas para el perfil
-$router->get('/perfil', [\App\Controllers\UserController::class, 'profile']);
+// Agregar más rutas aquí...
 
 // Ejecutar la aplicación
 $app->run();
