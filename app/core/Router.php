@@ -52,10 +52,12 @@ class Router
     {
         $path = $request->getPath();
         $method = $request->getMethod();
-        $callback = $this->routes[$method][$path] ?? null;
         
-        // Si no se encuentra la ruta
-        if (!$callback) {
+        // Revisar si la ruta existe
+        if (isset($this->routes[$method][$path])) {
+            $callback = $this->routes[$method][$path];
+        } else {
+            // No se encontró la ruta
             if ($this->notFoundHandler) {
                 return call_user_func($this->notFoundHandler, $request, $response);
             }
@@ -66,10 +68,15 @@ class Router
         
         // Si el callback es un array [controlador, método]
         if (is_array($callback)) {
-            $controller = new $callback[0]($request, $response);
-            $callback[0] = $controller;
+            $controllerClass = $callback[0];
+            $controller = new $controllerClass($request, $response);
+            $method = $callback[1];
+            
+            // Ejecutar el método del controlador
+            return $controller->$method();
         }
         
+        // Si el callback es una función
         return call_user_func($callback, $request, $response);
     }
     

@@ -14,13 +14,28 @@ class Request
     public function getPath()
     {
         $path = $_SERVER['REQUEST_URI'] ?? '/';
-        $position = strpos($path, '?');
         
-        if ($position === false) {
-            return $path;
+        // Si estamos en un subdirectorio, necesitamos ajustar la ruta
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $scriptDir = dirname($scriptName);
+        
+        // Si no estamos en el directorio raíz y el path comienza con ese directorio
+        if ($scriptDir !== '/' && $scriptDir !== '\\' && strpos($path, $scriptDir) === 0) {
+            $path = substr($path, strlen($scriptDir));
         }
         
-        return substr($path, 0, $position);
+        // Eliminar parámetros de consulta si existen
+        $position = strpos($path, '?');
+        if ($position !== false) {
+            $path = substr($path, 0, $position);
+        }
+        
+        // Asegurarse de que el path comience con /
+        if (empty($path) || $path[0] !== '/') {
+            $path = '/' . $path;
+        }
+        
+        return $path;
     }
     
     /**
