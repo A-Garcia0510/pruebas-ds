@@ -4,7 +4,7 @@
 return [
     'app' => [
         'name' => 'Café-VT',
-        'url' => 'http://localhost', // Cambia esto según tu entorno
+        'url' => 'http://localhost/pruebas-ds', // Cambia esto según tu entorno
         'env' => 'development', // 'development' o 'production'
     ],
     
