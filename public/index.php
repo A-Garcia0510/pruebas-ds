@@ -1,32 +1,50 @@
 <?php
-// public/index.php
+/**
+ * Punto de entrada principal de la aplicación
+ */
 
-// Definir la constante del directorio raíz
-define('ROOT_DIR', dirname(__DIR__));
+// Definir el directorio raíz de la aplicación
+define('APP_ROOT', dirname(__DIR__));
 
-// Cargar el autoloader
-require_once ROOT_DIR . '/vendor/autoload.php';
+// Cargar el autoloader de Composer
+require_once APP_ROOT . '/vendor/autoload.php';
 
-// Cargar la configuración
-$config = require_once ROOT_DIR . '/app/config/config.php';
-
-// Iniciar la sesión
+// Iniciar sesión
 session_start();
 
-// Crear instancia de la aplicación
+// Cargar la configuración
+$config = require_once APP_ROOT . '/app/config/config.php';
+
+// Inicializar la aplicación
 $app = new \App\Core\App($config);
 
-// Definir rutas (esto se moverá a un archivo de rutas más adelante)
-// Por ahora, solo configuramos una ruta de ejemplo y la página 404
+// Definir rutas
+$router = $app->router;
 
-// Ejemplo de ruta a página de inicio (se implementará en la siguiente fase)
-$app->router->get('/', [\App\Controllers\PageController::class, 'home']);
+// Ruta para la página de inicio
+$router->get('/', [\App\Controllers\PageController::class, 'index']);
 
-// Establecer manejador de página no encontrada
-$app->router->setNotFoundHandler(function($request, $response) {
-    $response->setStatusCode(404);
-    return require_once ROOT_DIR . '/app/views/errors/404.php';
-});
+// Ruta para la página de productos
+$router->get('/productos', [\App\Controllers\ProductController::class, 'index']);
+
+// Ruta para detalles de producto
+$router->get('/producto/{id}', [\App\Controllers\ProductController::class, 'show']);
+
+// Rutas para servicios
+$router->get('/servicios', [\App\Controllers\PageController::class, 'services']);
+
+// Rutas para ayuda
+$router->get('/ayuda', [\App\Controllers\PageController::class, 'help']);
+
+// Rutas de autenticación
+$router->get('/login', [\App\Controllers\AuthController::class, 'showLoginForm']);
+$router->post('/login', [\App\Controllers\AuthController::class, 'login']);
+$router->get('/registro', [\App\Controllers\AuthController::class, 'showRegisterForm']);
+$router->post('/registro', [\App\Controllers\AuthController::class, 'register']);
+$router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
+
+// Rutas para el perfil
+$router->get('/perfil', [\App\Controllers\UserController::class, 'profile']);
 
 // Ejecutar la aplicación
 $app->run();

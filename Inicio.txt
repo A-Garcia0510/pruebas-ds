@@ -1,391 +1,260 @@
-# Plan de Trabajo Detallado para Implementar MVC en Cafe-VT
+Disculpa por malinterpretar tu solicitud. Vamos a enfocarnos en un plan de trabajo por partes sin código específico, sino con las acciones concretas que necesitas realizar en cada fase.
 
-## Fase 1: Preparación y Estructura Básica
+# Plan de Trabajo por Etapas para Convertir a MVC
 
-### Estructura de directorios después de completar esta fase:
+## Fase 1: Preparación de la Estructura
 
-```
-Cafe-VT/ (directorio raíz existente)
-├── app/
-│   ├── controllers/
-│   ├── models/
-│   ├── views/
-│   │   └── layouts/
-│   ├── core/
-│   └── config/
-│       └── database.php
-├── public/
-│   ├── index.php
-│   ├── css/
-│   └── .htaccess
-├── CSS/ (carpeta original - se mantiene temporalmente)
-├── PHP/ (carpeta original - se mantiene temporalmente)
-├── src/ (carpeta original - se mantiene y usará)
-└── vendor/ (carpeta original - se mantiene)
-```
+**Acciones:**
+1. Crear las nuevas carpetas según el patrón MVC:
+   - `app/controllers`
+   - `app/models`
+   - `app/views/layouts`
+   - `app/core`
+   - `app/config`
+   - `public/css`
+   - `public/js`
 
-### Justificación de archivos clave:
+2. Crear los archivos de configuración básicos:
+   - Archivo de configuración principal (app/config/config.php)
+   - Configuración de base de datos (app/config/database.php)
 
-- **app/**: Separa el código de la aplicación del código público, mejorando seguridad.
-  - **controllers/**: Contendrá clases que manejan las solicitudes y ejecutan lógica de negocio.
-  - **models/**: Interactuará con la base de datos y define la estructura de datos.
-  - **views/**: Contiene archivos que definen cómo se presentará la información al usuario.
-  - **core/**: Contiene componentes fundamentales como router, autoloader, etc.
-  - **config/database.php**: Centraliza la configuración de la base de datos para facilitar su mantenimiento.
+3. Preparar archivos esenciales para el núcleo MVC:
+   - Archivo principal de la aplicación (App.php)
+   - Archivo para gestionar solicitudes (Request.php)
+   - Archivo para gestionar respuestas (Response.php)
 
-- **public/**: Único directorio accesible directamente desde el navegador.
-  - **index.php**: "Front controller" que procesa todas las solicitudes.
-  - **.htaccess**: Redirige todas las solicitudes a index.php para control centralizado.
+**Resultado:**
+Una estructura de directorios limpia que separa las responsabilidades según el patrón MVC.
 
-## Fase 2: Implementación del Core MVC
+## Fase 2: Implementación del Núcleo MVC
 
-### Estructura después de completar esta fase:
+**Acciones:**
+1. Desarrollar el sistema de enrutamiento básico que dirija las solicitudes a los controladores correctos
+2. Implementar el controlador base con métodos comunes para todos los controladores
+3. Crear un layout principal que servirá como plantilla para todas las páginas
+4. Configurar el archivo principal (public/index.php) que iniciará la aplicación
+5. Configurar el archivo .htaccess para redirigir todas las solicitudes al punto de entrada único
 
-```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   └── BaseController.php
-│   ├── models/
-│   ├── views/
-│   │   ├── layouts/
-│   │   │   └── main.php
-│   │   └── errors/
-│   │       └── 404.php
-│   ├── core/
-│   │   ├── Router.php
-│   │   ├── Request.php
-│   │   ├── Response.php
-│   │   └── App.php
-│   └── config/
-│       ├── database.php
-│       └── config.php
-├── public/
-│   ├── index.php
-│   ├── css/
-│   └── .htaccess
-├── [carpetas originales se mantienen]
-```
+**Resultado:**
+Un sistema MVC funcional pero sin controladores específicos implementados.
 
-### Justificación de archivos clave:
+## Fase 3: Migración de la Página de Inicio
 
-- **BaseController.php**: Define métodos comunes para todos los controladores, facilitando la reutilización de código.
+**Acciones:**
+1. Crear el PageController con el método index()
+2. Migrar el contenido de index.php existente a una vista bajo app/views/pages/home.php
+3. Mover los estilos CSS de la página de inicio a public/css/index.css
+4. Probar que la página de inicio funcione correctamente a través del nuevo sistema MVC
 
-- **Router.php**: Maneja la lógica de enrutamiento, determinando qué controlador y método ejecutar según la URL solicitada.
+**Resultado:**
+Primera página funcionando a través del patrón MVC.
 
-- **Request.php**: Encapsula datos de la solicitud HTTP (GET, POST, cookies, etc.), facilitando el acceso a estos datos.
+## Fase 4: Migración de Autenticación
 
-- **Response.php**: Maneja la generación de respuestas HTTP, incluyendo códigos de estado y cabeceras.
+**Acciones:**
+1. Crear el AuthController con métodos para login y registro
+2. Migrar formularios y lógica de autenticación de los archivos existentes
+3. Crear las vistas correspondientes en app/views/auth/
+4. Mover los estilos CSS relacionados a public/css/
+5. Implementar sesiones para mantener el estado de autenticación
 
-- **App.php**: Inicializa la aplicación, conectando los componentes principales (router, controladores, etc.).
-
-- **main.php**: Layout principal que proporciona la estructura HTML compartida entre todas las páginas.
-
-- **404.php**: Vista para página de error cuando no se encuentra una ruta.
-
-## Fase 3: Primer Módulo Funcional - Página de Inicio
-
-### Estructura después de completar esta fase:
-
-```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   ├── BaseController.php
-│   │   └── PageController.php
-│   ├── models/
-│   ├── views/
-│   │   ├── layouts/
-│   │   │   └── main.php
-│   │   ├── pages/
-│   │   │   └── home.php
-│   │   └── errors/
-│   │       └── 404.php
-│   ├── [carpetas core y config igual que antes]
-├── public/
-│   ├── index.php
-│   ├── css/
-│   │   ├── index.css (copiado de CSS/index.css)
-│   │   └── main.css (nuevo archivo para estilos compartidos)
-│   └── .htaccess
-├── [carpetas originales se mantienen]
-```
-
-### Justificación de archivos clave:
-
-- **PageController.php**: Maneja páginas estáticas o semi-estáticas como la página de inicio, servicios, y ayuda. Reduce la necesidad de crear controladores específicos para páginas simples.
-
-- **views/pages/home.php**: Contiene solo el contenido específico de la página de inicio, separado del layout común.
-
-- **public/css/main.css**: Estilos compartidos por todas las páginas, mejorando la consistencia y reduciendo duplicación.
-
-## Fase 4: Implementación de Autenticación
-
-### Estructura después de completar esta fase:
-
-```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   ├── BaseController.php
-│   │   ├── PageController.php
-│   │   └── AuthController.php
-│   ├── middleware/
-│   │   ├── Middleware.php
-│   │   └── AuthMiddleware.php
-│   ├── views/
-│   │   ├── layouts/
-│   │   │   └── main.php
-│   │   ├── pages/
-│   │   │   └── home.php
-│   │   ├── auth/
-│   │   │   ├── login.php
-│   │   │   └── register.php
-│   │   └── errors/
-│   │       └── 404.php
-│   ├── [demás carpetas igual que antes]
-├── public/
-│   ├── [igual que antes]
-│   ├── css/
-│   │   ├── [archivos anteriores]
-│   │   ├── login.css (copiado de CSS/login.css)
-│   │   └── registro.css (copiado de CSS/registro.css)
-├── [carpetas originales se mantienen]
-```
-
-### Justificación de archivos clave:
-
-- **AuthController.php**: Maneja la lógica de autenticación (login, registro, logout), interactuando con servicios existentes en `src/Auth/`.
-
-- **middleware/**: Nueva carpeta para componentes que se ejecutan antes de los controladores, validando requisitos como autenticación.
-  - **Middleware.php**: Clase base para todos los middleware.
-  - **AuthMiddleware.php**: Verifica si el usuario está autenticado antes de permitir acceso a rutas protegidas.
-
-- **views/auth/**: Contiene formularios de login y registro, separados de la lógica de negocio.
+**Resultado:**
+Sistema de autenticación funcionando a través del patrón MVC.
 
 ## Fase 5: Migración de Productos
 
-### Estructura después de completar esta fase:
+**Acciones:**
+1. Crear el ProductController con métodos para listar, ver detalles y buscar productos
+2. Migrar la lógica de productos existente al nuevo controlador
+3. Crear vistas para listado y detalle de productos
+4. Conectar con los repositorios existentes en src/Shop/Repositories/
+5. Mover los estilos CSS relacionados a public/css/productos.css
 
-```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   ├── [controladores anteriores]
-│   │   └── ProductController.php
-│   ├── models/
-│   │   └── ProductModel.php (opcional, si se necesita adicional a src/)
-│   ├── views/
-│   │   ├── [vistas anteriores]
-│   │   └── products/
-│   │       ├── index.php
-│   │       └── detail.php
-│   ├── [demás carpetas igual que antes]
-├── public/
-│   ├── [igual que antes]
-│   ├── css/
-│   │   ├── [archivos anteriores]
-│   │   └── productos.css (copiado de CSS/productos.css)
-│   ├── js/
-│   │   └── products.js (nuevo, para interactividad de productos)
-├── [carpetas originales se mantienen]
-```
-
-### Justificación de archivos clave:
-
-- **ProductController.php**: Maneja listado, búsqueda y detalle de productos, utilizando repositorios existentes en `src/Shop/Repositories/`.
-
-- **ProductModel.php**: Opcional, si se necesita extender la funcionalidad de los modelos existentes en `src/Shop/Models/`.
-
-- **views/products/**: Contiene vistas para visualizar productos.
-  - **index.php**: Vista para listado de productos con filtros.
-  - **detail.php**: Vista detallada de un producto individual.
-
-- **public/js/products.js**: Opcional, para funcionalidades dinámicas como filtrado AJAX, zoom de imágenes, etc.
+**Resultado:**
+Catálogo de productos funcionando a través del patrón MVC.
 
 ## Fase 6: Implementación del Carrito
 
-### Estructura después de completar esta fase:
+**Acciones:**
+1. Crear el CartController con métodos para agregar, eliminar, actualizar y mostrar productos en el carrito
+2. Migrar la lógica existente del carrito al nuevo controlador
+3. Crear vistas para el carrito y checkout
+4. Integrar con los servicios existentes en src/Shop/Services/
+5. Implementar la funcionalidad AJAX para operaciones del carrito si es necesario
 
-```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   ├── [controladores anteriores]
-│   │   └── CartController.php
-│   ├── views/
-│   │   ├── [vistas anteriores]
-│   │   └── cart/
-│   │       ├── index.php
-│   │       └── checkout.php
-│   ├── [demás carpetas igual que antes]
-├── public/
-│   ├── [igual que antes]
-│   ├── css/
-│   │   ├── [archivos anteriores]
-│   │   └── carro.css (copiado de CSS/carro.css)
-│   ├── js/
-│   │   ├── [archivos anteriores]
-│   │   └── cart.js (nuevo, para funcionalidad del carrito)
-├── [carpetas originales se mantienen]
-```
+**Resultado:**
+Carrito de compras funcionando a través del patrón MVC.
 
-### Justificación de archivos clave:
+## Fase 7: Dashboard y Páginas Restantes
 
-- **CartController.php**: Gestiona todas las operaciones del carrito (agregar, eliminar, actualizar, mostrar), utilizando servicios de `src/Shop/Services/`.
+**Acciones:**
+1. Crear el DashboardController para el panel de usuario
+2. Implementar páginas estáticas restantes (servicios, ayuda)
+3. Migrar la lógica y contenido de estas páginas
+4. Crear middleware para proteger rutas que requieren autenticación
+5. Implementar historial de pedidos y gestión de perfil de usuario
 
-- **views/cart/**: Contiene vistas para el carrito.
-  - **index.php**: Muestra el contenido actual del carrito.
-  - **checkout.php**: Formulario para finalizar la compra.
-
-- **public/js/cart.js**: Maneja operaciones AJAX para agregar/eliminar productos del carrito sin recargar la página.
-
-## Fase 7: Dashboard y Servicios Adicionales
-
-### Estructura después de completar esta fase:
-
-```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   ├── [controladores anteriores]
-│   │   └── DashboardController.php
-│   ├── views/
-│   │   ├── [vistas anteriores]
-│   │   ├── dashboard/
-│   │   │   ├── index.php
-│   │   │   ├── profile.php
-│   │   │   └── orders.php
-│   │   └── pages/
-│   │       ├── home.php
-│   │       ├── services.php
-│   │       └── help.php
-│   ├── [demás carpetas igual que antes]
-├── public/
-│   ├── [igual que antes]
-│   ├── css/
-│   │   ├── [archivos anteriores]
-│   │   ├── dashboard.css (copiado de CSS/dashboard.css)
-│   │   ├── servicios.css (copiado de CSS/servicios.css)
-│   │   └── ayuda.css (copiado de CSS/ayuda.css)
-├── [carpetas originales se mantienen]
-```
-
-### Justificación de archivos clave:
-
-- **DashboardController.php**: Maneja el panel de usuario, mostrando información personalizada como historial de compras, preferencias, etc.
-
-- **views/dashboard/**: Contiene vistas para el panel de usuario.
-  - **index.php**: Vista principal del dashboard con resumen.
-  - **profile.php**: Vista para editar perfil.
-  - **orders.php**: Vista para historial de pedidos.
-
-- **views/pages/**: Se completan las páginas estáticas.
-  - **services.php**: Migrada de Servicios.html.
-  - **help.php**: Migrada de Ayuda.html.
+**Resultado:**
+Panel de usuario y páginas estáticas funcionando a través del patrón MVC.
 
 ## Fase 8: Limpieza y Optimización
 
-### Estructura final del proyecto:
+**Acciones:**
+1. Eliminar archivos PHP/HTML antiguos una vez migrados completamente
+2. Reorganizar y optimizar CSS/JS para mejorar rendimiento
+3. Implementar manejo de errores y excepciones
+4. Actualizar el sistema de autoloading en composer.json
+5. Documentar la nueva estructura en README.md
 
+**Resultado:**
+Sistema completamente migrado a MVC, optimizado y documentado.
+
+# Guía de Implementación por Fases
+
+## Fase 1: Preparación de la Estructura
+
+**Archivos a crear:**
 ```
-Cafe-VT/
-├── app/
-│   ├── controllers/
-│   │   ├── BaseController.php
-│   │   ├── PageController.php
-│   │   ├── AuthController.php
-│   │   ├── ProductController.php
-│   │   ├── CartController.php
-│   │   └── DashboardController.php
-│   ├── middleware/
-│   │   ├── Middleware.php
-│   │   ├── AuthMiddleware.php
-│   │   └── AdminMiddleware.php (si es necesario)
-│   ├── models/ (solo si se necesitan adicionales a src/)
-│   ├── views/
-│   │   ├── layouts/
-│   │   │   └── main.php
-│   │   ├── pages/
-│   │   │   ├── home.php
-│   │   │   ├── services.php
-│   │   │   └── help.php
-│   │   ├── auth/
-│   │   │   ├── login.php
-│   │   │   └── register.php
-│   │   ├── products/
-│   │   │   ├── index.php
-│   │   │   └── detail.php
-│   │   ├── cart/
-│   │   │   ├── index.php
-│   │   │   └── checkout.php
-│   │   ├── dashboard/
-│   │   │   ├── index.php
-│   │   │   ├── profile.php
-│   │   │   └── orders.php
-│   │   └── errors/
-│   │       ├── 404.php
-│   │       └── 500.php
-│   ├── core/
-│   │   ├── Router.php
-│   │   ├── Request.php
-│   │   ├── Response.php
-│   │   ├── App.php
-│   │   └── helpers.php (funciones auxiliares)
-│   └── config/
-│       ├── database.php
-│       └── config.php
-├── public/
-│   ├── index.php
-│   ├── css/
-│   │   ├── main.css
-│   │   ├── index.css
-│   │   ├── login.css
-│   │   ├── registro.css
-│   │   ├── productos.css
-│   │   ├── carro.css
-│   │   ├── dashboard.css
-│   │   ├── servicios.css
-│   │   └── ayuda.css
-│   ├── js/
-│   │   ├── main.js
-│   │   ├── products.js
-│   │   ├── cart.js
-│   │   └── dashboard.js
-│   └── .htaccess
-├── src/ (se mantiene y utiliza)
-├── vendor/ (se mantiene)
-├── composer.json (se actualiza para autoloading)
-└── README.md (actualizado con información de la nueva estructura)
+app/
+├── controllers/
+├── models/
+├── views/
+│   └── layouts/
+├── core/
+└── config/
+    ├── config.php
+    └── database.php
+public/
+├── index.php
+├── css/
+├── js/
+└── .htaccess
 ```
 
-### Archivos eliminados:
-- Archivos HTML originales: `index.php`, `login.html`, `registro.html`, `Ayuda.html`, `Servicios.html`
-- Archivos PHP en `PHP/`: todos los archivos una vez migrados
-- Carpeta `CSS/` original (después de migrar todos los estilos a `public/css/`)
+## Fase 2: Implementación del Núcleo MVC
 
-### Justificación de la estructura final:
+**Archivos a crear:**
+```
+app/core/
+├── App.php (sistema de enrutamiento y bootstrap)
+├── Request.php (manejo de solicitudes HTTP)
+└── Response.php (manejo de respuestas HTTP)
+app/controllers/
+└── BaseController.php (controlador base)
+app/views/layouts/
+└── main.php (plantilla principal)
+app/views/errors/
+└── 404.php (página de error)
+```
 
-1. **Separación clara de responsabilidades**:
-   - Controladores: Gestionan solicitudes y coordinan el flujo de datos
-   - Vistas: Presentan la información al usuario
-   - Modelos/Servicios: Encapsulan la lógica de negocio y acceso a datos
+## Fase 3: Migración de la Página de Inicio
 
-2. **Seguridad mejorada**:
-   - Solo el directorio `public` es accesible desde la web
-   - Archivos críticos como configuraciones están fuera del alcance público
+**Archivos a crear/modificar:**
+```
+app/controllers/
+└── PageController.php (controlador para páginas estáticas)
+app/views/pages/
+└── home.php (vista de la página de inicio)
+public/css/
+└── index.css (estilos de la página de inicio)
+```
 
-3. **Mantenibilidad**:
-   - Estructura organizada por funcionalidad
-   - Reutilización de código a través de clases base
-   - Fácil ubicación de archivos relacionados
+**Archivos a eliminar después de la migración:**
+- El archivo index.php original (una vez migrado correctamente)
 
-4. **Compatibilidad con código existente**:
-   - Se mantiene y utiliza la carpeta `src/` con repositorios y servicios
-   - No se duplica funcionalidad ya implementada
+## Fase 4: Migración de Autenticación
 
-5. **Escalabilidad**:
-   - Fácil adición de nuevos controladores, vistas y funcionalidades
-   - Sistema de middleware para funcionalidades transversales
+**Archivos a crear/modificar:**
+```
+app/controllers/
+└── AuthController.php (controlador de autenticación)
+app/middleware/
+├── Middleware.php (clase base para middleware)
+└── AuthMiddleware.php (middleware de autenticación)
+app/views/auth/
+├── login.php (vista de inicio de sesión)
+└── register.php (vista de registro)
+public/css/
+├── login.css (estilos de inicio de sesión)
+└── registro.css (estilos de registro)
+```
 
-¿Te gustaría que profundice en algún aspecto específico de esta estructura o necesitas aclaraciones sobre alguna parte del plan de trabajo?
+**Archivos a eliminar después de la migración:**
+- login.html
+- registro.html
+
+## Fase 5: Migración de Productos
+
+**Archivos a crear/modificar:**
+```
+app/controllers/
+└── ProductController.php (controlador de productos)
+app/views/products/
+├── index.php (vista de listado de productos)
+└── detail.php (vista de detalle de producto)
+public/css/
+└── productos.css (estilos de productos)
+public/js/
+└── products.js (scripts para la funcionalidad de productos)
+```
+
+## Fase 6: Implementación del Carrito
+
+**Archivos a crear/modificar:**
+```
+app/controllers/
+└── CartController.php (controlador del carrito)
+app/views/cart/
+├── index.php (vista del carrito)
+└── checkout.php (vista de finalización de compra)
+public/css/
+└── carro.css (estilos del carrito)
+public/js/
+└── cart.js (scripts para la funcionalidad del carrito)
+```
+
+## Fase 7: Dashboard y Páginas Restantes
+
+**Archivos a crear/modificar:**
+```
+app/controllers/
+└── DashboardController.php (controlador del panel de usuario)
+app/views/dashboard/
+├── index.php (vista principal del dashboard)
+├── profile.php (vista de perfil)
+└── orders.php (vista de pedidos)
+app/views/pages/
+├── services.php (vista de servicios)
+└── help.php (vista de ayuda)
+public/css/
+├── dashboard.css (estilos del dashboard)
+├── servicios.css (estilos de la página de servicios)
+└── ayuda.css (estilos de la página de ayuda)
+```
+
+**Archivos a eliminar después de la migración:**
+- Servicios.html
+- Ayuda.html
+
+## Fase 8: Limpieza y Optimización
+
+**Acciones específicas:**
+1. Eliminar todos los archivos PHP en la carpeta PHP/ una vez migrados
+2. Eliminar la carpeta CSS/ original después de migrar todos los estilos
+3. Actualizar composer.json para manejar autoloading de clases
+4. Crear archivo README.md con documentación del nuevo sistema
+5. Implementar manejo centralizado de errores en app/core/
+
+# Recomendaciones para la implementación
+
+1. **Trabajo por módulos**: Completa un módulo a la vez antes de pasar al siguiente para ver resultados tangibles y poder hacer pruebas.
+
+2. **Pruebas continuas**: Después de cada fase, realiza pruebas exhaustivas para asegurar que todo sigue funcionando.
+
+3. **No elimines los archivos originales inmediatamente**: Mantén los archivos originales hasta que estés seguro de que la nueva implementación funciona correctamente.
+
+4. **Uso de la carpeta src/**: Aprovecha los servicios y repositorios ya implementados en la carpeta src/, integrándolos con los nuevos controladores.
+
+5. **Control de versiones**: Si es posible, utiliza un sistema de control de versiones como Git para poder revertir cambios si algo sale mal.
+
+¿Hay alguna fase específica sobre la que quieras que profundice más? ¿O necesitas más detalles sobre algún aspecto particular del plan?
