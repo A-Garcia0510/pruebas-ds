@@ -1,0 +1,29 @@
+# Redirigir todas las solicitudes a index.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Si la solicitud no es un archivo real o directorio existente
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Redirigir a index.php
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>
+
+# Desactivar la navegación por directorios
+Options -Indexes
+
+# Proteger archivos y directorios
+<FilesMatch "(\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|swp)|~)$">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</FilesMatch>
+
+# Establecer cabeceras de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "same-origin"
+</IfModule>
