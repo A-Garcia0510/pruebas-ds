@@ -52,7 +52,7 @@ abstract class BaseController
         // Extraer los datos para que estén disponibles en la vista
         extract($data);
         
-        $viewPath = dirname(__DIR__) . '/views/' . $view . '.php';
+        $viewPath = BASE_PATH . '/app/views/' . $view . '.php';
         
         if (!file_exists($viewPath)) {
             $error = "La vista {$view} no existe en {$viewPath}";
@@ -62,17 +62,17 @@ abstract class BaseController
         
         // Iniciar buffer de salida para la vista
         ob_start();
-        include_once $viewPath;
+        include $viewPath;
         $content = ob_get_clean();
         
         // Si no hay layout especificado o se ha establecido explícitamente a false, devolver solo el contenido
-        if (!isset($data['layout']) || $data['layout'] === false) {
+        if (isset($data['layout']) && $data['layout'] === false) {
             return $content;
         }
         
         // Por defecto usa el layout 'main'
         $layout = $data['layout'] ?? 'main';
-        $layoutPath = dirname(__DIR__) . '/views/layouts/' . $layout . '.php';
+        $layoutPath = BASE_PATH . '/app/views/layouts/' . $layout . '.php';
         
         if (!file_exists($layoutPath)) {
             $error = "El layout {$layout} no existe en {$layoutPath}";
@@ -88,7 +88,7 @@ abstract class BaseController
         
         // Renderizar con el layout
         ob_start();
-        include_once $layoutPath;
+        include $layoutPath;
         $fullContent = ob_get_clean();
         
         // Log para depuración

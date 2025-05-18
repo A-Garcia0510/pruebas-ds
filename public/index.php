@@ -1,6 +1,6 @@
 <?php
 /**
- * Punto de entrada simplificado de la aplicación
+ * Punto de entrada principal de la aplicación
  */
 
 // Inicializar la sesión
@@ -14,17 +14,7 @@ error_reporting(E_ALL);
 // Definir constante para la ruta base del proyecto
 define('BASE_PATH', dirname(__DIR__));
 
-// Incluir SimpleAssetManager
-require_once __DIR__ . '/SimpleAssetManager.php';
-
-// Cargar el autoloader
-$autoloadPath = BASE_PATH . '/vendor/autoload.php';
-if (!file_exists($autoloadPath)) {
-    die("Error: No se puede encontrar el archivo autoload.php. Verifica que Composer esté instalado correctamente.");
-}
-require_once $autoloadPath;
-
-// Cargar la configuración
+// Cargar configuración primero
 $configPath = BASE_PATH . '/app/config/config.php';
 if (!file_exists($configPath)) {
     die("Error: No se puede encontrar el archivo de configuración.");
@@ -39,11 +29,36 @@ if (isset($config['app']['display_errors'])) {
 // Determinar si estamos en modo debug
 $debugMode = isset($config['app']['debug']) && $config['app']['debug'];
 
+// Cargar los helpers necesarios
+require_once BASE_PATH . '/app/helpers/AssetHelper.php';
+require_once BASE_PATH . '/app/helpers/ViewHelper.php';
+
+// Cargar el autoloader
+$autoloadPath = BASE_PATH . '/vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+} else {
+    // Si no hay autoloader, cargamos las clases manualmente
+    $coreFiles = glob(BASE_PATH . '/app/core/*.php');
+    foreach ($coreFiles as $file) {
+        require_once $file;
+    }
+    
+    $controllerFiles = glob(BASE_PATH . '/app/controllers/*.php');
+    foreach ($controllerFiles as $file) {
+        require_once $file;
+    }
+    
+    if ($debugMode) {
+        error_log("Autoloader no encontrado. Cargando archivos manualmente.");
+    }
+}
+
 try {
     // Inicializar la aplicación
     $app = new \App\Core\App($config);
     
-    // --- Rutas principales ---
+    // Configurar rutas
     $app->router->get('/', [\App\Controllers\PageController::class, 'index']);
     
     // --- Rutas de autenticación (comentadas hasta que se implementen) ---
@@ -55,13 +70,13 @@ try {
     $app->router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
     */
     
-    // --- Ruta para depuración ---
+    // Ruta para depuración
     if ($debugMode) {
         $app->router->get('/debug', function($request, $response) use ($config) {
             echo "<h1>Información de Depuración</h1>";
             
             echo "<h2>Rutas CSS</h2>";
-            echo "<p>CSS Main: " . SimpleAssetManager::css('main') . "</p>";
+            echo "<p>CSS Main: " . AssetHelper::css('main') . "</p>";
             
             echo "<h2>Variables del Servidor</h2>";
             echo "<pre>";
@@ -74,7 +89,7 @@ try {
             echo "</pre>";
             
             echo "<h2>Prueba de enlaces CSS</h2>";
-            echo "<link rel='stylesheet' href='" . SimpleAssetManager::css('main') . "'>";
+            echo "<link rel='stylesheet' href='" . AssetHelper::css('main') . "'>";
             echo "<div style='border: 1px solid black; padding: 20px; margin: 20px;'>
                 Si el CSS 'main.css' está correctamente enlazado, este div debería tener estilos aplicados.
             </div>";
@@ -85,7 +100,7 @@ try {
     $app->run();
     
 } catch (Exception $e) {
-    // Mostrar un mensaje de error detallado en modo depuración
+    // Mostrar error detallado en modo debug
     if ($debugMode) {
         echo '<html><head><title>Error en la aplicación</title>';
         echo '<style>body{font-family:sans-serif;line-height:1.5;padding:20px;max-width:800px;margin:0 auto;}
@@ -98,7 +113,7 @@ try {
         echo '<pre>' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
         echo '</body></html>';
     } else {
-        // En producción, mostrar un mensaje genérico
+        // Mensaje genérico en producción
         echo '<html><head><title>Error</title>';
         echo '<style>body{font-family:sans-serif;line-height:1.5;padding:20px;max-width:800px;margin:0 auto;text-align:center;}
               h1{color:#e74c3c;}</style></head>';

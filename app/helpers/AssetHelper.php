@@ -1,102 +1,69 @@
 <?php
-namespace App\Helpers;
-
 /**
- * Clase auxiliar mejorada y corregida para manejar rutas de activos (CSS, JS, imágenes)
+ * AssetHelper.php
+ * 
+ * Un helper simplificado para manejar assets sin dependencias complejas
  */
-class AssetHelper
-{
-    private static $baseUrl;
-    
+
+class AssetHelper {
     /**
-     * Inicializa el helper con la URL base
+     * Obtiene la URL base para los activos
      * 
-     * @param array $config Configuración de la aplicación
+     * @return string URL base
      */
-    public static function init($config)
-    {
-        if (isset($config['app']['url']) && !empty($config['app']['url'])) {
-            // Usar la URL configurada si está definida y no está vacía
-            self::$baseUrl = rtrim($config['app']['url'], '/');
-        } else {
-            // Detectar automáticamente la URL base si no está configurada o está vacía
-            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-            $host = $_SERVER['HTTP_HOST'];
-            
-            // Determinar la ruta base examinando SCRIPT_NAME
-            $scriptName = $_SERVER['SCRIPT_NAME']; // Ejemplo: /pruebas-ds/public/index.php
-            $dirPath = dirname($scriptName); // Ejemplo: /pruebas-ds/public
-            
-            // Normalizar el directorio para que no termine en barra diagonal
-            // Pero preservarlo si es la raíz
-            if ($dirPath === '/' || $dirPath === '\\') {
-                $dirPath = '';
-            }
-            
-            self::$baseUrl = $protocol . $host . $dirPath;
-        }
+    public static function getBaseUrl() {
+        // Detectar protocolo
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
         
-        // Log para depuración
-        if (isset($config['app']['debug']) && $config['app']['debug']) {
-            error_log('AssetHelper::init() - BaseUrl configurada como: ' . self::$baseUrl);
-            error_log('AssetHelper::init() - REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
-            error_log('AssetHelper::init() - SCRIPT_NAME: ' . $_SERVER['SCRIPT_NAME']);
-            error_log('AssetHelper::init() - DOCUMENT_ROOT: ' . $_SERVER['DOCUMENT_ROOT']);
-        }
+        // Obtener el host
+        $host = $_SERVER['HTTP_HOST'];
+        
+        // Obtener la ruta base de la aplicación
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $basePath = rtrim(dirname($scriptName), '/');
+        
+        // Si estamos en el directorio raíz, basePath será una cadena vacía
+        return "$protocol://$host$basePath";
     }
     
     /**
-     * Genera una URL para un archivo CSS
+     * Obtiene la URL completa para un archivo CSS
      * 
      * @param string $filename Nombre del archivo CSS sin extensión
      * @return string URL completa al archivo CSS
      */
-    public static function css($filename)
-    {
-        return self::$baseUrl . '/css/' . $filename . '.css';
+    public static function css($filename) {
+        return self::getBaseUrl() . '/css/' . $filename . '.css?' . time();
     }
     
     /**
-     * Genera una URL para un archivo JavaScript
+     * Obtiene la URL completa para un archivo JavaScript
      * 
      * @param string $filename Nombre del archivo JS sin extensión
      * @return string URL completa al archivo JS
      */
-    public static function js($filename)
-    {
-        return self::$baseUrl . '/js/' . $filename . '.js';
+    public static function js($filename) {
+        return self::getBaseUrl() . '/js/' . $filename . '.js?' . time();
     }
     
     /**
-     * Genera una URL para una imagen
+     * Obtiene la URL completa para una imagen
      * 
      * @param string $path Ruta de la imagen relativa a la carpeta /img
      * @return string URL completa a la imagen
      */
-    public static function img($path)
-    {
-        return self::$baseUrl . '/img/' . $path;
+    public static function img($path) {
+        return self::getBaseUrl() . '/img/' . $path;
     }
     
     /**
-     * Genera una URL para cualquier ruta
+     * Obtiene la URL completa para una ruta específica
      * 
-     * @param string $path Ruta relativa a la raíz del sitio
+     * @param string $path Ruta relativa a la raíz del proyecto
      * @return string URL completa
      */
-    public static function url($path = '')
-    {
+    public static function url($path = '') {
         $path = ltrim($path, '/');
-        return empty($path) ? self::$baseUrl : self::$baseUrl . '/' . $path;
-    }
-    
-    /**
-     * Obtiene la URL base configurada
-     * 
-     * @return string URL base
-     */
-    public static function getBaseUrl()
-    {
-        return self::$baseUrl;
+        return self::getBaseUrl() . ($path ? "/$path" : '');
     }
 }
