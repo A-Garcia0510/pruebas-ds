@@ -2,7 +2,7 @@
 namespace App\Helpers;
 
 /**
- * Clase auxiliar mejorada para manejar rutas de activos (CSS, JS, imágenes)
+ * Clase auxiliar mejorada y corregida para manejar rutas de activos (CSS, JS, imágenes)
  */
 class AssetHelper
 {
@@ -15,27 +15,33 @@ class AssetHelper
      */
     public static function init($config)
     {
-        if (isset($config['app']['url'])) {
-            // Eliminar slash final si existe
+        if (isset($config['app']['url']) && !empty($config['app']['url'])) {
+            // Usar la URL configurada si está definida y no está vacía
             self::$baseUrl = rtrim($config['app']['url'], '/');
         } else {
-            // Detectar automáticamente la URL base si no está configurada
+            // Detectar automáticamente la URL base si no está configurada o está vacía
             $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
             $host = $_SERVER['HTTP_HOST'];
-            $scriptName = $_SERVER['SCRIPT_NAME'];
-            $dirName = dirname($scriptName);
             
-            // Si estamos en el directorio raíz, dirName será '\'
-            if ($dirName === '/' || $dirName === '\\') {
-                $dirName = '';
+            // Determinar la ruta base examinando SCRIPT_NAME
+            $scriptName = $_SERVER['SCRIPT_NAME']; // Ejemplo: /pruebas-ds/public/index.php
+            $dirPath = dirname($scriptName); // Ejemplo: /pruebas-ds/public
+            
+            // Normalizar el directorio para que no termine en barra diagonal
+            // Pero preservarlo si es la raíz
+            if ($dirPath === '/' || $dirPath === '\\') {
+                $dirPath = '';
             }
             
-            self::$baseUrl = $protocol . $host . $dirName;
+            self::$baseUrl = $protocol . $host . $dirPath;
         }
         
         // Log para depuración
         if (isset($config['app']['debug']) && $config['app']['debug']) {
             error_log('AssetHelper::init() - BaseUrl configurada como: ' . self::$baseUrl);
+            error_log('AssetHelper::init() - REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
+            error_log('AssetHelper::init() - SCRIPT_NAME: ' . $_SERVER['SCRIPT_NAME']);
+            error_log('AssetHelper::init() - DOCUMENT_ROOT: ' . $_SERVER['DOCUMENT_ROOT']);
         }
     }
     
