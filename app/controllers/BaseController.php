@@ -25,6 +25,11 @@ abstract class BaseController
         $this->request = $request;
         $this->response = $response;
         $this->config = App::$app->config;
+        
+        // Log para depuración
+        if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+            error_log('BaseController::__construct() - Controlador inicializado: ' . get_class($this));
+        }
     }
     
     /**
@@ -36,6 +41,11 @@ abstract class BaseController
      */
     protected function render($view, $data = [])
     {
+        // Log para depuración
+        if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+            error_log('BaseController::render() - Renderizando vista: ' . $view);
+        }
+        
         // Añadir configuración a los datos disponibles en la vista
         $data['config'] = $this->config;
         
@@ -45,7 +55,9 @@ abstract class BaseController
         $viewPath = dirname(__DIR__) . '/views/' . $view . '.php';
         
         if (!file_exists($viewPath)) {
-            throw new \Exception("La vista {$view} no existe");
+            $error = "La vista {$view} no existe en {$viewPath}";
+            error_log($error);
+            throw new \Exception($error);
         }
         
         // Iniciar buffer de salida
@@ -63,13 +75,27 @@ abstract class BaseController
         $layoutPath = dirname(__DIR__) . '/views/layouts/' . $layout . '.php';
         
         if (!file_exists($layoutPath)) {
-            throw new \Exception("El layout {$layout} no existe");
+            $error = "El layout {$layout} no existe en {$layoutPath}";
+            error_log($error);
+            throw new \Exception($error);
+        }
+        
+        // Log para depuración
+        if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+            error_log('BaseController::render() - Usando layout: ' . $layout);
         }
         
         // Renderizar con el layout
         ob_start();
         include_once $layoutPath;
-        return ob_get_clean();
+        $fullContent = ob_get_clean();
+        
+        // Log para depuración
+        if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+            error_log('BaseController::render() - Renderizado completo, tamaño: ' . strlen($fullContent) . ' bytes');
+        }
+        
+        return $fullContent;
     }
     
     /**
@@ -79,6 +105,16 @@ abstract class BaseController
      */
     protected function redirect($url)
     {
+        // Si es una URL relativa, agregarle la URL base
+        if (isset($this->config['app']['url']) && !empty($this->config['app']['url']) && $url[0] === '/') {
+            $url = $this->config['app']['url'] . $url;
+        }
+        
+        // Log para depuración
+        if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+            error_log('BaseController::redirect() - Redirigiendo a: ' . $url);
+        }
+        
         $this->response->redirect($url);
     }
     

@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Café-VT' ?></title>
-    <!-- Incluir CSS principales con ruta absoluta -->
+    <!-- Incluir CSS principales con ruta absoluta usando URL base -->
     <link rel="stylesheet" href="<?= $config['app']['url'] ?>/css/main.css">
-    <?php if (isset($css)): ?>
+    <?php if (isset($css) && is_array($css)): ?>
         <?php foreach ($css as $stylesheet): ?>
             <link rel="stylesheet" href="<?= $config['app']['url'] ?>/css/<?= $stylesheet ?>.css">
         <?php endforeach; ?>
@@ -16,21 +16,21 @@
     <header>
         <nav>
             <div class="logo">
-                <a href="/">Café-VT</a>
+                <a href="<?= $config['app']['url'] ?>/">Café-VT</a>
             </div>
             <ul class="nav-links">
-                <li><a href="/">Inicio</a></li>
-                <li><a href="/productos">Productos</a></li>
-                <li><a href="/servicios">Servicios</a></li>
-                <li><a href="/ayuda">Ayuda</a></li>
+                <li><a href="<?= $config['app']['url'] ?>/">Inicio</a></li>
+                <li><a href="<?= $config['app']['url'] ?>/productos">Productos</a></li>
+                <li><a href="<?= $config['app']['url'] ?>/servicios">Servicios</a></li>
+                <li><a href="<?= $config['app']['url'] ?>/ayuda">Ayuda</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="/dashboard">Mi Cuenta</a></li>
-                    <li><a href="/logout">Cerrar Sesión</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/dashboard">Mi Cuenta</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/logout">Cerrar Sesión</a></li>
                 <?php else: ?>
-                    <li><a href="/login">Iniciar Sesión</a></li>
-                    <li><a href="/registro">Registrarse</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/login">Iniciar Sesión</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/registro">Registrarse</a></li>
                 <?php endif; ?>
-                <li><a href="/carrito">Carrito</a></li>
+                <li><a href="<?= $config['app']['url'] ?>/carrito">Carrito</a></li>
             </ul>
         </nav>
     </header>
@@ -48,10 +48,10 @@
             <div class="footer-section">
                 <h3>Enlaces rápidos</h3>
                 <ul>
-                    <li><a href="/">Inicio</a></li>
-                    <li><a href="/productos">Productos</a></li>
-                    <li><a href="/servicios">Servicios</a></li>
-                    <li><a href="/ayuda">Ayuda</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/">Inicio</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/productos">Productos</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/servicios">Servicios</a></li>
+                    <li><a href="<?= $config['app']['url'] ?>/ayuda">Ayuda</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -66,7 +66,7 @@
     </footer>
 
     <!-- Incluir JavaScript con ruta absoluta -->
-    <?php if (isset($js)): ?>
+    <?php if (isset($js) && is_array($js)): ?>
         <?php foreach ($js as $script): ?>
             <script src="<?= $config['app']['url'] ?>/js/<?= $script ?>.js"></script>
         <?php endforeach; ?>
