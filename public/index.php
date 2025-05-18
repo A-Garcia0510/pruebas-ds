@@ -14,6 +14,9 @@ error_reporting(E_ALL);
 // Definir constante para la ruta base del proyecto
 define('BASE_PATH', dirname(__DIR__));
 
+// Incluir SimpleAssetManager
+require_once __DIR__ . '/SimpleAssetManager.php';
+
 // Cargar el autoloader
 $autoloadPath = BASE_PATH . '/vendor/autoload.php';
 if (!file_exists($autoloadPath)) {
@@ -58,7 +61,7 @@ try {
             echo "<h1>Información de Depuración</h1>";
             
             echo "<h2>Rutas CSS</h2>";
-            echo "<p>CSS Main: " . \App\Helpers\SimpleAssetManager::css('main') . "</p>";
+            echo "<p>CSS Main: " . SimpleAssetManager::css('main') . "</p>";
             
             echo "<h2>Variables del Servidor</h2>";
             echo "<pre>";
@@ -71,7 +74,7 @@ try {
             echo "</pre>";
             
             echo "<h2>Prueba de enlaces CSS</h2>";
-            echo "<link rel='stylesheet' href='" . \App\Helpers\SimpleAssetManager::css('main') . "'>";
+            echo "<link rel='stylesheet' href='" . SimpleAssetManager::css('main') . "'>";
             echo "<div style='border: 1px solid black; padding: 20px; margin: 20px;'>
                 Si el CSS 'main.css' está correctamente enlazado, este div debería tener estilos aplicados.
             </div>";

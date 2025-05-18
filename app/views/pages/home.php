@@ -6,13 +6,18 @@
  * - $isLoggedIn: Indica si el usuario está logueado
  * - $featuredProducts: Array de productos destacados
  */
+
+// Incluir SimpleAssetManager si no está ya incluido
+if (!class_exists('SimpleAssetManager')) {
+    require_once dirname(__DIR__, 2) . '/public/SimpleAssetManager.php';
+}
 ?>
 
 <section class="hero">
     <div class="hero-content">
         <h2>Bienvenidos a Ethos Coffee</h2>
         <p>Tu destino para una experiencia de compra excepcional.</p>
-        <a href="<?= \App\Helpers\AssetManager::url('productos') ?>" class="btn">Ver Productos</a>
+        <a href="<?= SimpleAssetManager::url('productos') ?>" class="btn">Ver Productos</a>
     </div>
 </section>
 
