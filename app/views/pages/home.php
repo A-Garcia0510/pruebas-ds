@@ -1,18 +1,4 @@
 <?php
-// Rastreador de errores para verificar el flujo de renderizado
-if (!defined('RENDER_DEBUG') && (isset($_GET['debug']) || (isset($config['app']['debug']) && $config['app']['debug']))) {
-    define('RENDER_DEBUG', true);
-    function debug_log($message) {
-        error_log($message);
-        if (isset($_GET['debug_display'])) {
-            echo "<!-- DEBUG: " . htmlspecialchars($message) . " -->\n";
-        }
-    }
-} else {
-    if (!defined('RENDER_DEBUG')) define('RENDER_DEBUG', false);
-    function debug_log($message) { /* No hacer nada */ }
-}
-
 /**
  * Vista de la página de inicio
  * 
@@ -20,21 +6,17 @@ if (!defined('RENDER_DEBUG') && (isset($_GET['debug']) || (isset($config['app'][
  * - $isLoggedIn: Indica si el usuario está logueado
  * - $featuredProducts: Array de productos destacados
  */
-debug_log('Renderizando vista home.php');
 ?>
 
 <section class="hero">
-    <?php debug_log('Inicio de sección hero'); ?>
     <div class="hero-content">
         <h2>Bienvenidos a Ethos Coffee</h2>
         <p>Tu destino para una experiencia de compra excepcional.</p>
-        <a href="<?= \App\Helpers\AssetHelper::url('productos') ?>" class="btn">Ver Productos</a>
+        <a href="<?= \App\Helpers\SimpleAssetManager::url('productos') ?>" class="btn">Ver Productos</a>
     </div>
-    <?php debug_log('Fin de sección hero'); ?>
 </section>
 
 <section class="section" id="servicios">
-    <?php debug_log('Inicio de sección servicios'); ?>
     <div class="container">
         <div class="section-title">
             <h2>Nuestros Servicios</h2>
@@ -56,11 +38,9 @@ debug_log('Renderizando vista home.php');
             </div>
         </div>
     </div>
-    <?php debug_log('Fin de sección servicios'); ?>
 </section>
 
 <section class="section featured-products">
-    <?php debug_log('Inicio de sección productos destacados'); ?>
     <div class="container">
         <div class="section-title">
             <h2>Productos Destacados</h2>
@@ -69,7 +49,7 @@ debug_log('Renderizando vista home.php');
             <?php foreach ($featuredProducts as $product): ?>
                 <div class="product-card">
                     <div class="product-img">
-                        <img src="<?= \App\Helpers\AssetHelper::url(ltrim($product['image'], '/')) ?>" alt="<?= $product['name'] ?>">
+                        <img src="<?= $product['image'] ?>" alt="<?= $product['name'] ?>">
                     </div>
                     <div class="product-info">
                         <h3><?= $product['name'] ?></h3>
@@ -80,8 +60,6 @@ debug_log('Renderizando vista home.php');
             <?php endforeach; ?>
         </div>
     </div>
-    <?php debug_log('Fin de sección productos destacados'); ?>
 </section>
 
 <div id="mensaje-confirmacion"></div>
-<?php debug_log('Fin de renderizado de home.php'); ?>
