@@ -28,7 +28,7 @@ debug_log('Renderizando vista home.php');
     <div class="hero-content">
         <h2>Bienvenidos a Ethos Coffee</h2>
         <p>Tu destino para una experiencia de compra excepcional.</p>
-        <a href="<?= $config['app']['url'] ?>/productos" class="btn">Ver Productos</a>
+        <a href="<?= \App\Helpers\AssetHelper::url('productos') ?>" class="btn">Ver Productos</a>
     </div>
     <?php debug_log('Fin de sección hero'); ?>
 </section>
@@ -69,7 +69,7 @@ debug_log('Renderizando vista home.php');
             <?php foreach ($featuredProducts as $product): ?>
                 <div class="product-card">
                     <div class="product-img">
-                        <img src="<?= $config['app']['url'] . $product['image'] ?>" alt="<?= $product['name'] ?>">
+                        <img src="<?= \App\Helpers\AssetHelper::url(ltrim($product['image'], '/')) ?>" alt="<?= $product['name'] ?>">
                     </div>
                     <div class="product-info">
                         <h3><?= $product['name'] ?></h3>

@@ -2,7 +2,7 @@
 namespace App\Helpers;
 
 /**
- * Clase auxiliar para manejar rutas de activos (CSS, JS, imágenes)
+ * Clase auxiliar mejorada para manejar rutas de activos (CSS, JS, imágenes)
  */
 class AssetHelper
 {
@@ -17,11 +17,25 @@ class AssetHelper
     {
         if (isset($config['app']['url'])) {
             // Eliminar slash final si existe
-            $url = rtrim($config['app']['url'], '/');
-            self::$baseUrl = $url;
+            self::$baseUrl = rtrim($config['app']['url'], '/');
         } else {
-            // URL por defecto si no está configurada
-            self::$baseUrl = '';
+            // Detectar automáticamente la URL base si no está configurada
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'];
+            $scriptName = $_SERVER['SCRIPT_NAME'];
+            $dirName = dirname($scriptName);
+            
+            // Si estamos en el directorio raíz, dirName será '\'
+            if ($dirName === '/' || $dirName === '\\') {
+                $dirName = '';
+            }
+            
+            self::$baseUrl = $protocol . $host . $dirName;
+        }
+        
+        // Log para depuración
+        if (isset($config['app']['debug']) && $config['app']['debug']) {
+            error_log('AssetHelper::init() - BaseUrl configurada como: ' . self::$baseUrl);
         }
     }
     
@@ -67,6 +81,16 @@ class AssetHelper
     public static function url($path = '')
     {
         $path = ltrim($path, '/');
-        return self::$baseUrl . '/' . $path;
+        return empty($path) ? self::$baseUrl : self::$baseUrl . '/' . $path;
+    }
+    
+    /**
+     * Obtiene la URL base configurada
+     * 
+     * @return string URL base
+     */
+    public static function getBaseUrl()
+    {
+        return self::$baseUrl;
     }
 }

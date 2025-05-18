@@ -4,7 +4,7 @@
 return [
     'app' => [
         'name' => 'Café-VT',
-        'url' => '/pruebas-ds/public', // Sin slash final para evitar dobles slashes
+        'url' => '', // Dejamos vacío para detectar automáticamente o configurar manualmente según el entorno
         'env' => 'development', // 'development' o 'production'
         'debug' => true, // Habilitamos el modo debug para ver errores
         'display_errors' => true, // Mostrar errores PHP
