@@ -4,7 +4,7 @@
 return [
     'app' => [
         'name' => 'Café-VT',
-        'url' => 'http://localhost/pruebas-ds', // Cambia esto según tu entorno
+        'url' => '//localhost/pruebas-ds/public/', // Añadido slash final', // Cambia esto según tu entorno
         'env' => 'development', // 'development' o 'production'
     ],
     
