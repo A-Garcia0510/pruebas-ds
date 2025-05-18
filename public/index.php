@@ -28,6 +28,9 @@ if (!file_exists($configPath)) {
 }
 $config = require_once $configPath;
 
+// Inicializar el helper de activos
+\App\Helpers\AssetHelper::init($config);
+
 // Configurar visualización de errores según configuración
 if (isset($config['app']['display_errors']) && $config['app']['display_errors']) {
     ini_set('display_errors', 1);
