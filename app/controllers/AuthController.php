@@ -5,147 +5,181 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Auth\AuthFactory;
 use App\Auth\Models\User;
+use App\Core\Database\DatabaseConfiguration;
+use App\Core\Database\MySQLDatabase;
 
 /**
- * Controlador para gestionar la autenticación de usuarios
+ * Controlador para la autenticación de usuarios
  */
 class AuthController extends BaseController
 {
-    private $authenticator;
-    private $userRepository;
-    
     /**
-     * Constructor del controlador de autenticación
+     * Muestra la página de inicio de sesión
      * 
-     * @param Request $request
-     * @param Response $response
-     */
-    public function __construct(Request $request, Response $response)
-    {
-        parent::__construct($request, $response);
-        
-        // Obtener el autenticador y repositorio de usuarios
-        $database = \App\Core\App::$app->getDB();
-        $this->authenticator = AuthFactory::createAuthenticator($database);
-        $this->userRepository = AuthFactory::createUserRepository($database);
-    }
-    
-    /**
-     * Muestra el formulario de inicio de sesión
-     */
-    public function showLoginForm()
-    {
-        // Si ya está autenticado, redirigir al dashboard
-        if ($this->authenticator->isAuthenticated()) {
-            $this->redirect('/dashboard');
-            return;
-        }
-        
-        return $this->render('auth/login', [
-            'title' => 'Iniciar Sesión',
-            'css' => ['login']
-        ]);
-    }
-    
-    /**
-     * Procesa el inicio de sesión
+     * @return string
      */
     public function login()
     {
-        // Si la solicitud no es POST, redirigir al formulario
-        if (!$this->request->isPost()) {
-            $this->redirect('/login');
-            return;
+        // Si el usuario ya está autenticado, redirigir al dashboard
+        if (isset($_SESSION['user_id'])) {
+            return $this->redirect('/dashboard');
         }
-        
-        // Obtener datos del formulario
-        $correo = $this->request->get('correo');
-        $password = $this->request->get('contra');
-        
-        // Intentar autenticar al usuario
-        if ($this->authenticator->authenticate($correo, $password)) {
-            $this->redirect('/dashboard');
-        } else {
-            // Si la autenticación falla, volver al formulario con mensaje de error
-            return $this->render('auth/login', [
-                'title' => 'Iniciar Sesión',
-                'css' => ['login'],
-                'error' => 'Correo electrónico o contraseña incorrectos'
-            ]);
-        }
+
+        $data = [
+            'title' => 'Iniciar Sesión - Café-VT',
+            'css' => ['login'],
+            'js' => ['auth']
+        ];
+
+        return $this->render('auth/login', $data);
     }
-    
+
     /**
-     * Muestra el formulario de registro
+     * Procesa el inicio de sesión
+     * 
+     * @return void
      */
-    public function showRegisterForm()
+    public function authenticate()
     {
-        // Si ya está autenticado, redirigir al dashboard
-        if ($this->authenticator->isAuthenticated()) {
-            $this->redirect('/dashboard');
-            return;
+        if (!$this->request->isPost()) {
+            return $this->redirect('/login');
         }
-        
-        return $this->render('auth/register', [
-            'title' => 'Registro',
-            'css' => ['registro']
-        ]);
+
+        $email = $this->request->get('correo');
+        $password = $this->request->get('contra');
+
+        // Validación básica
+        if (empty($email) || empty($password)) {
+            // Almacenar mensaje de error en sesión para mostrarlo en la vista
+            $_SESSION['error'] = 'Todos los campos son obligatorios.';
+            return $this->redirect('/login');
+        }
+
+        try {
+            // Configurar la base de datos
+            $dbConfig = new DatabaseConfiguration(
+                $this->config['database']['host'],
+                $this->config['database']['username'],
+                $this->config['database']['password'],
+                $this->config['database']['database']
+            );
+            $database = new MySQLDatabase($dbConfig);
+            
+            // Crear el autenticador
+            $authenticator = AuthFactory::createAuthenticator($database);
+            
+            if ($authenticator->authenticate($email, $password)) {
+                // Redirigir al dashboard
+                return $this->redirect('/dashboard');
+            } else {
+                $_SESSION['error'] = 'Datos incorrectos. Por favor, inténtalo de nuevo.';
+                return $this->redirect('/login');
+            }
+        } catch (\Exception $e) {
+            // Log del error
+            error_log('Error de autenticación: ' . $e->getMessage());
+            $_SESSION['error'] = 'Error en el sistema. Por favor, inténtalo más tarde.';
+            return $this->redirect('/login');
+        }
     }
-    
+
     /**
-     * Procesa el registro de un nuevo usuario
+     * Muestra la página de registro
+     * 
+     * @return string
      */
     public function register()
     {
-        // Si la solicitud no es POST, redirigir al formulario
-        if (!$this->request->isPost()) {
-            $this->redirect('/registro');
-            return;
+        // Si el usuario ya está autenticado, redirigir al dashboard
+        if (isset($_SESSION['user_id'])) {
+            return $this->redirect('/dashboard');
         }
-        
-        // Obtener datos del formulario
+
+        $data = [
+            'title' => 'Registro - Café-VT',
+            'css' => ['registro'],
+            'js' => ['auth']
+        ];
+
+        return $this->render('auth/register', $data);
+    }
+
+    /**
+     * Procesa el registro de un nuevo usuario
+     * 
+     * @return void
+     */
+    public function store()
+    {
+        if (!$this->request->isPost()) {
+            return $this->redirect('/register');
+        }
+
         $nombre = $this->request->get('nombre');
         $apellidos = $this->request->get('apellidos');
-        $correo = $this->request->get('correo');
+        $email = $this->request->get('correo');
         $password = $this->request->get('contra');
-        
-        // Verificar si ya existe un usuario con ese correo
-        if ($this->userRepository->emailExists($correo)) {
-            return $this->render('auth/register', [
-                'title' => 'Registro',
-                'css' => ['registro'],
-                'error' => 'El correo electrónico ya está registrado',
-                'nombre' => $nombre,
-                'apellidos' => $apellidos,
-                'correo' => $correo
-            ]);
+
+        // Validación básica
+        if (empty($nombre) || empty($apellidos) || empty($email) || empty($password)) {
+            $_SESSION['error'] = 'Todos los campos son obligatorios.';
+            return $this->redirect('/register');
         }
-        
-        // Crear y guardar el nuevo usuario
-        $user = new User(null, $nombre, $apellidos, $correo, $password);
-        
-        if ($this->userRepository->save($user)) {
-            // Autenticar al usuario después del registro
-            $this->authenticator->authenticate($correo, $password);
-            $this->redirect('/dashboard');
-        } else {
-            return $this->render('auth/register', [
-                'title' => 'Registro',
-                'css' => ['registro'],
-                'error' => 'Error al registrar el usuario',
-                'nombre' => $nombre,
-                'apellidos' => $apellidos,
-                'correo' => $correo
-            ]);
+
+        try {
+            // Configurar la base de datos
+            $dbConfig = new DatabaseConfiguration(
+                $this->config['database']['host'],
+                $this->config['database']['username'],
+                $this->config['database']['password'],
+                $this->config['database']['database']
+            );
+            $database = new MySQLDatabase($dbConfig);
+            
+            // Crear el repositorio de usuarios
+            $userRepository = AuthFactory::createUserRepository($database);
+            
+            // Verificar si el email ya existe
+            if ($userRepository->emailExists($email)) {
+                $_SESSION['error'] = 'El correo electrónico ya está registrado.';
+                return $this->redirect('/register');
+            }
+            
+            // Crear nuevo usuario
+            $user = new User(null, $nombre, $apellidos, $email, $password);
+            
+            // Guardar usuario
+            if ($userRepository->save($user)) {
+                // Crear autenticador y autenticar al usuario
+                $authenticator = AuthFactory::createAuthenticator($database);
+                $authenticator->authenticate($email, $password);
+                
+                return $this->redirect('/dashboard');
+            } else {
+                $_SESSION['error'] = 'Error al crear el usuario. Por favor, inténtalo de nuevo.';
+                return $this->redirect('/register');
+            }
+        } catch (\Exception $e) {
+            // Log del error
+            error_log('Error de registro: ' . $e->getMessage());
+            $_SESSION['error'] = 'Error en el sistema. Por favor, inténtalo más tarde.';
+            return $this->redirect('/register');
         }
     }
-    
+
     /**
      * Cierra la sesión del usuario
+     * 
+     * @return void
      */
     public function logout()
     {
-        $this->authenticator->logout();
-        $this->redirect('/');
+        // Destruir sesión
+        session_start();
+        session_unset();
+        session_destroy();
+        
+        // Redirigir a la página de inicio
+        return $this->redirect('/');
     }
 }

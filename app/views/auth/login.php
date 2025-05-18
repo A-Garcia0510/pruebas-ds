@@ -1,22 +1,27 @@
 <?php
 /**
- * Vista para el formulario de inicio de sesión
+ * Vista de inicio de sesión
  * 
- * Variables disponibles:
- * - $error: Mensaje de error (si existe)
+ * Datos disponibles:
+ * - $title: Título de la página
  */
+
+// Asegurarnos de que las clases helper estén disponibles
+require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 ?>
+
 <section class="login-section">
     <div class="login-container">
         <h2>Iniciar Sesión</h2>
         
-        <?php if (isset($error)): ?>
-            <div class="error-message">
-                <?= $error ?>
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger">
+                <?= $_SESSION['error'] ?>
+                <?php unset($_SESSION['error']); ?>
             </div>
         <?php endif; ?>
         
-        <form action="/login" method="POST">
+        <form action="<?= AssetHelper::url('auth/authenticate') ?>" method="POST">
             <div class="form-group">
                 <label for="correo">Correo Electrónico</label>
                 <input type="email" name="correo" id="correo" class="form-control" placeholder="tucorreo@ejemplo.com" required>
@@ -28,7 +33,7 @@
             </div>
             
             <div class="forgot-password">
-                <a href="#">¿Olvidaste tu contraseña?</a>
+                <a href="<?= AssetHelper::url('password/reset') ?>">¿Olvidaste tu contraseña?</a>
             </div>
             
             <button type="submit" class="login-btn">Iniciar Sesión</button>
@@ -45,7 +50,7 @@
         </div>
         
         <div class="register-link">
-            ¿No tienes una cuenta? <a href="/registro">Regístrate aquí</a>
+            ¿No tienes una cuenta? <a href="<?= AssetHelper::url('register') ?>">Regístrate aquí</a>
         </div>
     </div>
 </section>

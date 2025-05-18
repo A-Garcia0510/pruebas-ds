@@ -1,59 +1,62 @@
 <?php
 namespace App\Middleware;
 
-use App\Auth\AuthFactory;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\App;
 
 /**
- * Middleware para verificar que el usuario esté autenticado
+ * Middleware para verificar si el usuario está autenticado
  */
 class AuthMiddleware extends Middleware
 {
     /**
-     * Rutas que son excluidas del middleware
+     * Rutas que están protegidas por este middleware
      * 
      * @var array
      */
-    private $excludedRoutes;
+    private $protectedRoutes;
     
     /**
-     * Constructor del middleware de autenticación
+     * Constructor del middleware
      * 
-     * @param array $excludedRoutes Rutas excluidas del middleware (opcional)
+     * @param array $protectedRoutes Rutas que requieren autenticación
      */
-    public function __construct(array $excludedRoutes = [])
+    public function __construct($protectedRoutes = [])
     {
-        $this->excludedRoutes = $excludedRoutes;
+        $this->protectedRoutes = $protectedRoutes;
     }
     
     /**
-     * Maneja la solicitud verificando la autenticación
+     * Verifica si el usuario está autenticado antes de permitir el acceso
      * 
-     * @param Request $request
-     * @param Response $response
-     * @param callable $next
+     * @param Request $request Objeto de solicitud
+     * @param Response $response Objeto de respuesta
+     * @param callable $next Siguiente middleware o controlador
      * @return mixed
      */
-    public function handle(Request $request, Response $response, callable $next)
+    public function execute(Request $request, Response $response, callable $next)
     {
-        $path = $request->getPath();
-        
-        // Si la ruta está excluida, continuar
-        if (in_array($path, $this->excludedRoutes)) {
-            return $next($request, $response);
+        // Asegurarse de que la sesión esté iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
         
-        // Obtener autenticador y verificar si el usuario está autenticado
-        $authenticator = AuthFactory::createAuthenticator(App::$app->getDB());
+        $path = $request->getPath();
         
-        if (!$authenticator->isAuthenticated()) {
+        // Si la ruta actual está protegida y el usuario no está autenticado
+        if (in_array($path, $this->protectedRoutes) && !isset($_SESSION['user_id'])) {
+            // Guardar la URL solicitada para redirigir después del login (opcional)
+            $_SESSION['redirect_after_login'] = $path;
+            
+            // Mensaje para informar al usuario
+            $_SESSION['error'] = 'Debes iniciar sesión para acceder a esta página.';
+            
+            // Redirigir al login
             $response->redirect('/login');
             return;
         }
         
-        // Si está autenticado, continuar
+        // Si el usuario está autenticado o la ruta no está protegida, continuar
         return $next($request, $response);
     }
 }

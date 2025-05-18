@@ -1,22 +1,21 @@
 <?php
 namespace App\Middleware;
 
-use App\Auth\AuthFactory;
 use App\Core\Request;
 use App\Core\Response;
 
 /**
- * Middleware base para la aplicación
+ * Clase base para todos los middleware
  */
 abstract class Middleware
 {
     /**
-     * Ejecuta el middleware
+     * Método que debe ser implementado por todas las clases hijas
      * 
-     * @param Request $request
-     * @param Response $response
-     * @param callable $next
+     * @param Request $request Objeto de solicitud
+     * @param Response $response Objeto de respuesta
+     * @param callable $next Siguiente middleware o controlador
      * @return mixed
      */
-    abstract public function handle(Request $request, Response $response, callable $next);
+    abstract public function execute(Request $request, Response $response, callable $next);
 }
