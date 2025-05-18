@@ -1,6 +1,6 @@
 {
-    "name": "tu-proyecto/mvc",
-    "description": "Proyecto MVC personalizado",
+    "name": "cafe-vt/mvc-app",
+    "description": "Aplicación MVC para tienda Café-VT",
     "type": "project",
     "autoload": {
         "psr-4": {

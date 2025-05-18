@@ -1,29 +1,45 @@
-/* Base global styles */
+/* Estilos principales para Café-VT */
+
 :root {
-    --primary-color: #2C3E50;
-    --secondary-color: #3498DB;
-    --light-color: #ECF0F1;
-    --accent-color: #E74C3C;
-    --text-color: #2C3E50;
-    --background-color: #F9F9F9;
+    --primary-color: #8B4513;  /* Marrón café */
+    --secondary-color: #D2691E; /* Marrón más claro */
+    --accent-color: #FF6347;   /* Rojo tomate */
+    --light-color: #F5F5F5;    /* Gris claro */
+    --dark-color: #333;        /* Casi negro */
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
+    font-family: 'Arial', sans-serif;
     line-height: 1.6;
+    color: var(--dark-color);
+    background-color: var(--light-color);
 }
 
-/* Header & Navigation */
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+ul {
+    list-style: none;
+}
+
+.container {
+    width: 85%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Sección de encabezado y navegación */
 header {
-    background-color: #fff;
+    background-color: white;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
@@ -34,35 +50,24 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 1rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.logo {
-    height: 60px;
-    font-size: 1.8rem;
-    font-weight: 700;
-}
-
 .logo a {
-    text-decoration: none;
+    font-size: 1.8rem;
+    font-weight: bold;
     color: var(--primary-color);
 }
 
 .nav-links {
     display: flex;
-    list-style: none;
-}
-
-.nav-links li {
-    margin-left: 1.5rem;
+    gap: 1.5rem;
 }
 
 .nav-links a {
-    text-decoration: none;
-    color: var(--text-color);
-    font-weight: 500;
+    color: var(--dark-color);
     transition: color 0.3s;
 }
 
@@ -70,31 +75,40 @@ nav {
     color: var(--accent-color);
 }
 
-/* Common elements */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
+/* Botones */
 .btn {
     display: inline-block;
-    background-color: var(--accent-color);
+    background-color: var(--primary-color);
     color: white;
-    padding: 0.8rem 2rem;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
 }
 
 .btn:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
+    background-color: var(--secondary-color);
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.secondary-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* Sección principal */
+main {
+    min-height: 70vh;
 }
 
 .section {
-    padding: 4rem 2rem;
+    padding: 4rem 0;
 }
 
 .section-title {
@@ -103,51 +117,66 @@ nav {
 }
 
 .section-title h2 {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     color: var(--primary-color);
     position: relative;
     display: inline-block;
-    padding-bottom: 1rem;
 }
 
 .section-title h2::after {
     content: '';
     position: absolute;
-    width: 60px;
-    height: 3px;
-    background-color: var(--accent-color);
-    bottom: 0;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background-color: var(--accent-color);
 }
 
-/* Footer */
+/* Formularios */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Pie de página */
 footer {
-    background-color: white;
-    padding-top: 3rem;
+    background-color: var(--dark-color);
+    color: white;
+    padding: 3rem 0 0;
 }
 
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.footer-section {
-    margin-bottom: 2rem;
+    padding: 0 20px;
 }
 
 .footer-section h3 {
-    font-size: 1.2rem;
     margin-bottom: 1rem;
-    color: var(--primary-color);
+    color: white;
 }
 
 .footer-section ul {
-    list-style: none;
+    padding: 0;
 }
 
 .footer-section ul li {
@@ -155,45 +184,37 @@ footer {
 }
 
 .footer-section ul li a {
-    text-decoration: none;
-    color: #666;
-    transition: color 0.3s;
+    color: #ddd;
 }
 
 .footer-section ul li a:hover {
-    color: var(--accent-color);
+    color: white;
 }
 
 .footer-bottom {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 1.5rem;
     text-align: center;
+    padding: 1.5rem 0;
     margin-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mensajes de error */
+.error-message {
+    color: var(--accent-color);
+    background-color: rgba(255, 99, 71, 0.1);
+    padding: 0.8rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--accent-color);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-        padding: 1rem;
-    }
-    
-    .logo {
-        margin-bottom: 1rem;
-    }
-    
     .nav-links {
-        margin-bottom: 1rem;
-        flex-direction: column;
-        align-items: center;
+        display: none; /* En una implementación real, añadiríamos un menú hamburguesa */
     }
     
-    .nav-links li {
-        margin: 0.5rem 0;
-    }
-    
-    .section {
-        padding: 2rem 1rem;
+    .section-title h2 {
+        font-size: 2rem;
     }
 }

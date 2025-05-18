@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Café-VT' ?></title>
-    <!-- Incluir CSS principales -->
-    <link rel="stylesheet" href="/css/main.css">
+    <!-- Incluir CSS principales con ruta absoluta -->
+    <link rel="stylesheet" href="<?= $config['app']['url'] ?>public/css/main.css">
     <?php if (isset($css)): ?>
         <?php foreach ($css as $stylesheet): ?>
-            <link rel="stylesheet" href="/css/<?= $stylesheet ?>.css">
+            <link rel="stylesheet" href="<?= $config['app']['url'] ?>/css/<?= $stylesheet ?>.css">
         <?php endforeach; ?>
     <?php endif; ?>
 </head>
@@ -65,10 +65,10 @@
         </div>
     </footer>
 
-    <!-- Incluir JavaScript -->
+    <!-- Incluir JavaScript con ruta absoluta -->
     <?php if (isset($js)): ?>
         <?php foreach ($js as $script): ?>
-            <script src="/js/<?= $script ?>.js"></script>
+            <script src="<?= $config['app']['url'] ?>/js/<?= $script ?>.js"></script>
         <?php endforeach; ?>
     <?php endif; ?>
 </body>

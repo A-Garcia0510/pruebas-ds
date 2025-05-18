@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Core\Request;
 use App\Core\Response;
+use App\Core\App;
 
 /**
  * Controlador base que todos los controladores deben extender
@@ -11,6 +12,7 @@ abstract class BaseController
 {
     protected $request;
     protected $response;
+    protected $config;
     
     /**
      * Constructor del controlador base
@@ -22,6 +24,7 @@ abstract class BaseController
     {
         $this->request = $request;
         $this->response = $response;
+        $this->config = App::$app->config;
     }
     
     /**
@@ -33,6 +36,9 @@ abstract class BaseController
      */
     protected function render($view, $data = [])
     {
+        // Añadir configuración a los datos disponibles en la vista
+        $data['config'] = $this->config;
+        
         // Extraer los datos para que estén disponibles en la vista
         extract($data);
         
