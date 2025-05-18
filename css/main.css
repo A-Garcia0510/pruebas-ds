@@ -1,0 +1,220 @@
+/* Estilos principales para Café-VT */
+
+:root {
+    --primary-color: #8B4513;  /* Marrón café */
+    --secondary-color: #D2691E; /* Marrón más claro */
+    --accent-color: #FF6347;   /* Rojo tomate */
+    --light-color: #F5F5F5;    /* Gris claro */
+    --dark-color: #333;        /* Casi negro */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: var(--light-color);
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+ul {
+    list-style: none;
+}
+
+.container {
+    width: 85%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Sección de encabezado y navegación */
+header {
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo a {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    color: var(--dark-color);
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--accent-color);
+}
+
+/* Botones */
+.btn {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn:hover {
+    background-color: var(--secondary-color);
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.secondary-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* Sección principal */
+main {
+    min-height: 70vh;
+}
+
+.section {
+    padding: 4rem 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-title h2 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    position: relative;
+    display: inline-block;
+}
+
+.section-title h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background-color: var(--accent-color);
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Pie de página */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 3rem 0 0;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-section h3 {
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.footer-section ul {
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+    color: #ddd;
+}
+
+.footer-section ul li a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mensajes de error */
+.error-message {
+    color: var(--accent-color);
+    background-color: rgba(255, 99, 71, 0.1);
+    padding: 0.8rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--accent-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* En una implementación real, añadiríamos un menú hamburguesa */
+    }
+    
+    .section-title h2 {
+        font-size: 2rem;
+    }
+}

@@ -60,12 +60,12 @@ abstract class BaseController
             throw new \Exception($error);
         }
         
-        // Iniciar buffer de salida
+        // Iniciar buffer de salida para la vista
         ob_start();
         include_once $viewPath;
         $content = ob_get_clean();
         
-        // Si no hay layout especificado, devolver solo el contenido
+        // Si no hay layout especificado o se ha establecido explícitamente a false, devolver solo el contenido
         if (!isset($data['layout']) || $data['layout'] === false) {
             return $content;
         }
@@ -83,6 +83,7 @@ abstract class BaseController
         // Log para depuración
         if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
             error_log('BaseController::render() - Usando layout: ' . $layout);
+            error_log('BaseController::render() - Layout path: ' . $layoutPath);
         }
         
         // Renderizar con el layout

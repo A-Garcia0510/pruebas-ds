@@ -12,7 +12,7 @@
     <div class="hero-content">
         <h2>Bienvenidos a Ethos Coffee</h2>
         <p>Tu destino para una experiencia de compra excepcional.</p>
-        <a href="<?= \App\Helpers\SimpleAssetManager::url('productos') ?>" class="btn">Ver Productos</a>
+        <a href="<?= \App\Helpers\AssetManager::url('productos') ?>" class="btn">Ver Productos</a>
     </div>
 </section>
 

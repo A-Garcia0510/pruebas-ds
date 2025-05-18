@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Café-VT' ?></title>
     <!-- CSS Base -->
-    <link rel="stylesheet" href="<?= \App\Helpers\SimpleAssetManager::css('main') ?>">
+    <link rel="stylesheet" href="<?= \app\helpers\AssetManager::css('main') ?>">
     <!-- CSS Específicos -->
     <?php if (isset($css) && is_array($css)): ?>
         <?php foreach ($css as $stylesheet): ?>
-            <link rel="stylesheet" href="<?= \App\Helpers\SimpleAssetManager::css($stylesheet) ?>">
+            <link rel="stylesheet" href="<?= \app\helpers\AssetManager::css($stylesheet) ?>">
         <?php endforeach; ?>
     <?php endif; ?>
 </head>
@@ -17,21 +17,21 @@
     <header>
         <nav>
             <div class="logo">
-                <a href="<?= \App\Helpers\SimpleAssetManager::url() ?>">Café-VT</a>
+                <a href="<?= \app\helpers\AssetManager::url() ?>">Café-VT</a>
             </div>
             <ul class="nav-links">
-                <li><a href="<?= \App\Helpers\SimpleAssetManager::url() ?>">Inicio</a></li>
-                <li><a href="<?= \App\Helpers\SimpleAssetManager::url('productos') ?>">Productos</a></li>
-                <li><a href="<?= \App\Helpers\SimpleAssetManager::url('servicios') ?>">Servicios</a></li>
-                <li><a href="<?= \App\Helpers\SimpleAssetManager::url('ayuda') ?>">Ayuda</a></li>
+                <li><a href="<?= \app\helpers\AssetManager::url() ?>">Inicio</a></li>
+                <li><a href="<?= \app\helpers\AssetManager::url('productos') ?>">Productos</a></li>
+                <li><a href="<?= \app\helpers\AssetManager::url('servicios') ?>">Servicios</a></li>
+                <li><a href="<?= \app\helpers\AssetManager::url('ayuda') ?>">Ayuda</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('dashboard') ?>">Mi Cuenta</a></li>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('logout') ?>">Cerrar Sesión</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('dashboard') ?>">Mi Cuenta</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('logout') ?>">Cerrar Sesión</a></li>
                 <?php else: ?>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('login') ?>">Iniciar Sesión</a></li>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('registro') ?>">Registrarse</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('login') ?>">Iniciar Sesión</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('registro') ?>">Registrarse</a></li>
                 <?php endif; ?>
-                <li><a href="<?= \App\Helpers\SimpleAssetManager::url('carrito') ?>">Carrito</a></li>
+                <li><a href="<?= \app\helpers\AssetManager::url('carrito') ?>">Carrito</a></li>
             </ul>
         </nav>
     </header>
@@ -49,10 +49,10 @@
             <div class="footer-section">
                 <h3>Enlaces rápidos</h3>
                 <ul>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url() ?>">Inicio</a></li>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('productos') ?>">Productos</a></li>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('servicios') ?>">Servicios</a></li>
-                    <li><a href="<?= \App\Helpers\SimpleAssetManager::url('ayuda') ?>">Ayuda</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url() ?>">Inicio</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('productos') ?>">Productos</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('servicios') ?>">Servicios</a></li>
+                    <li><a href="<?= \app\helpers\AssetManager::url('ayuda') ?>">Ayuda</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -69,7 +69,7 @@
     <!-- JavaScript -->
     <?php if (isset($js) && is_array($js)): ?>
         <?php foreach ($js as $script): ?>
-            <script src="<?= \App\Helpers\SimpleAssetManager::js($script) ?>"></script>
+            <script src="<?= \app\helpers\AssetManager::js($script) ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
 </body>
