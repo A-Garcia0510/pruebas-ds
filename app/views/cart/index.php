@@ -40,8 +40,8 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
                 <tbody>
                     <?php foreach ($cartItems as $item): ?>
                         <tr data-id="<?= $item->getProductId() ?>">
-                            <td><?= htmlspecialchars($item->getName()) ?></td>
-                            <td>$<?= number_format($item->getPrice(), 0, ',', '.') ?></td>
+                            <td><?= htmlspecialchars($item->getProductName()) ?></td>
+                            <td>$<?= number_format($item->getProductPrice(), 0, ',', '.') ?></td>
                             <td>
                                 <div class="cantidad-controles">
                                     <button type="button" class="qty-btn decrementar" data-id="<?= $item->getProductId() ?>">-</button>
@@ -60,7 +60,7 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
                 </tbody>
             </table>
         </div>
-        
+
         <div class="carrito-resumen">
             <h3>Resumen del Pedido</h3>
             <div class="resumen-detalle">

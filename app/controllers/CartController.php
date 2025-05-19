@@ -75,7 +75,28 @@ class CartController extends BaseController
             return;
         }
         
-        return $this->render('cart/index');
+        try {
+            // Obtener los items del carrito para pasarlos a la vista
+            $correoUsuario = $_SESSION['correo'];
+            $cartItems = $this->cartService->getItems($correoUsuario);
+            
+            // Calcular el total del carrito
+            $cartTotal = $this->cartService->getTotal($correoUsuario);
+            
+            // Pasar los datos a la vista
+            return $this->render('cart/index', [
+                'cartItems' => $cartItems,
+                'cartTotal' => $cartTotal
+            ]);
+        } catch (\Exception $e) {
+            error_log('CartController::index() - Error al obtener items del carrito: ' . $e->getMessage());
+            $_SESSION['message'] = 'Error al cargar el carrito: ' . $e->getMessage();
+            $_SESSION['message_type'] = 'error';
+            return $this->render('cart/index', [
+                'cartItems' => [],
+                'cartTotal' => 0
+            ]);
+        }
     }
     
     /**
@@ -169,8 +190,13 @@ class CartController extends BaseController
             error_log("CartController::addItem() - Agregando producto ID: $productoID, cantidad: $cantidad");
             $result = $this->cartService->addItem($correoUsuario, $productoID, $cantidad);
             
-            error_log('CartController::addItem() - Producto agregado exitosamente');
-            $this->json(['success' => true, 'message' => 'Producto agregado al carrito.']);
+            if ($result) {
+                error_log('CartController::addItem() - Producto agregado exitosamente');
+                $this->json(['success' => true, 'message' => 'Producto agregado al carrito.']);
+            } else {
+                error_log('CartController::addItem() - No se pudo agregar el producto');
+                $this->json(['success' => false, 'message' => 'No se pudo agregar el producto al carrito.'], 400);
+            }
             
         } catch (ProductNotFoundException $e) {
             error_log('CartController::addItem() - Producto no encontrado: ' . $e->getMessage());
@@ -237,6 +263,44 @@ class CartController extends BaseController
         } catch (\Exception $e) {
             error_log('CartController::removeItem() - Error: ' . $e->getMessage());
             $this->json(['success' => false, 'message' => 'Error al eliminar producto: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    /**
+     * Vacía el carrito (para AJAX)
+     */
+    public function clear()
+    {
+        error_log('CartController::clear() - Inicio de solicitud');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            error_log('CartController::clear() - Método no permitido: ' . $_SERVER['REQUEST_METHOD']);
+            $this->json(['success' => false, 'message' => 'Método no permitido.'], 405);
+            return;
+        }
+        
+        if (!isset($_SESSION['correo'])) {
+            error_log('CartController::clear() - Usuario no logueado');
+            $this->json(['success' => false, 'message' => 'Usuario no logueado.'], 401);
+            return;
+        }
+        
+        try {
+            $correoUsuario = $_SESSION['correo'];
+            error_log('CartController::clear() - Vaciando carrito para usuario: ' . $correoUsuario);
+            
+            $result = $this->cartService->clear($correoUsuario);
+            
+            if ($result) {
+                error_log('CartController::clear() - Carrito vaciado exitosamente');
+                $this->json(['success' => true, 'message' => 'Carrito vaciado exitosamente.']);
+            } else {
+                error_log('CartController::clear() - No se pudo vaciar el carrito');
+                $this->json(['success' => false, 'message' => 'No se pudo vaciar el carrito.'], 400);
+            }
+        } catch (\Exception $e) {
+            error_log('CartController::clear() - Error: ' . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Error al vaciar el carrito: ' . $e->getMessage()], 500);
         }
     }
     
