@@ -28,43 +28,66 @@ $app = new \App\Core\App($config);
 
 // Rutas para páginas públicas
 $app->router->get('/', [\App\Controllers\PageController::class, 'index']);
+$app->router->get('/inicio', [\App\Controllers\PageController::class, 'index']);
 
-// Rutas de productos
+// Rutas de productos (en español e inglés para compatibilidad)
+$app->router->get('/productos', [\App\Controllers\ProductController::class, 'index']);
 $app->router->get('/products', [\App\Controllers\ProductController::class, 'index']);
+$app->router->get('/productos/detalle/{id}', [\App\Controllers\ProductController::class, 'detail']);
 $app->router->get('/products/detail/{id}', [\App\Controllers\ProductController::class, 'detail']);
+$app->router->get('/productos/categoria/{category}', [\App\Controllers\ProductController::class, 'byCategory']);
 $app->router->get('/products/category/{category}', [\App\Controllers\ProductController::class, 'byCategory']);
+$app->router->get('/api/productos', [\App\Controllers\ProductController::class, 'api']);
 $app->router->get('/api/products', [\App\Controllers\ProductController::class, 'api']);
+$app->router->post('/api/carrito/agregar', [\App\Controllers\ProductController::class, 'addToCart']);
 $app->router->post('/api/cart/add', [\App\Controllers\ProductController::class, 'addToCart']);
+
+// Rutas para otras páginas estáticas
+$app->router->get('/servicios', [\App\Controllers\PageController::class, 'services']);
+$app->router->get('/ayuda', [\App\Controllers\PageController::class, 'help']);
 
 // Rutas de autenticación
 $app->router->get('/login', [\App\Controllers\AuthController::class, 'login']);
+$app->router->get('/iniciar-sesion', [\App\Controllers\AuthController::class, 'login']);
 $app->router->post('/auth/authenticate', [\App\Controllers\AuthController::class, 'authenticate']);
+$app->router->get('/registro', [\App\Controllers\AuthController::class, 'register']);
 $app->router->get('/register', [\App\Controllers\AuthController::class, 'register']);
 $app->router->post('/auth/store', [\App\Controllers\AuthController::class, 'store']);
 $app->router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
+$app->router->get('/cerrar-sesion', [\App\Controllers\AuthController::class, 'logout']);
 $app->router->get('/auth/logout', [\App\Controllers\AuthController::class, 'logout']);
 
 // Rutas del dashboard
 $app->router->get('/dashboard', [\App\Controllers\DashboardController::class, 'index']);
 $app->router->get('/dashboard/', [\App\Controllers\DashboardController::class, 'index']);
+$app->router->get('/panel', [\App\Controllers\DashboardController::class, 'index']);
 
 // Aplicar middleware de autenticación
 // Definir rutas protegidas
 $protectedRoutes = [
     '/dashboard',
     '/dashboard/',
+    '/panel',
     '/profile',
-    '/orders'
+    '/perfil',
+    '/orders',
+    '/pedidos'
     // Agrega aquí otras rutas que requieran autenticación
 ];
 
-// Registrar middleware de autenticación
-$authMiddleware = new \App\Middleware\AuthMiddleware($protectedRoutes);
+// Verificar si la clase AuthMiddleware existe antes de usarla
+if (class_exists('\App\Middleware\AuthMiddleware')) {
+    // Registrar middleware de autenticación
+    $authMiddleware = new \App\Middleware\AuthMiddleware($protectedRoutes);
+} else {
+    // Mostrar advertencia si no existe la clase
+    error_log('ADVERTENCIA: La clase AuthMiddleware no existe. Rutas protegidas no funcionarán correctamente.');
+}
 
 // Configurar manejador para rutas no encontradas
 $app->router->setNotFoundHandler(function($request, $response) {
     $response->setStatusCode(404);
-    return '<h1>404 - Página no encontrada</h1>';
+    return require_once BASE_PATH . '/app/views/errors/404.php';
 });
 
 // -----------------------------------------
