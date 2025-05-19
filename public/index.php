@@ -29,6 +29,13 @@ $app = new \App\Core\App($config);
 // Rutas para páginas públicas
 $app->router->get('/', [\App\Controllers\PageController::class, 'index']);
 
+// Rutas de productos
+$app->router->get('/products', [\App\Controllers\ProductController::class, 'index']);
+$app->router->get('/products/detail/{id}', [\App\Controllers\ProductController::class, 'detail']);
+$app->router->get('/products/category/{category}', [\App\Controllers\ProductController::class, 'byCategory']);
+$app->router->get('/api/products', [\App\Controllers\ProductController::class, 'api']);
+$app->router->post('/api/cart/add', [\App\Controllers\ProductController::class, 'addToCart']);
+
 // Rutas de autenticación
 $app->router->get('/login', [\App\Controllers\AuthController::class, 'login']);
 $app->router->post('/auth/authenticate', [\App\Controllers\AuthController::class, 'authenticate']);
