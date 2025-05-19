@@ -1,0 +1,210 @@
+:root {
+    --primary-color: #2C3E50;
+    --secondary-color: #3498DB;
+    --light-color: #ECF0F1;
+    --accent-color: #E74C3C;
+    --text-color: #2C3E50;
+    --background-color: #F9F9F9;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 2rem;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+    position: relative;
+    display: inline-block;
+    padding-bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background-color: var(--accent-color);
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#carrito {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.producto {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.producto:hover {
+    transform: translateY(-5px);
+}
+
+.producto img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    object-fit: cover;
+}
+
+.producto h2 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.producto p {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.producto button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.producto button:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+.total {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: right;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    max-width: 500px;
+    margin: 0 auto 2rem auto;
+}
+
+#volver, #finalizarCompra {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+    margin: 0 0.5rem;
+    font-size: 1rem;
+}
+
+#volver {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+#volver:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+#finalizarCompra {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+#finalizarCompra:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Mensaje cuando no hay productos */
+#carrito p {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
+    #carrito {
+        grid-template-columns: 1fr;
+    }
+    
+    .total {
+        max-width: 100%;
+    }
+    
+    #volver, #finalizarCompra {
+        width: 100%;
+        margin: 0.5rem 0;
+        text-align: center;
+    }
+    
+    .buttons-container {
+        flex-direction: column;
+    }
+}
+
+/* Animación para los botones y productos */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.producto button:active, #volver:active, #finalizarCompra:active {
+    animation: pulse 0.3s;
+}

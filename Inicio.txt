@@ -78,7 +78,7 @@ Catálogo de productos funcionando a través del patrón MVC.
 **Acciones:**
 1. Crear el CartController con métodos para agregar, eliminar, actualizar y mostrar productos en el carrito
 2. Migrar la lógica existente del carrito al nuevo controlador
-3. Crear vistas para el carrito y checkout
+3. Crear vistas para el carrito 
 4. Integrar con los servicios existentes en src/Shop/Services/
 5. Implementar la funcionalidad AJAX para operaciones del carrito si es necesario
 
@@ -206,7 +206,7 @@ app/controllers/
 └── CartController.php (controlador del carrito)
 app/views/cart/
 ├── index.php (vista del carrito)
-└── checkout.php (vista de finalización de compra)
+└──  
 public/css/
 └── carro.css (estilos del carrito)
 public/js/

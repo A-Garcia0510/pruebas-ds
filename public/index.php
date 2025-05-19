@@ -30,6 +30,10 @@ $app = new \App\Core\App($config);
 $app->router->get('/', [\App\Controllers\PageController::class, 'index']);
 $app->router->get('/inicio', [\App\Controllers\PageController::class, 'index']);
 
+// Rutas de carrito
+$app->router->get('/carrito', [\App\Controllers\CartController::class, 'index']);
+$app->router->get('/cart', [\App\Controllers\CartController::class, 'index']);
+
 // Rutas de productos (en español e inglés para compatibilidad)
 $app->router->get('/productos', [\App\Controllers\ProductController::class, 'index']);
 $app->router->get('/products', [\App\Controllers\ProductController::class, 'index']);
