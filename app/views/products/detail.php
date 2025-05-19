@@ -11,7 +11,7 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
 $nombre_imagen = strtolower(str_replace(' ', '_', $product->getName())) . '.jpg';
 $imagen_ruta = "IMG-P/" . $nombre_imagen;
 ?>
-
+<link rel="stylesheet" href="<?= AssetHelper::css('detalleproducto') ?>">
 <div class="page-title">
     <h1>Detalle del Producto</h1>
     <a href="<?= AssetHelper::url('products') ?>" class="volver-link">

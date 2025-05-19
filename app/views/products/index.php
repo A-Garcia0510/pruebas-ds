@@ -7,6 +7,7 @@
 require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 require_once BASE_PATH . '/app/helpers/ViewHelper.php';
 ?>
+<link rel="stylesheet" href="<?= AssetHelper::css('productos') ?>">
 
 <div class="page-title">
     <h1>Nuestros Productos</h1>
