@@ -31,8 +31,15 @@ $app->router->get('/', [\App\Controllers\PageController::class, 'index']);
 $app->router->get('/inicio', [\App\Controllers\PageController::class, 'index']);
 
 // Rutas de carrito
-$app->router->get('/carrito', [\App\Controllers\CartController::class, 'index']);
+// Rutas para el carrito
 $app->router->get('/cart', [\App\Controllers\CartController::class, 'index']);
+$app->router->get('/carrito', [\App\Controllers\CartController::class, 'index']);
+
+// Rutas API para operaciones del carrito
+$app->router->post('/api/cart/add', [\App\Controllers\CartController::class, 'addItem']);
+$app->router->post('/api/cart/remove', [\App\Controllers\CartController::class, 'removeItem']);
+$app->router->post('/api/cart/clear', [\App\Controllers\CartController::class, 'clear']);
+$app->router->get('/api/cart', [\App\Controllers\CartController::class, 'getCart']);
 
 // Rutas de productos (en español e inglés para compatibilidad)
 $app->router->get('/productos', [\App\Controllers\ProductController::class, 'index']);
