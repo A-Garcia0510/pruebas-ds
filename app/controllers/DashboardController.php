@@ -4,64 +4,68 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Auth\AuthFactory;
+use App\Core\Database\DatabaseConfiguration;
+use App\Core\Database\MySQLDatabase;
 
 /**
- * Controlador para el dashboard del usuario
+ * Controlador para la sección de Dashboard del usuario
  */
 class DashboardController extends BaseController
 {
-    private $authenticator;
-    private $userRepository;
-    
     /**
-     * Constructor del controlador de dashboard
+     * Muestra el dashboard del usuario
      * 
-     * @param Request $request
-     * @param Response $response
-     */
-    public function __construct(Request $request, Response $response)
-    {
-        parent::__construct($request, $response);
-        
-        // Obtener el autenticador y repositorio de usuarios
-        $database = \App\Core\App::$app->getDB();
-        $this->authenticator = AuthFactory::createAuthenticator($database);
-        $this->userRepository = AuthFactory::createUserRepository($database);
-    }
-    
-    /**
-     * Página principal del dashboard
+     * @return string
      */
     public function index()
     {
-        // Verificar autenticación (como medida adicional de seguridad)
-        if (!$this->authenticator->isAuthenticated()) {
-            $this->redirect('/login');
-            return;
+        // Configurar la base de datos
+        $dbConfig = new DatabaseConfiguration(
+            $this->config['database']['host'],
+            $this->config['database']['username'],
+            $this->config['database']['password'],
+            $this->config['database']['database']
+        );
+        
+        try {
+            // Crear conexión a la base de datos
+            $database = new MySQLDatabase($dbConfig);
+            
+            // Crear el autenticador
+            $authenticator = AuthFactory::createAuthenticator($database);
+            
+            // Verificar si el usuario está autenticado
+            if (!$authenticator->isAuthenticated()) {
+                // Almacenar mensaje de error en sesión
+                $_SESSION['error'] = 'Debes iniciar sesión para acceder a esta página.';
+                return $this->redirect('/login');
+            }
+            
+            // Obtener email del usuario actual
+            $correo = $authenticator->getCurrentUserEmail();
+            
+            // Obtener los datos del usuario
+            $userRepository = AuthFactory::createUserRepository($database);
+            $user = $userRepository->findByEmail($correo);
+            
+            if (!$user) {
+                throw new \Exception("Error: No se pudieron recuperar los datos del usuario.");
+            }
+            
+            $data = [
+                'title' => 'Mi Cuenta - Café Aroma',
+                'user' => $user,
+                'css' => ['dashboard'],
+                'layout' => 'main'
+            ];
+            
+            return $this->render('dashboard/index', $data);
+            
+        } catch (\Exception $e) {
+            // Log del error
+            error_log('Error en DashboardController: ' . $e->getMessage());
+            $_SESSION['error'] = 'Error en el sistema: ' . $e->getMessage();
+            return $this->redirect('/');
         }
-        
-        // Obtener correo del usuario actual
-        $correo = $this->authenticator->getCurrentUserEmail();
-        
-        // Obtener los datos del usuario
-        $user = $this->userRepository->findByEmail($correo);
-        
-        if (!$user) {
-            return $this->render('errors/general', [
-                'title' => 'Error',
-                'message' => 'No se pudieron recuperar los datos del usuario.'
-            ]);
-        }
-        
-        // Preparar datos para la vista
-        $data = [
-            'title' => 'Mi Cuenta',
-            'css' => ['dashboard'],
-            'nombre' => $user->getNombre(),
-            'apellidos' => $user->getApellidos(),
-            'correo' => $correo
-        ];
-        
-        return $this->render('dashboard/index', $data);
     }
 }

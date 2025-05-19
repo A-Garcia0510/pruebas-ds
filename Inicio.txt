@@ -92,7 +92,7 @@ Carrito de compras funcionando a través del patrón MVC.
 2. Implementar páginas estáticas restantes (servicios, ayuda)
 3. Migrar la lógica y contenido de estas páginas
 4. Crear middleware para proteger rutas que requieren autenticación
-5. Implementar historial de pedidos y gestión de perfil de usuario
+
 
 **Resultado:**
 Panel de usuario y páginas estáticas funcionando a través del patrón MVC.
@@ -221,8 +221,8 @@ app/controllers/
 └── DashboardController.php (controlador del panel de usuario)
 app/views/dashboard/
 ├── index.php (vista principal del dashboard)
-├── profile.php (vista de perfil)
-└── orders.php (vista de pedidos)
+├── 
+└── 
 app/views/pages/
 ├── services.php (vista de servicios)
 └── help.php (vista de ayuda)
