@@ -8,8 +8,14 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 <div class="container">
     <h1>Carrito de Compras</h1>
     
+    <div id="carrito-error" class="alert alert-danger" style="display: none;">
+        Se produjo un error al comunicarse con el servidor. Por favor, intenta nuevamente.
+    </div>
+    
     <div id="carrito-contenedor">
-        <div id="carrito"></div>
+        <div id="carrito">
+            <p>Cargando carrito...</p>
+        </div>
         <div class="total" id="total"></div>
     </div>
     
@@ -20,6 +26,13 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 </div>
 
 <script>
+    // Mostrar/ocultar mensaje de error
+    function mostrarError(mostrar, mensaje = 'Se produjo un error al comunicarse con el servidor. Por favor, intenta nuevamente.') {
+        const errorDiv = document.getElementById('carrito-error');
+        errorDiv.textContent = mensaje;
+        errorDiv.style.display = mostrar ? 'block' : 'none';
+    }
+    
     // Función para formatear números en formato CLP (con punto como separador de miles)
     function formatearPrecioCLP(numero) {
         return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -27,18 +40,32 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
     
     // Función para obtener el carrito del usuario
     function obtenerCarrito() {
+        console.log('Obteniendo carrito...');
+        mostrarError(false);
+        
         fetch('<?= AssetHelper::url('cart/items') ?>')
-            .then(response => response.json())
+            .then(response => {
+                console.log('Respuesta recibida:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Datos recibidos:', data);
                 if (data.success) {
-                    mostrarCarrito(data.carrito);
+                    mostrarCarrito(data.carrito || []); // Asegurar que carrito sea al menos un array vacío
                 } else {
                     mostrarCarrito([]); // Si no hay productos, mostramos el carrito vacío
+                    if (data.message) {
+                        console.warn('Mensaje del servidor:', data.message);
+                    }
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Error de comunicación con el servidor.');
+                console.error('Error al obtener carrito:', error);
+                document.getElementById('carrito').innerHTML = '<p>Error al cargar el carrito. Intenta recargar la página.</p>';
+                mostrarError(true, 'Error de comunicación con el servidor: ' + error.message);
             });
     }
 
@@ -48,7 +75,7 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
         carritoDiv.innerHTML = '';
         let total = 0;
 
-        if (carrito.length === 0) {
+        if (!carrito || carrito.length === 0) {
             carritoDiv.innerHTML = '<p>No hay productos en el carrito.</p>';
             document.getElementById('total').innerHTML = '';
             return;
@@ -58,14 +85,20 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
             const subtotal = producto.precio * producto.cantidad;
             total += subtotal;
 
-            const nombre_imagen = producto.nombre_producto.toLowerCase().replace(/ /g, '_') + '.jpg'; // Generamos el nombre de la imagen basado en el nombre del producto.
+            // Usar una imagen por defecto si el nombre del producto está vacío
+            let nombre_imagen;
+            if (producto.nombre_producto) {
+                nombre_imagen = producto.nombre_producto.toLowerCase().replace(/ /g, '_') + '.jpg';
+            } else {
+                nombre_imagen = 'default.jpg'; // Imagen por defecto
+            }
 
             carritoDiv.innerHTML += `
                 <div class="producto">
-                    <img src="<?= AssetHelper::url('img-p') ?>/${nombre_imagen}" alt="${producto.nombre_producto}" width="100" />
-                    <h2>${producto.nombre_producto}</h2>
-                    <p>Precio: $${formatearPrecioCLP(producto.precio)}</p>
-                    <p>Cantidad: ${producto.cantidad}</p>
+                    <img src="<?= AssetHelper::url('img-p') ?>/${nombre_imagen}" alt="${producto.nombre_producto || 'Producto'}" width="100" onerror="this.src='<?= AssetHelper::url('img-p') ?>/default.jpg';" />
+                    <h2>${producto.nombre_producto || 'Producto sin nombre'}</h2>
+                    <p>Precio: $${formatearPrecioCLP(producto.precio || 0)}</p>
+                    <p>Cantidad: ${producto.cantidad || 0}</p>
                     <button class="btn btn-danger" onclick="eliminarDelCarrito(${producto.producto_ID})">Eliminar</button>
                 </div>
             `;
@@ -85,52 +118,78 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 
     // Función para eliminar un producto del carrito
     function eliminarDelCarrito(productoID) {
+        console.log('Eliminando producto:', productoID);
+        mostrarError(false);
+        
         fetch('<?= AssetHelper::url('cart/remove') ?>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ producto_ID: productoID })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Respuesta recibida:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Datos recibidos:', data);
             if (data.success) {
                 obtenerCarrito(); // Recargar el carrito después de eliminar
             } else {
-                alert('Error al eliminar el producto del carrito: ' + data.message);
+                alert('Error al eliminar el producto del carrito: ' + (data.message || 'Error desconocido'));
+                mostrarError(true, 'Error al eliminar el producto: ' + (data.message || 'Error desconocido'));
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error de comunicación con el servidor.');
+            console.error('Error al eliminar producto:', error);
+            mostrarError(true, 'Error de comunicación con el servidor: ' + error.message);
         });
     }
 
     // Función para finalizar la compra
     function finalizarCompra() {
+        console.log('Finalizando compra...');
+        mostrarError(false);
+        
         // Verifica si el carrito está vacío
-        const carrito = document.getElementById('carrito').children.length;
-        if (carrito === 0 || (document.getElementById('carrito').children[0].tagName === 'P' && document.getElementById('carrito').children[0].textContent === 'No hay productos en el carrito.')) {
+        const carritoDiv = document.getElementById('carrito');
+        if (carritoDiv.children.length === 0 || (carritoDiv.children[0].tagName === 'P' && carritoDiv.children[0].textContent.includes('No hay productos'))) {
             alert('No puedes finalizar la compra porque el carrito está vacío.');
             return; // Detenemos la ejecución si el carrito está vacío
         }
 
-        fetch('<?= AssetHelper::url('cart/checkout') ?>', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Compra realizada con éxito.');
-                    window.location.href = '<?= AssetHelper::url('productos') ?>';
-                } else {
-                    alert('Error al finalizar la compra: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error de comunicación con el servidor.');
-            });
+        fetch('<?= AssetHelper::url('cart/checkout') ?>', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            console.log('Respuesta recibida:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos recibidos:', data);
+            if (data.success) {
+                alert('Compra realizada con éxito.');
+                window.location.href = '<?= AssetHelper::url('productos') ?>';
+            } else {
+                alert('Error al finalizar la compra: ' + (data.message || 'Error desconocido'));
+                mostrarError(true, 'Error al finalizar la compra: ' + (data.message || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error al finalizar compra:', error);
+            mostrarError(true, 'Error de comunicación con el servidor: ' + error.message);
+        });
     }
 
     // Llamada inicial para cargar los productos en el carrito
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM cargado, obteniendo carrito...');
         obtenerCarrito();
     });
 </script>
