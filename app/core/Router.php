@@ -56,44 +56,127 @@ class Router
         // Normalizar path para quitar o añadir slash final según sea necesario
         $path = $this->normalizePath($path);
         
-        // Revisar si la ruta existe
+        // Debug log
+        if (App::$app->config['app']['debug'] ?? false) {
+            error_log("Router::resolve() - Resolviendo ruta: $method $path");
+        }
+        
+        // Revisar rutas exactas primero
         if (isset($this->routes[$method][$path])) {
             $callback = $this->routes[$method][$path];
-        } 
-        // Intentar con o sin slash final
-        else {
-            $altPath = ($path === '/') ? $path : rtrim($path, '/');
-            
-            if ($path !== $altPath && isset($this->routes[$method][$altPath])) {
-                $callback = $this->routes[$method][$altPath];
-            } 
-            // Intentar con slash final si no tiene
-            else if ($path !== "$altPath/" && isset($this->routes[$method]["$altPath/"])) {
-                $callback = $this->routes[$method]["$altPath/"];
-            }
-            else {
-                // No se encontró la ruta
-                if ($this->notFoundHandler) {
-                    return call_user_func($this->notFoundHandler, $request, $response);
-                }
+            return $this->executeCallback($callback, $request, $response, []);
+        }
+        
+        // Revisar rutas con parámetros
+        foreach ($this->routes[$method] as $route => $callback) {
+            if (strpos($route, '{') !== false) {
+                $routeRegex = $this->convertRouteToRegex($route);
                 
-                $response->setStatusCode(404);
-                return $this->renderNotFoundPage($response);
+                if (preg_match($routeRegex, $path, $matches)) {
+                    // Extraer parámetros
+                    $params = $this->extractParams($route, $matches);
+                    
+                    // Log para depuración
+                    if (App::$app->config['app']['debug'] ?? false) {
+                        error_log("Router::resolve() - Ruta con parámetros encontrada: $route");
+                        error_log("Router::resolve() - Parámetros: " . print_r($params, true));
+                    }
+                    
+                    return $this->executeCallback($callback, $request, $response, $params);
+                }
             }
         }
         
-        // Si el callback es un array [controlador, método]
-        if (is_array($callback)) {
-            $controllerClass = $callback[0];
-            $controller = new $controllerClass($request, $response);
-            $method = $callback[1];
+        // Intentar con o sin slash final
+        $altPath = ($path === '/') ? $path : rtrim($path, '/');
             
-            // Ejecutar el método del controlador
-            return $controller->$method();
+        if ($path !== $altPath && isset($this->routes[$method][$altPath])) {
+            $callback = $this->routes[$method][$altPath];
+            return $this->executeCallback($callback, $request, $response, []);
+        } 
+        // Intentar con slash final si no tiene
+        else if ($path !== "$altPath/" && isset($this->routes[$method]["$altPath/"])) {
+            $callback = $this->routes[$method]["$altPath/"];
+            return $this->executeCallback($callback, $request, $response, []);
         }
         
-        // Si el callback es una función
-        return call_user_func($callback, $request, $response);
+        // No se encontró la ruta
+        if ($this->notFoundHandler) {
+            return call_user_func($this->notFoundHandler, $request, $response);
+        }
+        
+        $response->setStatusCode(404);
+        return $this->renderNotFoundPage($response);
+    }
+    
+    /**
+     * Convierte una ruta con parámetros a expresión regular
+     * 
+     * @param string $route
+     * @return string
+     */
+    protected function convertRouteToRegex($route)
+    {
+        // Escapar caracteres especiales
+        $route = preg_quote($route, '/');
+        
+        // Reemplazar parámetros con patrones regex
+        $route = preg_replace('/\\\{([a-zA-Z0-9_]+)\\\}/', '([^\/]+)', $route);
+        
+        return '/^' . $route . '$/';
+    }
+    
+    /**
+     * Extrae los parámetros de la URL
+     * 
+     * @param string $route
+     * @param array $matches
+     * @return array
+     */
+    protected function extractParams($route, $matches)
+    {
+        $params = [];
+        preg_match_all('/\{([a-zA-Z0-9_]+)\}/', $route, $paramNames);
+        
+        // El primer elemento de $matches es la coincidencia completa
+        array_shift($matches);
+        
+        foreach ($paramNames[1] as $index => $name) {
+            $params[$name] = $matches[$index] ?? null;
+        }
+        
+        return $params;
+    }
+    
+    /**
+     * Ejecuta el callback con los parámetros extraídos
+     * 
+     * @param mixed $callback
+     * @param Request $request
+     * @param Response $response
+     * @param array $params
+     * @return mixed
+     */
+    protected function executeCallback($callback, $request, $response, $params)
+    {
+        if (is_array($callback)) {
+            [$controllerClass, $method] = $callback;
+            $controller = new $controllerClass($request, $response);
+            
+            // Log para depuración
+            if (App::$app->config['app']['debug'] ?? false) {
+                error_log("Router::executeCallback() - Ejecutando método: $controllerClass::$method");
+                error_log("Router::executeCallback() - Parámetros: " . print_r($params, true));
+            }
+            
+            if (empty($params)) {
+                return $controller->$method();
+            } else {
+                return call_user_func_array([$controller, $method], $params);
+            }
+        }
+        
+        return call_user_func_array($callback, [$request, $response]);
     }
     
     /**

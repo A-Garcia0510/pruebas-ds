@@ -74,6 +74,11 @@ class ProductController extends BaseController
                 throw new ProductNotFoundException("Producto con ID $id no encontrado");
             }
             
+            // Debug para verificar que se está obteniendo el producto
+            if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+                error_log('ProductController::detail() - Producto encontrado: ' . print_r($product, true));
+            }
+            
             // Renderizar la vista de detalle de producto
             return $this->render('products/detail', [
                 'product' => $product,
@@ -81,11 +86,24 @@ class ProductController extends BaseController
             ]);
             
         } catch (ProductNotFoundException $e) {
+            // Log del error
+            error_log('ProductController::detail() - Error: ' . $e->getMessage());
+            
             // Manejar el error si el producto no existe
             $this->response->setStatusCode(404);
             return $this->render('errors/404', [
                 'message' => $e->getMessage(),
                 'title' => 'Producto no encontrado'
+            ]);
+        } catch (\Exception $e) {
+            // Log del error
+            error_log('ProductController::detail() - Error inesperado: ' . $e->getMessage());
+            
+            // Manejar otros errores
+            $this->response->setStatusCode(500);
+            return $this->render('errors/500', [
+                'message' => 'Ha ocurrido un error inesperado',
+                'title' => 'Error interno'
             ]);
         }
     }
@@ -101,6 +119,11 @@ class ProductController extends BaseController
         if ($category === null) {
             $this->redirect('products');
             return;
+        }
+        
+        // Log para depuración
+        if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
+            error_log('ProductController::byCategory() - Buscando productos por categoría: ' . $category);
         }
         
         // Obtener todas las categorías

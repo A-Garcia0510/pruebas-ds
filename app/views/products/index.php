@@ -29,19 +29,6 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
     <?php else: ?>
         <?php foreach ($products as $product): ?>
             <div class="producto-tarjeta" data-id="<?= $product->getId() ?>">
-                <div class="producto-imagen">
-                    <?php
-                    // Intentar cargar la imagen del producto, si existe
-                    $imagen_nombre = strtolower(str_replace(' ', '_', $product->getName())) . '.jpg';
-                    $imagen_ruta = "IMG-P/" . $imagen_nombre;
-                    if (file_exists(BASE_PATH . '/public/' . $imagen_ruta)) {
-                        echo '<img src="' . AssetHelper::url($imagen_ruta) . '" alt="' . htmlspecialchars($product->getName()) . '">';
-                    } else {
-                        // Si no existe, usar un placeholder
-                        echo '<img src="/api/placeholder/300/300" alt="' . htmlspecialchars($product->getName()) . '">';
-                    }
-                    ?>
-                </div>
                 <div class="producto-info">
                     <h2><?= htmlspecialchars($product->getName()) ?></h2>
                     <p class="categoria"><?= htmlspecialchars($product->getCategory()) ?></p>
@@ -62,4 +49,5 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
     Ver Carrito
 </button>
 
-<script src="<?= AssetHelper::js('products') ?>"></script>
+<!-- Cambiar la referencia del script a main.js en lugar de products.js -->
+<script src="<?= AssetHelper::js('main') ?>"></script>
