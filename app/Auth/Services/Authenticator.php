@@ -1,5 +1,6 @@
 <?php
-// src/Auth/Services/Authenticator.php
+// Modificar el Authenticator.php para mejorar la consistencia de la autenticación
+
 namespace App\Auth\Services;
 
 use App\Auth\Interfaces\AuthenticatorInterface;
@@ -38,6 +39,11 @@ class Authenticator implements AuthenticatorInterface
         $this->sessionHandler->set('usuario_id', $user->getId());
         $this->sessionHandler->set('mensaje', 'Inicio de sesión exitoso.');
         
+        // Agregar también las variables de sesión en formato alternativo
+        // para mantener compatibilidad con el resto del sistema
+        $_SESSION['user_id'] = $user->getId();
+        $_SESSION['email'] = $user->getEmail();
+        
         return true;
     }
     
@@ -49,11 +55,19 @@ class Authenticator implements AuthenticatorInterface
     
     public function isAuthenticated(): bool
     {
-        return $this->sessionHandler->has('correo');
+        // Verificar tanto con correo como con user_id
+        return $this->sessionHandler->has('correo') || 
+               $this->sessionHandler->has('usuario_id') ||
+               isset($_SESSION['user_id']);
     }
     
     public function getCurrentUserEmail(): ?string
     {
-        return $this->sessionHandler->get('correo');
+        return $_SESSION['email'] ?? $this->sessionHandler->get('correo');
+    }
+    
+    public function getCurrentUserId(): ?int
+    {
+        return $_SESSION['user_id'] ?? $this->sessionHandler->get('usuario_id');
     }
 }

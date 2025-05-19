@@ -69,9 +69,13 @@ class AuthController extends BaseController
             $authenticator = AuthFactory::createAuthenticator($database);
             
             if ($authenticator->authenticate($email, $password)) {
-                // Redirigir al dashboard
-                return $this->redirect('/dashboard');
-            } else {
+                // Asegurar que las variables de sesión estén sincronizadas
+            $_SESSION['user_id'] = $_SESSION['usuario_id'];
+            $_SESSION['email'] = $_SESSION['correo'];
+    // Redirigir al dashboard con la ruta correcta
+                return $this->redirect('/dashboard/');
+            }
+             else {
                 $_SESSION['error'] = 'Datos incorrectos. Por favor, inténtalo de nuevo.';
                 return $this->redirect('/login');
             }
@@ -150,12 +154,17 @@ class AuthController extends BaseController
             
             // Guardar usuario
             if ($userRepository->save($user)) {
-                // Crear autenticador y autenticar al usuario
+            // Crear autenticador y autenticar al usuario
                 $authenticator = AuthFactory::createAuthenticator($database);
                 $authenticator->authenticate($email, $password);
-                
-                return $this->redirect('/dashboard');
-            } else {
+    
+             // Asegurar que las variables de sesión estén sincronizadas
+                $_SESSION['user_id'] = $_SESSION['usuario_id'];
+                $_SESSION['email'] = $_SESSION['correo'];
+    
+            return $this->redirect('/dashboard/');
+        }
+            else {
                 $_SESSION['error'] = 'Error al crear el usuario. Por favor, inténtalo de nuevo.';
                 return $this->redirect('/register');
             }

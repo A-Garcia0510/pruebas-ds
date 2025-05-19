@@ -1,4 +1,6 @@
 <?php
+// Modificar el archivo de rutas en public/index.php
+
 /**
  * Punto de entrada principal de la aplicación
  * 
@@ -33,11 +35,17 @@ $app->router->post('/auth/authenticate', [\App\Controllers\AuthController::class
 $app->router->get('/register', [\App\Controllers\AuthController::class, 'register']);
 $app->router->post('/auth/store', [\App\Controllers\AuthController::class, 'store']);
 $app->router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
+$app->router->get('/auth/logout', [\App\Controllers\AuthController::class, 'logout']);
+
+// Rutas del dashboard
+$app->router->get('/dashboard', [\App\Controllers\DashboardController::class, 'index']);
+$app->router->get('/dashboard/', [\App\Controllers\DashboardController::class, 'index']);
 
 // Aplicar middleware de autenticación
 // Definir rutas protegidas
 $protectedRoutes = [
     '/dashboard',
+    '/dashboard/',
     '/profile',
     '/orders'
     // Agrega aquí otras rutas que requieran autenticación
