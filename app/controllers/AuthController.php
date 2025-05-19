@@ -22,7 +22,7 @@ class AuthController extends BaseController
     {
         // Si el usuario ya está autenticado, redirigir al dashboard
         if (isset($_SESSION['user_id'])) {
-            return $this->redirect('/dashboard');
+            return $this->redirect('/pruebas-ds/public/dashboard');
         }
 
         $data = [
@@ -42,7 +42,7 @@ class AuthController extends BaseController
     public function authenticate()
     {
         if (!$this->request->isPost()) {
-            return $this->redirect('/login');
+            return $this->redirect('/pruebas-ds/public/login');
         }
 
         $email = $this->request->get('correo');
@@ -52,7 +52,7 @@ class AuthController extends BaseController
         if (empty($email) || empty($password)) {
             // Almacenar mensaje de error en sesión para mostrarlo en la vista
             $_SESSION['error'] = 'Todos los campos son obligatorios.';
-            return $this->redirect('/login');
+            return $this->redirect('/pruebas-ds/public/login');
         }
 
         try {
@@ -70,20 +70,20 @@ class AuthController extends BaseController
             
             if ($authenticator->authenticate($email, $password)) {
                 // Asegurar que las variables de sesión estén sincronizadas
-            $_SESSION['user_id'] = $_SESSION['usuario_id'];
-            $_SESSION['email'] = $_SESSION['correo'];
-    // Redirigir al dashboard con la ruta correcta
-                return $this->redirect('/dashboard/');
+                $_SESSION['user_id'] = $_SESSION['usuario_id'];
+                $_SESSION['email'] = $_SESSION['correo'];
+                // Redirigir al dashboard con la ruta correcta
+                return $this->redirect('/pruebas-ds/public/dashboard');
             }
-             else {
+            else {
                 $_SESSION['error'] = 'Datos incorrectos. Por favor, inténtalo de nuevo.';
-                return $this->redirect('/login');
+                return $this->redirect('/pruebas-ds/public/login');
             }
         } catch (\Exception $e) {
             // Log del error
             error_log('Error de autenticación: ' . $e->getMessage());
             $_SESSION['error'] = 'Error en el sistema. Por favor, inténtalo más tarde.';
-            return $this->redirect('/login');
+            return $this->redirect('/pruebas-ds/public/login');
         }
     }
 
@@ -96,7 +96,7 @@ class AuthController extends BaseController
     {
         // Si el usuario ya está autenticado, redirigir al dashboard
         if (isset($_SESSION['user_id'])) {
-            return $this->redirect('/dashboard');
+            return $this->redirect('/pruebas-ds/public/dashboard');
         }
 
         $data = [
@@ -116,7 +116,7 @@ class AuthController extends BaseController
     public function store()
     {
         if (!$this->request->isPost()) {
-            return $this->redirect('/register');
+            return $this->redirect('/pruebas-ds/public/register');
         }
 
         $nombre = $this->request->get('nombre');
@@ -127,7 +127,7 @@ class AuthController extends BaseController
         // Validación básica
         if (empty($nombre) || empty($apellidos) || empty($email) || empty($password)) {
             $_SESSION['error'] = 'Todos los campos son obligatorios.';
-            return $this->redirect('/register');
+            return $this->redirect('/pruebas-ds/public/register');
         }
 
         try {
@@ -146,7 +146,7 @@ class AuthController extends BaseController
             // Verificar si el email ya existe
             if ($userRepository->emailExists($email)) {
                 $_SESSION['error'] = 'El correo electrónico ya está registrado.';
-                return $this->redirect('/register');
+                return $this->redirect('/pruebas-ds/public/register');
             }
             
             // Crear nuevo usuario
@@ -154,25 +154,25 @@ class AuthController extends BaseController
             
             // Guardar usuario
             if ($userRepository->save($user)) {
-            // Crear autenticador y autenticar al usuario
+                // Crear autenticador y autenticar al usuario
                 $authenticator = AuthFactory::createAuthenticator($database);
                 $authenticator->authenticate($email, $password);
     
-             // Asegurar que las variables de sesión estén sincronizadas
+                // Asegurar que las variables de sesión estén sincronizadas
                 $_SESSION['user_id'] = $_SESSION['usuario_id'];
                 $_SESSION['email'] = $_SESSION['correo'];
     
-            return $this->redirect('/dashboard/');
-        }
+                return $this->redirect('/pruebas-ds/public/dashboard');
+            }
             else {
                 $_SESSION['error'] = 'Error al crear el usuario. Por favor, inténtalo de nuevo.';
-                return $this->redirect('/register');
+                return $this->redirect('/pruebas-ds/public/register');
             }
         } catch (\Exception $e) {
             // Log del error
             error_log('Error de registro: ' . $e->getMessage());
             $_SESSION['error'] = 'Error en el sistema. Por favor, inténtalo más tarde.';
-            return $this->redirect('/register');
+            return $this->redirect('/pruebas-ds/public/register');
         }
     }
 
@@ -189,6 +189,6 @@ class AuthController extends BaseController
         session_destroy();
         
         // Redirigir a la página de inicio
-        return $this->redirect('/');
+        return $this->redirect('/pruebas-ds/public/');
     }
 }

@@ -106,9 +106,41 @@ abstract class BaseController
      */
     protected function redirect($url)
     {
-        // Si es una URL relativa, agregarle la URL base
-        if (isset($this->config['app']['url']) && !empty($this->config['app']['url']) && $url[0] === '/') {
-            $url = $this->config['app']['url'] . $url;
+        // No modificar URLs absolutas (comienzan con http:// o https://)
+        if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0) {
+            $this->response->redirect($url);
+            return;
+        }
+            
+        // Si la URL es relativa pero no comienza con /pruebas-ds/public, agregarla
+        if ($url[0] === '/' && strpos($url, '/pruebas-ds/public') !== 0) {
+            // Asegurarse que no hay doble barra
+            if ($url !== '/') {
+                $url = '/pruebas-ds/public' . $url;
+            } else {
+                $url = '/pruebas-ds/public/';
+            }
+        }
+        
+        // Si es una URL relativa sin barra inicial, agregarle la barra y el prefijo
+        if ($url[0] !== '/') {
+            $url = '/pruebas-ds/public/' . $url;
+        }
+        
+        // Si tenemos una URL base configurada, usarla
+        if (isset($this->config['app']['url']) && !empty($this->config['app']['url'])) {
+            // Quitar la barra inicial de la URL para evitar doble barra
+            if ($url[0] === '/') {
+                $url = substr($url, 1);
+            }
+            
+            // Asegurarse de que la URL base termina con barra
+            $baseUrl = $this->config['app']['url'];
+            if (substr($baseUrl, -1) !== '/') {
+                $baseUrl .= '/';
+            }
+            
+            $url = $baseUrl . $url;
         }
         
         // Log para depuración

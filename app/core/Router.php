@@ -53,17 +53,33 @@ class Router
         $path = $request->getPath();
         $method = $request->getMethod();
         
+        // Normalizar path para quitar o añadir slash final según sea necesario
+        $path = $this->normalizePath($path);
+        
         // Revisar si la ruta existe
         if (isset($this->routes[$method][$path])) {
             $callback = $this->routes[$method][$path];
-        } else {
-            // No se encontró la ruta
-            if ($this->notFoundHandler) {
-                return call_user_func($this->notFoundHandler, $request, $response);
-            }
+        } 
+        // Intentar con o sin slash final
+        else {
+            $altPath = ($path === '/') ? $path : rtrim($path, '/');
             
-            $response->setStatusCode(404);
-            return $this->renderNotFoundPage($response);
+            if ($path !== $altPath && isset($this->routes[$method][$altPath])) {
+                $callback = $this->routes[$method][$altPath];
+            } 
+            // Intentar con slash final si no tiene
+            else if ($path !== "$altPath/" && isset($this->routes[$method]["$altPath/"])) {
+                $callback = $this->routes[$method]["$altPath/"];
+            }
+            else {
+                // No se encontró la ruta
+                if ($this->notFoundHandler) {
+                    return call_user_func($this->notFoundHandler, $request, $response);
+                }
+                
+                $response->setStatusCode(404);
+                return $this->renderNotFoundPage($response);
+            }
         }
         
         // Si el callback es un array [controlador, método]
@@ -78,6 +94,30 @@ class Router
         
         // Si el callback es una función
         return call_user_func($callback, $request, $response);
+    }
+    
+    /**
+     * Normaliza la ruta para manejar consistentemente con o sin slash final
+     * 
+     * @param string $path
+     * @return string
+     */
+    protected function normalizePath($path)
+    {
+        // Si es la raíz, devolver solo /
+        if ($path === '/' || $path === '') {
+            return '/';
+        }
+        
+        // Eliminar múltiples slashes consecutivos
+        $path = preg_replace('#/+#', '/', $path);
+        
+        // Asegurar que la ruta comience con /
+        if ($path[0] !== '/') {
+            $path = '/' . $path;
+        }
+        
+        return $path;
     }
     
     /**
