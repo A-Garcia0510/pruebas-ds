@@ -1,51 +1,125 @@
 classDiagram
-    %% Clases principales en src
+    %% Core Classes
+    class App {
+        +config: array
+        +db: DatabaseInterface
+        +router: Router
+        +request: Request
+        +response: Response
+        +__construct(config: array)
+        +run()
+    }
+
+    class Router {
+        -routes: array
+        +get(path: string, callback: array)
+        +post(path: string, callback: array)
+        +resolve()
+    }
+
+    class Request {
+        +getMethod(): string
+        +getPath(): string
+        +getBody(): array
+        +getQuery(): array
+    }
+
+    class Response {
+        +setStatusCode(code: int)
+        +redirect(url: string)
+        +json(data: mixed)
+    }
+
+    %% Database Classes
     class DatabaseInterface {
         <<interface>>
         +getConnection()
+        +query(sql: string, params: array)
+        +prepare(sql: string)
     }
 
     class MySQLDatabase {
-        -connection
-        -config
-        +__construct(DatabaseConfiguration config)
-        +getConnection()
+        -connection: PDO
+        -config: DatabaseConfiguration
+        +__construct(config: DatabaseConfiguration)
+        +getConnection(): PDO
+        +query(sql: string, params: array)
+        +prepare(sql: string)
     }
 
     class DatabaseConfiguration {
-        +getHost()
-        +getUsername()
-        +getPassword()
-        +getDatabase()
+        +host: string
+        +username: string
+        +password: string
+        +database: string
+        +__construct(host: string, username: string, password: string, database: string)
     }
 
-    class PurchaseServiceInterface {
-        <<interface>>
-        +createPurchase(userId: string): bool
-        +getUserPurchases(userId: string): array
-        +getPurchaseDetails(purchaseId: int): array
+    %% Shop Classes
+    class CartService {
+        -db: DatabaseInterface
+        -productRepository: ProductRepository
+        +getItems(userEmail: string): array
+        +addItem(userEmail: string, productId: int, quantity: int): bool
+        +removeItem(userEmail: string, productId: int): bool
+        +updateQuantity(userEmail: string, productId: int, quantity: int): bool
+        +getTotal(userEmail: string): float
+    }
+
+    class ProductRepository {
+        -db: DatabaseInterface
+        +findAll(): array
+        +findById(id: int): Product
+        +findByCategory(category: string): array
+        +updateStock(id: int, quantity: int): bool
     }
 
     class PurchaseService {
         -db: DatabaseInterface
-        -cartService: CartInterface
-        -productRepository: ProductRepositoryInterface
+        -cartService: CartService
+        -productRepository: ProductRepository
         -purchaseRepository: PurchaseRepository
-        +createPurchase(userId: string): bool
-        +getUserPurchases(userId: string): array
+        +createPurchase(userEmail: string): bool
+        +getUserPurchases(userEmail: string): array
         +getPurchaseDetails(purchaseId: int): array
     }
 
     class PurchaseRepository {
         -db: DatabaseInterface
         +save(purchase: Purchase): bool
+        +findByUser(userEmail: string): array
         +findDetailsByPurchaseId(purchaseId: int): array
     }
 
+    %% Models
+    class Product {
+        -id: int
+        -name: string
+        -description: string
+        -price: float
+        -stock: int
+        -category: string
+        +getId(): int
+        +getName(): string
+        +getDescription(): string
+        +getPrice(): float
+        +getStock(): int
+        +getCategory(): string
+        +hasStock(quantity: int): bool
+    }
+
     class Purchase {
-        -details: array
+        -id: int
+        -userEmail: string
+        -date: DateTime
         -total: float
-        +addDetail(detail: PurchaseDetail): self
+        -details: array
+        +getId(): int
+        +getUserEmail(): string
+        +getDate(): DateTime
+        +getTotal(): float
+        +getDetails(): array
+        +addDetail(detail: PurchaseDetail)
         +calculateTotal(): float
     }
 
@@ -53,40 +127,99 @@ classDiagram
         -productId: int
         -quantity: int
         -price: float
+        +getProductId(): int
+        +getQuantity(): int
+        +getPrice(): float
         +getSubtotal(): float
     }
 
-    %% Clases principales en PHP
-    class Cart {
-        -db: Database
-        +addToCart(correo: string, productoID: int, cantidad: int): array
-        +removeFromCart(correo: string, productoID: int): array
-        +clearCart(correo: string): array
+    %% Controllers
+    class BaseController {
+        -request: Request
+        -response: Response
+        -config: array
+        +render(view: string, data: array): string
+        +redirect(url: string)
+        +json(data: mixed, statusCode: int)
     }
 
-    class Product {
-        -db: Database
-        +getAllProducts(): array
-        +getProductsByCategory(categoria: string): array
-        +updateStock(productoID: int, cantidad: int): bool
+    class CartController {
+        -cartService: CartService
+        -productRepository: ProductRepository
+        +index()
+        +getItems()
+        +addItem()
+        +removeItem()
+        +checkout()
     }
 
-    class User {
-        -db: Database
-        +login(correo: string, contraseña: string): bool
-        +register(nombre: string, apellidos: string, correo: string, contraseña: string): array
+    class ProductController {
+        -productRepository: ProductRepository
+        +index()
+        +detail(id: int)
+        +byCategory(category: string)
+        +api()
+        +addToCart()
+    }
+
+    %% Auth Classes
+    class AuthController {
+        -userRepository: UserRepository
+        +login()
+        +register()
+        +authenticate()
         +logout()
     }
 
-    %% Relaciones entre clases
+    class UserRepository {
+        -db: DatabaseInterface
+        +findByEmail(email: string): User
+        +save(user: User): bool
+        +validateCredentials(email: string, password: string): bool
+    }
+
+    class User {
+        -id: int
+        -name: string
+        -lastname: string
+        -email: string
+        -password: string
+        -role: string
+        +getId(): int
+        +getName(): string
+        +getEmail(): string
+        +getRole(): string
+        +validatePassword(password: string): bool
+    }
+
+    %% Relationships
+    App --> Router
+    App --> Request
+    App --> Response
+    App --> DatabaseInterface
+
+    Router --> Request
+    Router --> Response
+
     MySQLDatabase --> DatabaseInterface
-    PurchaseService --> PurchaseServiceInterface
+    CartService --> DatabaseInterface
+    CartService --> ProductRepository
+    ProductRepository --> DatabaseInterface
+    PurchaseService --> DatabaseInterface
+    PurchaseService --> CartService
+    PurchaseService --> ProductRepository
     PurchaseService --> PurchaseRepository
-    PurchaseService --> Cart
-    PurchaseService --> Product
     PurchaseRepository --> DatabaseInterface
+
+    BaseController --> Request
+    BaseController --> Response
+    CartController --> BaseController
+    CartController --> CartService
+    ProductController --> BaseController
+    ProductController --> ProductRepository
+    AuthController --> BaseController
+    AuthController --> UserRepository
+
     Purchase --> PurchaseDetail
-    Cart --> Product
-    Cart --> User
-    Product --> Database
-    User --> Database
+    UserRepository --> DatabaseInterface
+    UserRepository --> User
