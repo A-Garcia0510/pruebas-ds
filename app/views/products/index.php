@@ -52,3 +52,4 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
 
 <!-- Cambiar la referencia del script a main.js en lugar de products.js -->
 <script src="<?= AssetHelper::js('main') ?>"></script>
+<script src="<?= AssetHelper::js('cart') ?>"></script>

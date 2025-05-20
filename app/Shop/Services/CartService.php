@@ -24,6 +24,8 @@ class CartService implements CartInterface
     
     public function addItem(string $userId, int $productId, int $quantity): bool
     {
+        error_log("CartService::addItem() - Iniciando con userId: " . $userId . ", productId: " . $productId . ", quantity: " . $quantity);
+        
         $conn = $this->db->getConnection();
         
         // Primero obtenemos el usuario_ID a partir del correo
@@ -33,19 +35,23 @@ class CartService implements CartInterface
         $userResult = $stmtUser->get_result();
         
         if ($userResult->num_rows === 0) {
+            error_log("CartService::addItem() - Usuario no encontrado: " . $userId);
             throw new \Exception("Usuario no encontrado");
         }
         
         $userData = $userResult->fetch_assoc();
         $userIdInt = $userData['usuario_ID']; // ID numérico del usuario
+        error_log("CartService::addItem() - usuario_ID encontrado: " . $userIdInt);
         
         // Verificar si el producto existe y tiene stock suficiente
         $product = $this->productRepository->findById($productId);
         if (!$product) {
+            error_log("CartService::addItem() - Producto no encontrado: " . $productId);
             throw new ProductNotFoundException("El producto no existe");
         }
         
         if (!$product->hasStock($quantity)) {
+            error_log("CartService::addItem() - Stock insuficiente para producto: " . $productId);
             throw new InsufficientStockException(
                 "No hay stock suficiente", 
                 400, 
@@ -63,16 +69,21 @@ class CartService implements CartInterface
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
+            error_log("CartService::addItem() - Actualizando cantidad existente");
             // Actualizar cantidad
             $stmt = $conn->prepare("UPDATE Carro SET cantidad = cantidad + ? WHERE usuario_ID = ? AND producto_ID = ?");
             $stmt->bind_param("iii", $quantity, $userIdInt, $productId);
         } else {
+            error_log("CartService::addItem() - Insertando nuevo item");
             // Insertar nuevo item
             $stmt = $conn->prepare("INSERT INTO Carro (usuario_ID, producto_ID, cantidad) VALUES (?, ?, ?)");
             $stmt->bind_param("iii", $userIdInt, $productId, $quantity);
         }
         
-        return $stmt->execute();
+        $success = $stmt->execute();
+        error_log("CartService::addItem() - Operación completada con éxito: " . ($success ? "Sí" : "No"));
+        
+        return $success;
     }
     
     public function removeItem(string $userId, int $productId): bool
@@ -100,6 +111,8 @@ class CartService implements CartInterface
     
     public function getItems(string $userId): array
     {
+        error_log("CartService::getItems() - Iniciando con userId: " . $userId);
+        
         $conn = $this->db->getConnection();
         
         // Obtener usuario_ID a partir del correo
@@ -109,11 +122,13 @@ class CartService implements CartInterface
         $userResult = $stmtUser->get_result();
         
         if ($userResult->num_rows === 0) {
+            error_log("CartService::getItems() - Usuario no encontrado: " . $userId);
             throw new \Exception("Usuario no encontrado");
         }
         
         $userData = $userResult->fetch_assoc();
         $userIdInt = $userData['usuario_ID'];
+        error_log("CartService::getItems() - usuario_ID encontrado: " . $userIdInt);
         
         $stmt = $conn->prepare("
             SELECT c.*, p.nombre_producto, p.precio 
@@ -125,8 +140,11 @@ class CartService implements CartInterface
         $stmt->execute();
         $result = $stmt->get_result();
         
+        error_log("CartService::getItems() - Número de items encontrados: " . $result->num_rows);
+        
         $items = [];
         while ($data = $result->fetch_assoc()) {
+            error_log("CartService::getItems() - Procesando item: " . json_encode($data));
             $items[] = new CartItem(
                 $userId, // Mantenemos el correo como identificador en el objeto CartItem
                 $data['producto_ID'],
@@ -136,6 +154,7 @@ class CartService implements CartInterface
             );
         }
         
+        error_log("CartService::getItems() - Total de items procesados: " . count($items));
         return $items;
     }
     

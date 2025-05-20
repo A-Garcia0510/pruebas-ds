@@ -69,9 +69,13 @@ class AuthController extends BaseController
             $authenticator = AuthFactory::createAuthenticator($database);
             
             if ($authenticator->authenticate($email, $password)) {
-                // Asegurar que las variables de sesión estén sincronizadas
+                // Guardar el correo en la sesión
+                $_SESSION['correo'] = $email;
                 $_SESSION['user_id'] = $_SESSION['usuario_id'];
-                $_SESSION['email'] = $_SESSION['correo'];
+                
+                // Log para depuración
+                error_log('Usuario autenticado - Correo guardado en sesión: ' . $email);
+                
                 // Redirigir al dashboard con la ruta correcta
                 return $this->redirect('/pruebas-ds/public/dashboard');
             }
@@ -184,7 +188,6 @@ class AuthController extends BaseController
     public function logout()
     {
         // Destruir sesión
-        session_start();
         session_unset();
         session_destroy();
         

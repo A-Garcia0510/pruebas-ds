@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnTodos = document.getElementById('btn-todos');
     const categoriaButtons = document.querySelectorAll('.categoria-bar button');
     const productosGrid = document.getElementById('productos');
-    const agregarButtons = document.querySelectorAll('.agregar');
     
     // Base URL para peticiones AJAX
     const baseUrl = window.location.pathname.includes('/public/') 
@@ -63,9 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         productosGrid.appendChild(productCard);
                     });
-                    
-                    // Añadir eventos a los nuevos botones de agregar
-                    setupAddToCartButtons();
                 } else {
                     console.error('Error al cargar productos:', data.message);
                     productosGrid.innerHTML = '<div class="error-state">Error al cargar productos. Por favor, intenta nuevamente.</div>';
@@ -75,40 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error en la petición:', error);
                 productosGrid.innerHTML = '<div class="error-state">Error al cargar productos. Por favor, intenta nuevamente.</div>';
             });
-    }
-    
-    /**
-     * Configura los eventos para los botones de agregar al carrito
-     */
-    function setupAddToCartButtons() {
-        document.querySelectorAll('.agregar').forEach(button => {
-            button.addEventListener('click', function() {
-                const productId = this.dataset.id;
-                
-                fetch(`${baseUrl}/api/cart/add`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        producto_ID: productId, 
-                        cantidad: 1 
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Producto agregado al carrito con éxito.');
-                    } else {
-                        alert('Error al agregar producto: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al agregar el producto al carrito.');
-                });
-            });
-        });
     }
     
     /**
@@ -135,7 +97,4 @@ document.addEventListener('DOMContentLoaded', function() {
             loadProductsByCategory(category);
         });
     });
-    
-    // Configurar botones de agregar iniciales
-    setupAddToCartButtons();
 });

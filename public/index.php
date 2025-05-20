@@ -10,6 +10,29 @@
 // Definir la ruta base del proyecto
 define('BASE_PATH', dirname(__DIR__));
 
+// Configurar el manejador de errores personalizado
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    if (!(error_reporting() & $errno)) {
+        return false;
+    }
+    
+    $error = [
+        'success' => false,
+        'message' => 'Error interno del servidor',
+        'error' => [
+            'type' => $errno,
+            'message' => $errstr,
+            'file' => $errfile,
+            'line' => $errline
+        ]
+    ];
+    
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode($error);
+    exit;
+});
+
 // Cargar el autoloader de Composer
 require_once BASE_PATH . '/vendor/autoload.php';
 
@@ -31,15 +54,14 @@ $app->router->get('/', [\App\Controllers\PageController::class, 'index']);
 $app->router->get('/inicio', [\App\Controllers\PageController::class, 'index']);
 
 // Rutas de carrito
-// Rutas para el carrito
 $app->router->get('/cart', [\App\Controllers\CartController::class, 'index']);
 $app->router->get('/carrito', [\App\Controllers\CartController::class, 'index']);
 
 // Rutas API para operaciones del carrito
-$app->router->post('/api/cart/add', [\App\Controllers\CartController::class, 'addItem']);
-$app->router->post('/api/cart/remove', [\App\Controllers\CartController::class, 'removeItem']);
-$app->router->post('/api/cart/clear', [\App\Controllers\CartController::class, 'clear']);
-$app->router->get('/api/cart', [\App\Controllers\CartController::class, 'getCart']);
+$app->router->get('/cart/items', [\App\Controllers\CartController::class, 'getItems']);
+$app->router->post('/cart/add', [\App\Controllers\CartController::class, 'addItem']);
+$app->router->post('/cart/remove', [\App\Controllers\CartController::class, 'removeItem']);
+$app->router->post('/cart/checkout', [\App\Controllers\CartController::class, 'checkout']);
 
 // Rutas de productos (en español e inglés para compatibilidad)
 $app->router->get('/productos', [\App\Controllers\ProductController::class, 'index']);
@@ -82,7 +104,12 @@ $protectedRoutes = [
     '/profile',
     '/perfil',
     '/orders',
-    '/pedidos'
+    '/pedidos',
+    '/cart',
+    '/carrito',
+    '/cart/items',
+    '/cart/remove',
+    '/cart/checkout'
     // Agrega aquí otras rutas que requieran autenticación
 ];
 

@@ -1,10 +1,13 @@
 // public/js/cart.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    const CART_API_URL = '/api/cart';
+    const BASE_URL = '/pruebas-ds/public';
+    const CART_API_URL = BASE_URL + '/cart/items';
     
     // Log para depuración
     console.log('Script de carrito inicializado');
+    console.log('URL base:', BASE_URL);
+    console.log('URL del carrito:', CART_API_URL);
     
     // Cargar el contenido del carrito en la página
     function cargarCarrito() {
@@ -12,10 +15,18 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fetch(CART_API_URL)
             .then(response => {
+                console.log('Respuesta del servidor:', response);
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
                 }
-                return response.json();
+                return response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Error al parsear JSON:', text);
+                        throw new Error('Respuesta no válida del servidor');
+                    }
+                });
             })
             .then(data => {
                 console.log('Datos del carrito recibidos:', data);
@@ -53,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const carritoVacio = document.querySelector('.carrito-vacio');
             const carritoItems = document.querySelector('.carrito-items');
             
-            if ((carritoVacio && data.items && data.items.length > 0) || 
-                (carritoItems && (!data.items || data.items.length === 0))) {
+            if ((carritoVacio && data.carrito && data.carrito.length > 0) || 
+                (carritoItems && (!data.carrito || data.carrito.length === 0))) {
                 console.log('Estado del carrito cambió, recargando página');
                 window.location.reload();
                 return;
@@ -77,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function agregarAlCarrito(productoId, cantidad) {
         console.log(`Agregando producto ID: ${productoId}, cantidad: ${cantidad}`);
         
-        fetch('/api/cart/add', {
+        fetch(BASE_URL + '/cart/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,10 +99,18 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         })
         .then(response => {
+            console.log('Respuesta del servidor:', response);
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
             }
-            return response.json();
+            return response.text().then(text => {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Error al parsear JSON:', text);
+                    throw new Error('Respuesta no válida del servidor');
+                }
+            });
         })
         .then(data => {
             console.log('Respuesta del servidor:', data);
@@ -182,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Asignar eventos a botones de agregar al carrito en la lista de productos
-    const botonesAgregar = document.querySelectorAll('.agregar-al-carrito, .agregar');
+    const botonesAgregar = document.querySelectorAll('.agregar');
     if (botonesAgregar && botonesAgregar.length > 0) {
         console.log(`Encontrados ${botonesAgregar.length} botones de agregar al carrito`);
         
