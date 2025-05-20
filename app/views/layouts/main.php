@@ -11,8 +11,8 @@
     require_once BASE_PATH . '/app/helpers/ViewHelper.php';
     ?>
     
-    <!-- CSS Base - forzamos la recarga con timestamp para desarrollo -->
-    <link rel="stylesheet" href="<?= AssetHelper::css('main') ?>">
+    <!-- CSS Base -->
+    <link rel="stylesheet" href="<?= AssetHelper::css('common') ?>">
     
     <!-- CSS Específicos -->
     <?php if (isset($css) && is_array($css)): ?>

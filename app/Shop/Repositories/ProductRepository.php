@@ -40,10 +40,16 @@ class ProductRepository implements ProductRepositoryInterface
         );
     }
     
-    public function findAll(): array
+    public function findAll(int $limit = null): array
     {
         $conn = $this->db->getConnection();
-        $result = $conn->query("SELECT * FROM Producto");
+        $sql = "SELECT * FROM Producto";
+        
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+        
+        $result = $conn->query($sql);
         
         $products = [];
         while ($data = $result->fetch_assoc()) {

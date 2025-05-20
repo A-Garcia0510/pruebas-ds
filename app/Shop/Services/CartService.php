@@ -192,4 +192,104 @@ class CartService implements CartInterface
         
         return $total;
     }
+
+    /**
+     * Obtiene un item específico del carrito
+     * 
+     * @param string $userEmail Email del usuario
+     * @param int $productId ID del producto
+     * @return CartItem|null
+     */
+    public function getItem($userEmail, $productId)
+    {
+        $conn = $this->db->getConnection();
+        
+        // Obtener usuario_ID a partir del correo
+        $stmtUser = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
+        $stmtUser->bind_param("s", $userEmail);
+        $stmtUser->execute();
+        $userResult = $stmtUser->get_result();
+        
+        if ($userResult->num_rows === 0) {
+            return null;
+        }
+        
+        $userData = $userResult->fetch_assoc();
+        $userIdInt = $userData['usuario_ID'];
+        
+        $stmt = $conn->prepare("
+            SELECT c.*, p.nombre_producto, p.precio 
+            FROM Carro c 
+            JOIN Producto p ON c.producto_ID = p.producto_ID 
+            WHERE c.usuario_ID = ? AND c.producto_ID = ?
+        ");
+        $stmt->bind_param("ii", $userIdInt, $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            return null;
+        }
+        
+        $data = $result->fetch_assoc();
+        return new CartItem(
+            $userEmail,
+            $data['producto_ID'],
+            $data['cantidad'],
+            $data['nombre_producto'],
+            $data['precio']
+        );
+    }
+
+    /**
+     * Actualiza la cantidad de un producto en el carrito
+     * 
+     * @param string $userEmail Email del usuario
+     * @param int $productId ID del producto
+     * @param int $quantity Nueva cantidad
+     * @return bool
+     */
+    public function updateQuantity($userEmail, $productId, $quantity)
+    {
+        $conn = $this->db->getConnection();
+        
+        // Verificar stock disponible
+        $product = $this->productRepository->findById($productId);
+        if (!$product) {
+            throw new ProductNotFoundException("Producto no encontrado");
+        }
+        
+        if (!$product->hasStock($quantity)) {
+            throw new InsufficientStockException(
+                "Stock insuficiente. Solo hay " . $product->getStock() . " unidades disponibles.",
+                400,
+                null,
+                $productId,
+                $quantity,
+                $product->getStock()
+            );
+        }
+        
+        // Obtener usuario_ID a partir del correo
+        $stmtUser = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
+        $stmtUser->bind_param("s", $userEmail);
+        $stmtUser->execute();
+        $userResult = $stmtUser->get_result();
+        
+        if ($userResult->num_rows === 0) {
+            throw new \Exception("Usuario no encontrado");
+        }
+        
+        $userData = $userResult->fetch_assoc();
+        $userIdInt = $userData['usuario_ID'];
+        
+        $stmt = $conn->prepare("
+            UPDATE Carro 
+            SET cantidad = ? 
+            WHERE usuario_ID = ? AND producto_ID = ?
+        ");
+        $stmt->bind_param("iii", $quantity, $userIdInt, $productId);
+        
+        return $stmt->execute();
+    }
 }

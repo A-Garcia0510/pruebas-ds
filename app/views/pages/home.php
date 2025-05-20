@@ -9,13 +9,20 @@
 
 // Asegurarnos de que las clases helper estén disponibles
 require_once BASE_PATH . '/app/helpers/AssetHelper.php';
+require_once BASE_PATH . '/app/helpers/ViewHelper.php';
 ?>
 
+<link rel="stylesheet" href="<?= AssetHelper::css('index') ?>">
+
 <section class="hero">
+    <video autoplay muted loop class="hero-video">
+        <source src="<?= AssetHelper::url('videos/video1.mp4') ?>" type="video/mp4">
+        Tu navegador no soporta el elemento de video.
+    </video>
     <div class="hero-content">
         <h2>Bienvenidos a Ethos Coffee</h2>
         <p>Tu destino para una experiencia de compra excepcional.</p>
-        <a href="<?= AssetHelper::url('productos') ?>" class="btn">Ver Productos</a>
+        <a href="<?= AssetHelper::url('products') ?>" class="btn">Ver Productos</a>
     </div>
 </section>
 
@@ -49,18 +56,30 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
             <h2>Productos Destacados</h2>
         </div>
         <div class="products-grid">
+            <?php if (!empty($featuredProducts)): ?>
             <?php foreach ($featuredProducts as $product): ?>
                 <div class="product-card">
-                    <div class="product-img">
-                        <img src="<?= $product['image'] ?>" alt="<?= $product['name'] ?>">
+                        <div class="product-image">
+                            <?php
+                            $nombre_imagen = strtolower(str_replace(' ', '_', $product->getName())) . '.jpg';
+                            $imagen_ruta = "IMG-P/" . $nombre_imagen;
+                            if (file_exists(BASE_PATH . '/public/' . $imagen_ruta)) {
+                                echo '<img src="' . AssetHelper::url($imagen_ruta) . '" alt="' . htmlspecialchars($product->getName()) . '">';
+                            } else {
+                                echo '<img src="/api/placeholder/400/400" alt="' . htmlspecialchars($product->getName()) . '">';
+                            }
+                            ?>
                     </div>
                     <div class="product-info">
-                        <h3><?= $product['name'] ?></h3>
-                        <p><?= $product['description'] ?></p>
-                        <div class="price">$<?= number_format($product['price'], 2) ?></div>
+                            <h3><?= htmlspecialchars($product->getName()) ?></h3>
+                            <p class="price">$<?= number_format($product->getPrice(), 0, ',', '.') ?></p>
+                            <a href="<?= AssetHelper::url('products/detail/' . $product->getId()) ?>" class="btn">Ver Detalles</a>
                     </div>
                 </div>
             <?php endforeach; ?>
+            <?php else: ?>
+                <p class="no-products">No hay productos destacados disponibles en este momento.</p>
+            <?php endif; ?>
         </div>
     </div>
 </section>

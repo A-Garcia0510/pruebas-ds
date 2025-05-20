@@ -41,11 +41,16 @@ class ProductController extends BaseController
         // Obtener todos los productos
         $products = $this->productRepository->findAll();
         
+        // Verificar si el usuario está autenticado
+        $isLoggedIn = isset($_SESSION['correo']);
+        
         // Renderizar la vista de listado de productos
         return $this->render('products/index', [
             'categories' => $categories,
             'products' => $products,
-            'title' => 'Nuestros Productos'
+            'title' => 'Nuestros Productos',
+            'isLoggedIn' => $isLoggedIn,
+            'css' => ['productos']
         ]);
     }
     
@@ -74,10 +79,15 @@ class ProductController extends BaseController
                 throw new ProductNotFoundException("Producto con ID $id no encontrado");
             }
             
+            // Verificar si el usuario está autenticado
+            $isLoggedIn = isset($_SESSION['correo']);
+            
             // Renderizar la vista de detalle de producto
             return $this->render('products/detail', [
                 'product' => $product,
-                'title' => $product->getName()
+                'title' => $product->getName(),
+                'isLoggedIn' => $isLoggedIn,
+                'css' => ['detalleproducto']
             ]);
             
         } catch (ProductNotFoundException $e) {
@@ -109,12 +119,16 @@ class ProductController extends BaseController
         // Obtener productos por categoría
         $products = $this->productRepository->findByCategory($category);
         
+        // Verificar si el usuario está autenticado
+        $isLoggedIn = isset($_SESSION['correo']);
+        
         // Renderizar la vista de listado de productos filtrados por categoría
         return $this->render('products/index', [
             'categories' => $categories,
             'products' => $products,
             'currentCategory' => $category,
-            'title' => 'Productos - ' . $category
+            'title' => 'Productos - ' . $category,
+            'isLoggedIn' => $isLoggedIn
         ]);
     }
     
@@ -165,6 +179,14 @@ class ProductController extends BaseController
                 'success' => false,
                 'message' => 'Método no permitido'
             ], 405);
+        }
+        
+        // Verificar si el usuario está autenticado
+        if (!isset($_SESSION['correo'])) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Debes iniciar sesión para agregar productos al carrito'
+            ], 401);
         }
         
         // Obtener datos del cuerpo de la solicitud

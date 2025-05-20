@@ -75,7 +75,10 @@ class CartController extends BaseController
             return;
         }
         
-        return $this->render('cart/index');
+        return $this->render('cart/index', [
+            'title' => 'Carrito de Compras - Café-VT',
+            'css' => ['carro']
+        ]);
     }
     
     /**
@@ -91,12 +94,12 @@ class CartController extends BaseController
         error_log('===================');
 
         try {
-            if (!isset($_SESSION['correo'])) {
+        if (!isset($_SESSION['correo'])) {
                 error_log('Usuario no autenticado - No existe $_SESSION[correo]');
                 $this->jsonResponse(['success' => false, 'message' => 'Usuario no autenticado'], 401);
-                return;
-            }
-
+            return;
+        }
+        
             $userEmail = $_SESSION['correo'];
             error_log("CartController::getItems() - Obteniendo carrito para usuario: " . $userEmail);
             
@@ -109,12 +112,12 @@ class CartController extends BaseController
                 'success' => true,
                 'carrito' => array_map(function($item) {
                     return [
-                        'producto_ID' => $item->getProductId(),
-                        'nombre_producto' => $item->getProductName(),
-                        'cantidad' => $item->getQuantity(),
-                        'precio' => $item->getProductPrice(),
+                    'producto_ID' => $item->getProductId(),
+                    'nombre_producto' => $item->getProductName(),
+                    'cantidad' => $item->getQuantity(),
+                    'precio' => $item->getProductPrice(),
                         'subtotal' => $item->getSubtotal()
-                    ];
+                ];
                 }, $items),
                 'total' => $total,
                 'message' => count($items) > 0 ? 'Carrito obtenido exitosamente' : 'El carrito está vacío'
@@ -144,7 +147,7 @@ class CartController extends BaseController
                 $this->jsonResponse(['success' => false, 'message' => 'Usuario no autenticado'], 401);
                 return;
             }
-
+            
             $data = json_decode(file_get_contents('php://input'), true);
             
             if (!isset($data['producto_ID']) || !isset($data['cantidad'])) {
@@ -154,7 +157,7 @@ class CartController extends BaseController
                 ], 400);
                 return;
             }
-
+            
             $userEmail = $_SESSION['correo'];
             $productId = (int)$data['producto_ID'];
             $quantity = (int)$data['cantidad'];
@@ -167,11 +170,20 @@ class CartController extends BaseController
                 return;
             }
 
-            $this->cartService->addItem($userEmail, $productId, $quantity);
+            // Verificar si el producto ya existe en el carrito
+            $existingItem = $this->cartService->getItem($userEmail, $productId);
+            
+            if ($existingItem) {
+                // Si existe, actualizar la cantidad
+                $this->cartService->updateQuantity($userEmail, $productId, $quantity);
+            } else {
+                // Si no existe, agregar nuevo item
+                $this->cartService->addItem($userEmail, $productId, $quantity);
+            }
             
             $this->jsonResponse([
                 'success' => true,
-                'message' => 'Producto agregado al carrito exitosamente'
+                'message' => 'Carrito actualizado exitosamente'
             ]);
             
         } catch (ProductNotFoundException $e) {
@@ -181,7 +193,7 @@ class CartController extends BaseController
             ], 404);
         } catch (InsufficientStockException $e) {
             $this->jsonResponse([
-                'success' => false,
+                'success' => false, 
                 'message' => $e->getMessage(),
                 'producto_ID' => $e->getProductId(),
                 'cantidad_solicitada' => $e->getRequestedQuantity(),
@@ -193,7 +205,7 @@ class CartController extends BaseController
             
             $this->jsonResponse([
                 'success' => false,
-                'message' => 'Error al agregar producto al carrito: ' . $e->getMessage()
+                'message' => 'Error al actualizar el carrito: ' . $e->getMessage()
             ], 500);
         }
     }

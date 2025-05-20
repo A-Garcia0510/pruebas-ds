@@ -75,9 +75,11 @@ $app->router->get('/api/products', [\App\Controllers\ProductController::class, '
 $app->router->post('/api/carrito/agregar', [\App\Controllers\ProductController::class, 'addToCart']);
 $app->router->post('/api/cart/add', [\App\Controllers\ProductController::class, 'addToCart']);
 
-// Rutas para otras páginas estáticas
+// Rutas para páginas estáticas
 $app->router->get('/servicios', [\App\Controllers\PageController::class, 'services']);
+$app->router->get('/services', [\App\Controllers\PageController::class, 'services']);
 $app->router->get('/ayuda', [\App\Controllers\PageController::class, 'help']);
+$app->router->get('/help', [\App\Controllers\PageController::class, 'help']);
 
 // Rutas de autenticación
 $app->router->get('/login', [\App\Controllers\AuthController::class, 'login']);

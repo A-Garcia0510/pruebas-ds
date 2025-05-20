@@ -1,10 +1,12 @@
 :root {
-    --primary-color: #2C3E50;
-    --secondary-color: #3498DB;
-    --light-color: #ECF0F1;
-    --accent-color: #E74C3C;
-    --text-color: #2C3E50;
-    --background-color: #F9F9F9;
+    --primary-color: #5D4037;
+    --secondary-color: #8D6E63;
+    --light-color: #EFEBE9;
+    --accent-color: #4CAF50;
+    --text-color: #3E2723;
+    --background-color: #FFF8E1;
+    --danger-color: #D32F2F;
+    --success-color: #388E3C;
 }
 
 * {
@@ -18,6 +20,12 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
+    padding: 2rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 2rem;
 }
 
@@ -55,107 +63,174 @@ h1::after {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    position: relative;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .producto:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .producto img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 5px;
-    margin-bottom: 1rem;
+    width: 150px;
+    height: 150px;
     object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .producto h2 {
     color: var(--primary-color);
     margin-bottom: 0.5rem;
     font-size: 1.3rem;
+    font-weight: 600;
 }
 
 .producto p {
-    color: #666;
+    color: var(--text-color);
     margin-bottom: 0.5rem;
+    font-size: 1.1rem;
 }
 
-.producto button {
-    background-color: var(--accent-color);
+.producto .cantidad {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.producto .cantidad button {
+    background-color: var(--light-color);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    transition: all 0.3s;
+}
+
+.producto .cantidad button:hover {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.producto .cantidad span {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.producto button.eliminar {
+    background-color: var(--danger-color);
     color: white;
     border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 30px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    margin-top: 1rem;
+    transition: all 0.3s;
     font-weight: 500;
+    width: 100%;
+    margin-top: 1rem;
 }
 
-.producto button:hover {
-    background-color: #c0392b;
+.producto button.eliminar:hover {
+    background-color: #B71C1C;
     transform: translateY(-2px);
 }
 
 .total {
     background-color: white;
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    text-align: right;
-    font-size: 1.1rem;
-    line-height: 1.8;
     max-width: 500px;
     margin: 0 auto 2rem auto;
 }
 
-#volver, #finalizarCompra {
-    display: inline-block;
-    padding: 0.8rem 2rem;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s;
-    cursor: pointer;
-    border: none;
-    margin: 0 0.5rem;
-    font-size: 1rem;
+.resumen-total {
+    text-align: right;
 }
 
-#volver {
-    background-color: var(--secondary-color);
-    color: white;
+.resumen-total p {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--text-color);
 }
 
-#volver:hover {
-    background-color: #2980b9;
-    transform: translateY(-2px);
+.resumen-total .total-final {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--light-color);
 }
 
-#finalizarCompra {
-    background-color: var(--accent-color);
-    color: white;
-}
-
-#finalizarCompra:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-}
-
-.buttons-container {
+.cart-actions {
     display: flex;
     justify-content: center;
     gap: 1rem;
     margin-top: 2rem;
 }
 
-/* Mensaje cuando no hay productos */
+.btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #6D4C41;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #388E3C;
+    transform: translateY(-2px);
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.alert-danger {
+    background-color: #FFEBEE;
+    color: var(--danger-color);
+    border: 1px solid #FFCDD2;
+}
+
 #carrito p {
     grid-column: 1 / -1;
     text-align: center;
@@ -164,12 +239,11 @@ h1::after {
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     font-size: 1.1rem;
-    color: #666;
+    color: var(--text-color);
 }
 
-/* Estilos responsivos */
 @media (max-width: 768px) {
-    body {
+    .container {
         padding: 1rem;
     }
     
@@ -181,30 +255,23 @@ h1::after {
         max-width: 100%;
     }
     
-    #volver, #finalizarCompra {
-        width: 100%;
-        margin: 0.5rem 0;
-        text-align: center;
-    }
-    
-    .buttons-container {
+    .cart-actions {
         flex-direction: column;
     }
-}
-
-/* Animación para los botones y productos */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
+    
+    .btn {
+        width: 100%;
+        text-align: center;
     }
 }
 
-.producto button:active, #volver:active, #finalizarCompra:active {
-    animation: pulse 0.3s;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

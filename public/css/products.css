@@ -132,7 +132,6 @@ header {
     padding: 0 2rem;
 }
 
-/* Estilos actualizados para productos sin imágenes */
 .producto-tarjeta {
     background-color: white;
     border-radius: 10px;
@@ -156,21 +155,25 @@ header {
 }
 
 .producto-info h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     font-size: 1.3rem;
     color: var(--primary-color);
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 0.8rem;
 }
 
-.precio {
+.producto-info .categoria {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.producto-info .precio {
     font-weight: 600;
     color: var(--accent-color);
     font-size: 1.4rem;
     margin-bottom: 0.5rem;
 }
 
-.stock {
+.producto-info .stock {
     color: #666;
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
@@ -182,6 +185,7 @@ header {
     gap: 1rem;
 }
 
+.acciones a,
 .acciones button {
     flex: 1;
     padding: 0.8rem;
@@ -190,6 +194,8 @@ header {
     cursor: pointer;
     font-weight: 500;
     transition: all 0.3s;
+    text-align: center;
+    text-decoration: none;
 }
 
 .ver-detalle {
@@ -208,6 +214,20 @@ header {
 
 .agregar:hover {
     background-color: #388E3C;
+}
+
+.login-required {
+    background-color: var(--light-color);
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    padding: 0.8rem;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.login-required:hover {
+    background-color: #e0d8d3;
 }
 
 /* Cart Button */

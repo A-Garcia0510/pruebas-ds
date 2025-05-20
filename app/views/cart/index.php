@@ -94,12 +94,16 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
             }
 
             carritoDiv.innerHTML += `
-                <div class="producto">
-                    <img src="<?= AssetHelper::url('img-p') ?>/${nombre_imagen}" alt="${producto.nombre_producto || 'Producto'}" width="100" onerror="this.src='<?= AssetHelper::url('img-p') ?>/default.jpg';" />
+                <div class="producto" data-id="${producto.producto_ID}">
+                    <img src="<?= AssetHelper::url('img-p') ?>/${nombre_imagen}" alt="${producto.nombre_producto || 'Producto'}" onerror="this.src='<?= AssetHelper::url('img-p') ?>/default.jpg';" />
                     <h2>${producto.nombre_producto || 'Producto sin nombre'}</h2>
                     <p>Precio: $${formatearPrecioCLP(producto.precio || 0)}</p>
-                    <p>Cantidad: ${producto.cantidad || 0}</p>
-                    <button class="btn btn-danger" onclick="eliminarDelCarrito(${producto.producto_ID})">Eliminar</button>
+                    <div class="cantidad">
+                        <button onclick="actualizarCantidad(${producto.producto_ID}, ${producto.cantidad - 1})" ${producto.cantidad <= 1 ? 'disabled' : ''}>-</button>
+                        <span>${producto.cantidad || 0}</span>
+                        <button onclick="actualizarCantidad(${producto.producto_ID}, ${producto.cantidad + 1})">+</button>
+                    </div>
+                    <button class="eliminar" onclick="eliminarDelCarrito(${producto.producto_ID})">Eliminar</button>
                 </div>
             `;
         });
@@ -114,6 +118,49 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
                 <p class="total-final">Total: $${formatearPrecioCLP(totalConIVA)}</p>
             </div>
         `;
+    }
+
+    // Función para actualizar la cantidad de un producto
+    function actualizarCantidad(productoID, nuevaCantidad) {
+        if (nuevaCantidad < 1) {
+            eliminarDelCarrito(productoID);
+            return;
+        }
+
+        // Mostrar indicador de carga
+        const productoElement = document.querySelector(`.producto[data-id="${productoID}"]`);
+        if (productoElement) {
+            productoElement.style.opacity = '0.5';
+        }
+
+        fetch('<?= AssetHelper::url('cart/add') ?>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                producto_ID: productoID, 
+                cantidad: nuevaCantidad 
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                obtenerCarrito();
+            } else {
+                mostrarError(true, data.message || 'Error al actualizar la cantidad');
+                // Restaurar opacidad
+                if (productoElement) {
+                    productoElement.style.opacity = '1';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarError(true, 'Error al actualizar la cantidad');
+            // Restaurar opacidad
+            if (productoElement) {
+                productoElement.style.opacity = '1';
+            }
+        });
     }
 
     // Función para eliminar un producto del carrito

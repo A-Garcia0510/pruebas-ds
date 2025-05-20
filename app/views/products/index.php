@@ -7,7 +7,7 @@
 require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 require_once BASE_PATH . '/app/helpers/ViewHelper.php';
 ?>
-<link rel="stylesheet" href="<?= AssetHelper::css('productos') ?>">
+<link rel="stylesheet" href="<?= AssetHelper::css('products') ?>">
 
 <div class="page-title">
     <h1>Nuestros Productos</h1>
@@ -37,7 +37,11 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
                     <p class="stock">Disponible: <?= $product->getStock() ?> unidades</p>
                     <div class="acciones">
                         <a href="<?= AssetHelper::url('products/detail/' . $product->getId()) ?>" class="ver-detalle">Ver Detalle</a>
+                        <?php if ($isLoggedIn): ?>
                         <button class="agregar" data-id="<?= $product->getId() ?>">Agregar</button>
+                        <?php else: ?>
+                            <a href="<?= AssetHelper::url('login') ?>" class="login-required">Inicia sesión para comprar</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -45,11 +49,46 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
     <?php endif; ?>
 </div>
 
+<?php if ($isLoggedIn): ?>
 <button id="carrito-btn" class="carrito-button" onclick="window.location.href='<?= AssetHelper::url('cart') ?>'">
     <img src="<?= AssetHelper::img('carro.png') ?>" alt="Carrito" class="carrito-logo">
     Ver Carrito
 </button>
 
-<!-- Cambiar la referencia del script a main.js en lugar de products.js -->
 <script src="<?= AssetHelper::js('main') ?>"></script>
 <script src="<?= AssetHelper::js('cart') ?>"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartButtons = document.querySelectorAll('.agregar');
+    
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.id;
+            
+            fetch('<?= AssetHelper::url('cart/add') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    producto_ID: productId, 
+                    cantidad: 1 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Producto agregado al carrito con éxito.');
+                } else {
+                    alert('Error al agregar producto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar el producto al carrito.');
+            });
+        });
+    });
+});
+</script>
+<?php endif; ?>

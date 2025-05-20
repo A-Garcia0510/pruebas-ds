@@ -38,18 +38,24 @@ $imagen_ruta = "IMG-P/" . $nombre_imagen;
         <p class="precio">$<?= number_format($product->getPrice(), 0, ',', '.') ?></p>
         <p class="stock">Disponibilidad: <?= $product->getStock() ?> unidades</p>
         
-        <div class="cantidad-selector">
-            <label for="cantidad">Cantidad:</label>
-            <div class="cantidad-controles">
-                <button type="button" id="decrementar">-</button>
-                <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="<?= $product->getStock() ?>">
-                <button type="button" id="incrementar">+</button>
+        <?php if ($isLoggedIn): ?>
+            <div class="cantidad-selector">
+                <label for="cantidad">Cantidad:</label>
+                <div class="cantidad-controles">
+                    <button type="button" id="decrementar">-</button>
+                    <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="<?= $product->getStock() ?>">
+                    <button type="button" id="incrementar">+</button>
+                </div>
             </div>
-        </div>
-        
-        <button class="agregar-btn" id="agregar-carrito" data-id="<?= $product->getId() ?>">
-            Agregar al Carrito
-        </button>
+            
+            <button class="agregar-btn" id="agregar-carrito" data-id="<?= $product->getId() ?>">
+                Agregar al Carrito
+            </button>
+        <?php else: ?>
+            <div class="login-required">
+                <p>Para agregar productos al carrito, debes <a href="<?= AssetHelper::url('login') ?>">iniciar sesión</a></p>
+            </div>
+        <?php endif; ?>
         
         <div class="descripcion">
             <h3>Descripción:</h3>
@@ -58,6 +64,7 @@ $imagen_ruta = "IMG-P/" . $nombre_imagen;
     </div>
 </div>
 
+<?php if ($isLoggedIn): ?>
 <button id="carrito-btn" class="carrito-button" onclick="window.location.href='<?= AssetHelper::url('cart') ?>'">
     <img src="<?= AssetHelper::img('carro.png') ?>" alt="Carrito" class="carrito-logo">
     Ver Carrito
@@ -89,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     agregarCarritoBtn.addEventListener('click', function() {
         const cantidad = parseInt(cantidadInput.value);
         
-        fetch('<?= AssetHelper::url('api/cart/add') ?>', {
+        fetch('<?= AssetHelper::url('cart/add') ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -114,3 +121,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<?php endif; ?>

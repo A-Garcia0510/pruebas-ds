@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error en la petición:', error);
                 productosGrid.innerHTML = '<div class="error-state">Error al cargar productos. Por favor, intenta nuevamente.</div>';
-            });
+        });
     }
     
     /**
