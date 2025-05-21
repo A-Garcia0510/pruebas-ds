@@ -62,6 +62,9 @@ $app->router->get('/cart/items', [\App\Controllers\CartController::class, 'getIt
 $app->router->post('/cart/add', [\App\Controllers\CartController::class, 'addItem']);
 $app->router->post('/cart/remove', [\App\Controllers\CartController::class, 'removeItem']);
 $app->router->post('/cart/checkout', [\App\Controllers\CartController::class, 'checkout']);
+$app->router->get('/cart/history', [\App\Controllers\CartController::class, 'history']);
+$app->router->post('/cart/undo', [\App\Controllers\CartController::class, 'undoLastAction']);
+$app->router->post('/cart/redo', [\App\Controllers\CartController::class, 'redoLastAction']);
 
 // Rutas de productos (en español e inglés para compatibilidad)
 $app->router->get('/productos', [\App\Controllers\ProductController::class, 'index']);

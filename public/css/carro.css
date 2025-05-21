@@ -26,7 +26,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 20px;
 }
 
 h1 {
@@ -181,54 +181,52 @@ h1::after {
 
 .cart-actions {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 2rem;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
 .btn {
-    display: inline-block;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
     font-weight: 500;
-    transition: all 0.3s;
-    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
     border: none;
-    font-size: 1rem;
 }
 
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: white;
+.btn-success:hover:not(:disabled) {
+    background-color: #218838;
 }
 
-.btn-secondary:hover {
-    background-color: #6D4C41;
-    transform: translateY(-2px);
-}
-
-.btn-primary {
-    background-color: var(--accent-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #388E3C;
-    transform: translateY(-2px);
+.btn-success:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
 }
 
 .alert {
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    text-align: center;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
 
 .alert-danger {
-    background-color: #FFEBEE;
-    color: var(--danger-color);
-    border: 1px solid #FFCDD2;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
 }
 
 #carrito p {
@@ -257,11 +255,26 @@ h1::after {
     
     .cart-actions {
         flex-direction: column;
+        gap: 10px;
     }
     
     .btn {
         width: 100%;
         text-align: center;
+    }
+
+    .table-responsive {
+        margin: 0 -15px;
+        border-radius: 0;
+    }
+
+    .quantity-controls {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .quantity-controls input {
+        width: 100%;
     }
 }
 
@@ -274,4 +287,438 @@ h1::after {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Estilos para los botones de Deshacer/Rehacer */
+.action-buttons {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.action-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#undoBtn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#undoBtn:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+#redoBtn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#redoBtn:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+/* Estilos para la tabla del carrito */
+.table-responsive {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 12px;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Estilos para los controles de cantidad */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    background-color: #f3f3f3;
+    padding: 0.15rem 0.5rem;
+    border-radius: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    min-width: 90px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.btn-quantity {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(93, 64, 55, 0.10);
+}
+
+.btn-quantity:hover:not(:disabled) {
+    background-color: var(--accent-color);
+    color: #fff;
+    transform: scale(1.08);
+}
+
+.btn-quantity:disabled {
+    background-color: #e0e0e0;
+    color: #bdbdbd;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.quantity-input {
+    width: 36px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0 2px;
+    outline: none;
+}
+
+.quantity-input:focus {
+    background: #fffbe7;
+    border-radius: 4px;
+}
+
+/* Estilos para el botón de eliminar */
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.delete-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Estilos para los botones de acción */
+.cart-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 16px;
+}
+
+.cart-actions .btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1em;
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-success:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Estilos para la tabla del carrito */
+.table-responsive {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 16px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+    color: #495057;
+}
+
+/* Estilos para el total */
+.total-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.total-section p {
+    margin: 8px 0;
+    font-size: 1.1em;
+    color: #495057;
+}
+
+.total-section .total-final {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #28a745;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid #dee2e6;
+}
+
+/* Estilos para los botones de Deshacer/Rehacer */
+.action-buttons {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+}
+
+.action-buttons button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 1.1em;
+}
+
+.action-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #6c757d;
+}
+
+#undoBtn, #redoBtn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#undoBtn:hover:not(:disabled), #redoBtn:hover:not(:disabled) {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos para mensajes de error */
+.alert {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 2px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .table-responsive {
+        margin: 0 -15px;
+        border-radius: 0;
+    }
+
+    .cart-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .cart-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .quantity-controls {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .quantity-input {
+        width: 100%;
+    }
+
+    .btn-quantity {
+        width: 100%;
+    }
+}
+
+/* --- Nombre del producto alineado horizontalmente con la imagen --- */
+.table td .d-flex {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.table td .d-flex img {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(93, 64, 55, 0.10);
+    background: #fff;
+    margin: 0;
+    transition: transform 0.22s cubic-bezier(.4,1.3,.6,1), box-shadow 0.22s;
+}
+
+.table td .d-flex img:hover {
+    transform: scale(1.08) rotate(-2deg);
+    box-shadow: 0 8px 24px rgba(93, 64, 55, 0.18);
+}
+
+.table td .d-flex span {
+    font-size: 1.18em;
+    font-weight: 700;
+    color: var(--primary-color);
+    max-width: 180px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+/* --- Mejorar el botón Seguir Comprando --- */
+.cart-actions .btn-outline-primary {
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+    background: #fff;
+    font-weight: 600;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.08);
+    transition: all 0.2s;
+}
+
+.cart-actions .btn-outline-primary i {
+    font-size: 1.2em;
+    margin-right: 4px;
+}
+
+.cart-actions .btn-outline-primary:hover {
+    background: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.18);
+}
+
+.table td .d-flex {
+    align-items: center;
+    gap: 0;
+}
+
+.table td .d-flex span {
+    font-size: 1.18em;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 150px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+/* Centrar el botón de eliminar en la columna de acciones */
+.table td:last-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }

@@ -8,6 +8,8 @@ use App\Shop\Interfaces\ProductRepositoryInterface;
 use App\Shop\Models\CartItem;
 use App\Shop\Exceptions\ProductNotFoundException;
 use App\Shop\Exceptions\InsufficientStockException;
+use PDO;
+use Exception;
 
 class CartService implements CartInterface
 {
@@ -22,68 +24,132 @@ class CartService implements CartInterface
         $this->productRepository = $productRepository;
     }
     
-    public function addItem(string $userId, int $productId, int $quantity): bool
+    public function addItem(string $userEmail, int $productId, int $quantity, bool $actualizar = false): bool
     {
-        error_log("CartService::addItem() - Iniciando con userId: " . $userId . ", productId: " . $productId . ", quantity: " . $quantity);
-        
-        $conn = $this->db->getConnection();
-        
-        // Primero obtenemos el usuario_ID a partir del correo
-        $stmtUser = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
-        $stmtUser->bind_param("s", $userId); // $userId aquí es el correo electrónico
-        $stmtUser->execute();
-        $userResult = $stmtUser->get_result();
-        
-        if ($userResult->num_rows === 0) {
-            error_log("CartService::addItem() - Usuario no encontrado: " . $userId);
-            throw new \Exception("Usuario no encontrado");
+        try {
+            // Verificar stock disponible
+            $product = $this->productRepository->findById($productId);
+            if (!$product) {
+                error_log("CartService::addItem - Producto no encontrado: " . $productId);
+                return false;
+            }
+
+            // Verificar stock usando el método getStock() del objeto Product
+            if ($product->getStock() < $quantity) {
+                error_log("CartService::addItem - Stock insuficiente para producto: " . $productId . ". Stock disponible: " . $product->getStock());
+                return false;
+            }
+
+            // Verificar si el producto ya está en el carrito
+            $cartItem = $this->getCartItem($userEmail, $productId);
+            
+            if ($cartItem) {
+                // Si el producto ya existe y estamos actualizando, simplemente actualizamos la cantidad
+                if ($actualizar) {
+                    return $this->updateItemQuantity($userEmail, $productId, $quantity);
+                }
+                // Si no estamos actualizando, sumamos la cantidad nueva a la existente
+                $quantity += $cartItem['cantidad'];
+            }
+
+            // Obtener usuario_ID a partir del correo
+            $conn = $this->db->getConnection();
+            $stmtUser = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
+            $stmtUser->bind_param("s", $userEmail);
+            $stmtUser->execute();
+            $userResult = $stmtUser->get_result();
+            
+            if ($userResult->num_rows === 0) {
+                error_log("CartService::addItem - Usuario no encontrado: " . $userEmail);
+                return false;
+            }
+            
+            $userData = $userResult->fetch_assoc();
+            $userIdInt = $userData['usuario_ID'];
+
+            // Si el producto no existe en el carrito, lo agregamos
+            if (!$cartItem) {
+                $stmt = $conn->prepare("INSERT INTO Carro (usuario_ID, producto_ID, cantidad) VALUES (?, ?, ?)");
+                $stmt->bind_param("iii", $userIdInt, $productId, $quantity);
+                $result = $stmt->execute();
+                
+                if (!$result) {
+                    error_log("CartService::addItem - Error al insertar en carrito: " . $stmt->error);
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            error_log("Error en CartService::addItem: " . $e->getMessage());
+            return false;
         }
-        
-        $userData = $userResult->fetch_assoc();
-        $userIdInt = $userData['usuario_ID']; // ID numérico del usuario
-        error_log("CartService::addItem() - usuario_ID encontrado: " . $userIdInt);
-        
-        // Verificar si el producto existe y tiene stock suficiente
-        $product = $this->productRepository->findById($productId);
-        if (!$product) {
-            error_log("CartService::addItem() - Producto no encontrado: " . $productId);
-            throw new ProductNotFoundException("El producto no existe");
-        }
-        
-        if (!$product->hasStock($quantity)) {
-            error_log("CartService::addItem() - Stock insuficiente para producto: " . $productId);
-            throw new InsufficientStockException(
-                "No hay stock suficiente", 
-                400, 
-                null, 
-                $productId, 
-                $quantity, 
-                $product->getStock()
-            );
-        }
-        
-        // Verificar si el producto ya está en el carro
-        $stmt = $conn->prepare("SELECT * FROM Carro WHERE usuario_ID = ? AND producto_ID = ?");
-        $stmt->bind_param("ii", $userIdInt, $productId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            error_log("CartService::addItem() - Actualizando cantidad existente");
-            // Actualizar cantidad
-            $stmt = $conn->prepare("UPDATE Carro SET cantidad = cantidad + ? WHERE usuario_ID = ? AND producto_ID = ?");
+    }
+    
+    private function updateItemQuantity(string $userEmail, int $productId, int $quantity): bool
+    {
+        try {
+            $conn = $this->db->getConnection();
+            
+            // Obtener usuario_ID a partir del correo
+            $stmtUser = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
+            $stmtUser->bind_param("s", $userEmail);
+            $stmtUser->execute();
+            $userResult = $stmtUser->get_result();
+            
+            if ($userResult->num_rows === 0) {
+                error_log("CartService::updateItemQuantity - Usuario no encontrado: " . $userEmail);
+                return false;
+            }
+            
+            $userData = $userResult->fetch_assoc();
+            $userIdInt = $userData['usuario_ID'];
+
+            $stmt = $conn->prepare("UPDATE Carro SET cantidad = ? WHERE usuario_ID = ? AND producto_ID = ?");
             $stmt->bind_param("iii", $quantity, $userIdInt, $productId);
-        } else {
-            error_log("CartService::addItem() - Insertando nuevo item");
-            // Insertar nuevo item
-            $stmt = $conn->prepare("INSERT INTO Carro (usuario_ID, producto_ID, cantidad) VALUES (?, ?, ?)");
-            $stmt->bind_param("iii", $userIdInt, $productId, $quantity);
+            $result = $stmt->execute();
+            
+            if (!$result) {
+                error_log("CartService::updateItemQuantity - Error al actualizar cantidad: " . $stmt->error);
+                return false;
+            }
+            
+            return true;
+        } catch (\Exception $e) {
+            error_log("Error en CartService::updateItemQuantity: " . $e->getMessage());
+            return false;
         }
-        
-        $success = $stmt->execute();
-        error_log("CartService::addItem() - Operación completada con éxito: " . ($success ? "Sí" : "No"));
-        
-        return $success;
+    }
+    
+    private function getCartItem(string $userEmail, int $productId): ?array
+    {
+        try {
+            $conn = $this->db->getConnection();
+            
+            // Obtener usuario_ID a partir del correo
+            $stmtUser = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
+            $stmtUser->bind_param("s", $userEmail);
+            $stmtUser->execute();
+            $userResult = $stmtUser->get_result();
+            
+            if ($userResult->num_rows === 0) {
+                error_log("CartService::getCartItem - Usuario no encontrado: " . $userEmail);
+                return null;
+            }
+            
+            $userData = $userResult->fetch_assoc();
+            $userIdInt = $userData['usuario_ID'];
+
+            $stmt = $conn->prepare("SELECT * FROM Carro WHERE usuario_ID = ? AND producto_ID = ?");
+            $stmt->bind_param("ii", $userIdInt, $productId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            return $result->fetch_assoc() ?: null;
+        } catch (\Exception $e) {
+            error_log("Error en CartService::getCartItem: " . $e->getMessage());
+            return null;
+        }
     }
     
     public function removeItem(string $userId, int $productId): bool

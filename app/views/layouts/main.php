@@ -14,6 +14,9 @@
     <!-- CSS Base -->
     <link rel="stylesheet" href="<?= AssetHelper::css('common') ?>">
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- CSS Específicos -->
     <?php if (isset($css) && is_array($css)): ?>
         <?php foreach ($css as $stylesheet): ?>

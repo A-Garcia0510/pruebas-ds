@@ -189,76 +189,56 @@ class ProductController extends BaseController
             ], 401);
         }
         
-        // Obtener datos del cuerpo de la solicitud
-        $data = json_decode(file_get_contents('php://input'), true);
-        $productId = $data['producto_ID'] ?? null;
-        $quantity = $data['cantidad'] ?? 1;
-        
-        // Validar datos
-        if (!$productId || !is_numeric($productId) || !is_numeric($quantity) || $quantity < 1) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Datos inválidos'
-            ], 400);
-        }
-        
         try {
-            // Obtener producto
-            $product = $this->productRepository->findById((int)$productId);
+            // Obtener datos del cuerpo de la solicitud
+            $data = json_decode(file_get_contents('php://input'), true);
+            $productId = $data['producto_ID'] ?? null;
+            $quantity = $data['cantidad'] ?? 1;
             
-            // Verificar si el producto existe
-            if (!$product) {
-                throw new ProductNotFoundException("Producto no encontrado");
-            }
-            
-            // Verificar stock
-            if (!$product->hasStock($quantity)) {
+            // Validar datos
+            if (!$productId || !is_numeric($productId) || !is_numeric($quantity) || $quantity < 1) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'Stock insuficiente. Solo hay ' . $product->getStock() . ' unidades disponibles.'
+                    'message' => 'Datos inválidos'
                 ], 400);
             }
-            
-            // Inicializar carrito si no existe
-            if (!isset($_SESSION['carrito'])) {
-                $_SESSION['carrito'] = [];
+
+            // Inicializar servicios necesarios
+            $dbConfig = new \App\Core\Database\DatabaseConfiguration(
+                $this->config['database']['host'],
+                $this->config['database']['username'],
+                $this->config['database']['password'],
+                $this->config['database']['database']
+            );
+            $db = new \App\Core\Database\MySQLDatabase($dbConfig);
+            $cartService = new \App\Shop\Services\CartService($db, $this->productRepository);
+            $commandInvoker = new \App\Shop\Commands\CartCommandInvoker();
+
+            // Crear y ejecutar el comando
+            $command = new \App\Shop\Commands\AddToCartCommand(
+                $cartService,
+                $_SESSION['correo'],
+                (int)$productId,
+                (int)$quantity
+            );
+
+            if ($commandInvoker->executeCommand($command)) {
+                return $this->json([
+                    'success' => true,
+                    'message' => 'Producto agregado al carrito'
+                ]);
+            } else {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Error al agregar el producto al carrito'
+                ], 500);
             }
             
-            // Agregar al carrito o actualizar cantidad
-            $found = false;
-            foreach ($_SESSION['carrito'] as &$item) {
-                if ($item['producto_ID'] == $productId) {
-                    $item['cantidad'] += $quantity;
-                    $found = true;
-                    break;
-                }
-            }
-            
-            if (!$found) {
-                $_SESSION['carrito'][] = [
-                    'producto_ID' => $productId,
-                    'nombre' => $product->getName(),
-                    'precio' => $product->getPrice(),
-                    'cantidad' => $quantity
-                ];
-            }
-            
-            // Devolver respuesta exitosa
-            return $this->json([
-                'success' => true,
-                'message' => 'Producto agregado al carrito',
-                'cartCount' => count($_SESSION['carrito'])
-            ]);
-            
-        } catch (ProductNotFoundException $e) {
-            return $this->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 404);
         } catch (\Exception $e) {
+            error_log("Error en ProductController::addToCart: " . $e->getMessage());
             return $this->json([
                 'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage()
+                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
             ], 500);
         }
     }
