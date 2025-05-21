@@ -1,17 +1,30 @@
 <?php
 namespace App\Core;
 
+use App\Core\Interfaces\RequestInterface;
+
 /**
  * Gestiona los datos de la solicitud HTTP
  */
-class Request
+class Request implements RequestInterface
 {
+    private array $body = [];
+    private array $queryParams = [];
+    private array $headers = [];
+    
+    public function __construct()
+    {
+        $this->body = $this->getRequestBody();
+        $this->queryParams = $_GET;
+        $this->headers = getallheaders();
+    }
+    
     /**
      * Obtiene la ruta actual de la URL
      * 
      * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
         $path = $_SERVER['REQUEST_URI'] ?? '/';
         
@@ -51,7 +64,7 @@ class Request
      * 
      * @return string
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return strtoupper($_SERVER['REQUEST_METHOD']);
     }
@@ -81,23 +94,29 @@ class Request
      * 
      * @return array
      */
-    public function getBody()
+    public function getBody(): array
     {
-        $body = [];
-        
-        if ($this->isGet()) {
-            foreach ($_GET as $key => $value) {
-                $body[$key] = filter_input(INPUT_GET, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            }
-        }
-        
-        if ($this->isPost()) {
-            foreach ($_POST as $key => $value) {
-                $body[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            }
-        }
-        
-        return $body;
+        return $this->body;
+    }
+    
+    /**
+     * Obtiene los parámetros de consulta
+     * 
+     * @return array
+     */
+    public function getQueryParams(): array
+    {
+        return $this->queryParams;
+    }
+    
+    /**
+     * Obtiene los encabezados de la solicitud
+     * 
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
     
     /**
@@ -107,9 +126,56 @@ class Request
      * @param mixed $default Valor por defecto si no existe
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
+        // Primero buscar en los parámetros GET
+        if (isset($_GET[$key])) {
+            return $_GET[$key];
+        }
+        
+        // Luego buscar en el cuerpo de la solicitud
         $body = $this->getBody();
         return $body[$key] ?? $default;
+    }
+    
+    /**
+     * Obtiene un encabezado específico de la solicitud
+     * 
+     * @param string $name Nombre del encabezado
+     * @return ?string
+     */
+    public function getHeader(string $name): ?string
+    {
+        return $this->headers[$name] ?? null;
+    }
+    
+    /**
+     * Determina si la solicitud es una solicitud AJAX
+     * 
+     * @return bool
+     */
+    public function isAjax(): bool
+    {
+        return isset($this->headers['X-Requested-With']) && 
+               strtolower($this->headers['X-Requested-With']) === 'xmlhttprequest';
+    }
+    
+    private function getRequestBody(): array
+    {
+        $body = [];
+        
+        if ($this->getMethod() === 'GET') {
+            return $body;
+        }
+        
+        if (isset($_SERVER['CONTENT_TYPE']) && 
+            strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $json = file_get_contents('php://input');
+            $body = json_decode($json, true) ?? [];
+        } else {
+            $body = $_POST;
+        }
+        
+        return $body;
     }
 }

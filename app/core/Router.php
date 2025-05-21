@@ -8,6 +8,23 @@ class Router
 {
     protected $routes = [];
     protected $notFoundHandler;
+    protected $request;
+    protected $response;
+    protected $container;
+    
+    /**
+     * Constructor del Router
+     * 
+     * @param Request $request
+     * @param Response $response
+     * @param Container $container
+     */
+    public function __construct(Request $request, Response $response, Container $container)
+    {
+        $this->request = $request;
+        $this->response = $response;
+        $this->container = $container;
+    }
     
     /**
      * Añade una ruta GET
@@ -44,14 +61,12 @@ class Router
     /**
      * Resuelve la ruta actual y ejecuta el callback correspondiente
      * 
-     * @param Request $request
-     * @param Response $response
      * @return mixed
      */
-    public function resolve(Request $request, Response $response)
+    public function resolve()
     {
-        $path = $request->getPath();
-        $method = $request->getMethod();
+        $path = $this->request->getPath();
+        $method = $this->request->getMethod();
         
         // Normalizar path para quitar o añadir slash final según sea necesario
         $path = $this->normalizePath($path);
@@ -64,7 +79,7 @@ class Router
         // Revisar rutas exactas primero
         if (isset($this->routes[$method][$path])) {
             $callback = $this->routes[$method][$path];
-            return $this->executeCallback($callback, $request, $response, []);
+            return $this->executeCallback($callback, []);
         }
         
         // Revisar rutas con parámetros
@@ -82,7 +97,7 @@ class Router
                         error_log("Router::resolve() - Parámetros: " . print_r($params, true));
                     }
                     
-                    return $this->executeCallback($callback, $request, $response, $params);
+                    return $this->executeCallback($callback, $params);
                 }
             }
         }
@@ -92,21 +107,21 @@ class Router
             
         if ($path !== $altPath && isset($this->routes[$method][$altPath])) {
             $callback = $this->routes[$method][$altPath];
-            return $this->executeCallback($callback, $request, $response, []);
+            return $this->executeCallback($callback, []);
         } 
         // Intentar con slash final si no tiene
         else if ($path !== "$altPath/" && isset($this->routes[$method]["$altPath/"])) {
             $callback = $this->routes[$method]["$altPath/"];
-            return $this->executeCallback($callback, $request, $response, []);
+            return $this->executeCallback($callback, []);
         }
         
         // No se encontró la ruta
         if ($this->notFoundHandler) {
-            return call_user_func($this->notFoundHandler, $request, $response);
+            return call_user_func($this->notFoundHandler, $this->request, $this->response);
         }
         
-        $response->setStatusCode(404);
-        return $this->renderNotFoundPage($response);
+        $this->response->setStatusCode(404);
+        return $this->renderNotFoundPage();
     }
     
     /**
@@ -152,16 +167,16 @@ class Router
      * Ejecuta el callback con los parámetros extraídos
      * 
      * @param mixed $callback
-     * @param Request $request
-     * @param Response $response
      * @param array $params
      * @return mixed
      */
-    protected function executeCallback($callback, $request, $response, $params)
+    protected function executeCallback($callback, $params)
     {
         if (is_array($callback)) {
             [$controllerClass, $method] = $callback;
-            $controller = new $controllerClass($request, $response);
+            
+            // Usar el contenedor para crear el controlador
+            $controller = $this->container->resolve($controllerClass);
             
             // Log para depuración
             if (App::$app->config['app']['debug'] ?? false) {
@@ -176,7 +191,7 @@ class Router
             }
         }
         
-        return call_user_func_array($callback, [$request, $response]);
+        return call_user_func_array($callback, [$this->request, $this->response]);
     }
     
     /**
@@ -206,12 +221,11 @@ class Router
     /**
      * Renderiza la página 404 por defecto
      * 
-     * @param Response $response
      * @return string
      */
-    protected function renderNotFoundPage(Response $response)
+    protected function renderNotFoundPage()
     {
-        $response->setStatusCode(404);
+        $this->response->setStatusCode(404);
         
         // Comprobar si existe la vista 404
         $errorViewPath = dirname(__DIR__) . '/views/errors/404.php';

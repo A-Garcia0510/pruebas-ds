@@ -4,14 +4,32 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Auth\AuthFactory;
+use App\Core\Container;
 use App\Core\Database\DatabaseConfiguration;
 use App\Core\Database\MySQLDatabase;
+use App\Core\Database\DatabaseInterface;
 
 /**
  * Controlador para la sección de Dashboard del usuario
  */
 class DashboardController extends BaseController
 {
+    private $database;
+    private $authenticator;
+    private $userRepository;
+
+    public function __construct(
+        Request $request,
+        Response $response,
+        Container $container,
+        DatabaseInterface $database
+    ) {
+        parent::__construct($request, $response, $container);
+        $this->database = $database;
+        $this->authenticator = AuthFactory::createAuthenticator($database);
+        $this->userRepository = AuthFactory::createUserRepository($database);
+    }
+
     /**
      * Muestra el dashboard del usuario
      * 
@@ -19,34 +37,19 @@ class DashboardController extends BaseController
      */
     public function index()
     {
-        // Configurar la base de datos
-        $dbConfig = new DatabaseConfiguration(
-            $this->config['database']['host'],
-            $this->config['database']['username'],
-            $this->config['database']['password'],
-            $this->config['database']['database']
-        );
-        
         try {
-            // Crear conexión a la base de datos
-            $database = new MySQLDatabase($dbConfig);
-            
-            // Crear el autenticador
-            $authenticator = AuthFactory::createAuthenticator($database);
-            
             // Verificar si el usuario está autenticado
-            if (!$authenticator->isAuthenticated()) {
+            if (!$this->authenticator->isAuthenticated()) {
                 // Almacenar mensaje de error en sesión
                 $_SESSION['error'] = 'Debes iniciar sesión para acceder a esta página.';
                 return $this->redirect('/login');
             }
             
             // Obtener email del usuario actual
-            $correo = $authenticator->getCurrentUserEmail();
+            $correo = $this->authenticator->getCurrentUserEmail();
             
             // Obtener los datos del usuario
-            $userRepository = AuthFactory::createUserRepository($database);
-            $user = $userRepository->findByEmail($correo);
+            $user = $this->userRepository->findByEmail($correo);
             
             if (!$user) {
                 throw new \Exception("Error: No se pudieron recuperar los datos del usuario.");

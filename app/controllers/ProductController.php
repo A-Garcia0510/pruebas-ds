@@ -1,10 +1,11 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Request;
-use App\Core\Response;
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Interfaces\ResponseInterface;
 use App\Shop\Repositories\ProductRepository;
 use App\Shop\Exceptions\ProductNotFoundException;
+use App\Core\Container;
 
 class ProductController extends BaseController
 {
@@ -12,22 +13,15 @@ class ProductController extends BaseController
     
     /**
      * Constructor del controlador de productos
-     * 
-     * @param Request $request
-     * @param Response $response
-     * @param ProductRepository $productRepository
      */
-    public function __construct(Request $request, Response $response, ProductRepository $productRepository = null)
-    {
-        parent::__construct($request, $response);
+    public function __construct(
+        RequestInterface $request, 
+        ResponseInterface $response,
+        ProductRepository $productRepository,
+        Container $container
+    ) {
+        parent::__construct($request, $response, $container);
         $this->productRepository = $productRepository;
-        
-        // Si no se inyecta el repositorio, lo creamos
-        if ($this->productRepository === null) {
-            // Obtener la instancia de base de datos del contenedor
-            $db = \App\Core\App::$app->db;
-            $this->productRepository = new ProductRepository($db);
-        }
     }
     
     /**
@@ -137,35 +131,43 @@ class ProductController extends BaseController
      */
     public function api()
     {
-        // Obtener parámetros de la solicitud
-        $category = $this->request->get('category');
-        
-        // Obtener productos según el filtro
-        $products = [];
-        if ($category && $category !== 'todos') {
-            $products = $this->productRepository->findByCategory($category);
-        } else {
-            $products = $this->productRepository->findAll();
+        try {
+            // Obtener parámetros de la solicitud
+            $category = $this->request->get('category');
+            
+            // Obtener productos según el filtro
+            $products = [];
+            if ($category && $category !== 'todos') {
+                $products = $this->productRepository->findByCategory($category);
+            } else {
+                $products = $this->productRepository->findAll();
+            }
+            
+            // Convertir objetos Product a arrays para JSON
+            $productsArray = [];
+            foreach ($products as $product) {
+                $productsArray[] = [
+                    'id' => $product->getId(),
+                    'name' => $product->getName(),
+                    'description' => $product->getDescription(),
+                    'price' => $product->getPrice(),
+                    'stock' => $product->getStock(),
+                    'category' => $product->getCategory()
+                ];
+            }
+            
+            // Devolver respuesta JSON
+            $this->response->json([
+                'success' => true,
+                'products' => $productsArray
+            ]);
+        } catch (\Exception $e) {
+            error_log("Error en ProductController::api: " . $e->getMessage());
+            $this->response->json([
+                'success' => false,
+                'message' => 'Error al obtener productos: ' . $e->getMessage()
+            ], 500);
         }
-        
-        // Convertir objetos Product a arrays para JSON
-        $productsArray = [];
-        foreach ($products as $product) {
-            $productsArray[] = [
-                'id' => $product->getId(),
-                'name' => $product->getName(),
-                'description' => $product->getDescription(),
-                'price' => $product->getPrice(),
-                'stock' => $product->getStock(),
-                'category' => $product->getCategory()
-            ];
-        }
-        
-        // Devolver respuesta JSON
-        return $this->json([
-            'success' => true,
-            'products' => $productsArray
-        ]);
     }
     
     /**

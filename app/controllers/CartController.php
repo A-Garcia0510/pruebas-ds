@@ -1,68 +1,50 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Database\DatabaseConfiguration;
-use App\Core\Database\MySQLDatabase;
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Interfaces\ResponseInterface;
 use App\Shop\Services\CartService;
 use App\Shop\Repositories\ProductRepository;
 use App\Shop\Repositories\PurchaseRepository;
 use App\Shop\Services\PurchaseService;
-use App\Shop\Exceptions\ProductNotFoundException;
-use App\Shop\Exceptions\InsufficientStockException;
 use App\Shop\Services\ProductService;
 use App\Shop\Commands\CartCommandInvoker;
-use App\Shop\Commands\AddToCartCommand;
-use App\Shop\Commands\RemoveFromCartCommand;
+use App\Core\Container;
+use App\Controllers\BaseController;
 
 /**
  * Controlador para gestionar las operaciones del carrito de compras
  */
 class CartController extends BaseController
 {
-    private $cartService;
-    private $productRepository;
-    private $purchaseRepository;
-    private $purchaseService;
-    private $productService;
-    private $commandInvoker;
+    private CartService $cartService;
+    private ProductRepository $productRepository;
+    private PurchaseRepository $purchaseRepository;
+    private PurchaseService $purchaseService;
+    private ProductService $productService;
+    private CartCommandInvoker $commandInvoker;
     
     /**
      * Constructor del controlador
      */
-    public function __construct($request, $response)
-    {
-        parent::__construct($request, $response);
-        
-        try {
-            // Log para depuración
-            if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
-                error_log('CartController::__construct() - Inicializando servicios');
-            }
-            
-            // Inicializar servicios
-            $dbConfig = new DatabaseConfiguration(
-                $this->config['database']['host'],
-                $this->config['database']['username'],
-                $this->config['database']['password'],
-                $this->config['database']['database']
-            );
-            
-            $db = new MySQLDatabase($dbConfig);
-            $this->productRepository = new ProductRepository($db);
-            $this->cartService = new CartService($db, $this->productRepository);
-            $this->purchaseRepository = new PurchaseRepository($db);
-            $this->purchaseService = new PurchaseService($db, $this->cartService, $this->productRepository, $this->purchaseRepository);
-            $this->productService = new ProductService($this->productRepository);
-            $this->commandInvoker = new CartCommandInvoker($this->cartService);
-            
-            // Log para depuración
-            if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
-                error_log('CartController::__construct() - Servicios inicializados correctamente');
-            }
-        } catch (\Exception $e) {
-            error_log('CartController::__construct() - Error al inicializar servicios: ' . $e->getMessage());
-            // No lanzar excepción aquí para evitar errores en el constructor
-        }
+    public function __construct(
+        CartService $cartService,
+        RequestInterface $request,
+        ResponseInterface $response,
+        ProductRepository $productRepository,
+        PurchaseRepository $purchaseRepository,
+        PurchaseService $purchaseService,
+        ProductService $productService,
+        CartCommandInvoker $commandInvoker,
+        Container $container
+    ) {
+        parent::__construct($request, $response, $container);
+        $this->cartService = $cartService;
+        $this->productRepository = $productRepository;
+        $this->purchaseRepository = $purchaseRepository;
+        $this->purchaseService = $purchaseService;
+        $this->productService = $productService;
+        $this->commandInvoker = $commandInvoker;
     }
     
     /**
@@ -70,22 +52,17 @@ class CartController extends BaseController
      */
     public function index()
     {
-        // Log para depuración
-        error_log('CartController::index() - Accediendo a la página del carrito');
-        
-        // Verificar que el usuario esté autenticado
         if (!isset($_SESSION['correo'])) {
-            // Redirigir con mensaje de sesión
             $_SESSION['message'] = 'Debes iniciar sesión para acceder al carrito';
             $_SESSION['message_type'] = 'error';
-            error_log('CartController::index() - Usuario no autenticado, redirigiendo a login');
-            $this->redirect('login');
+            $this->response->redirect('/pruebas-ds/public/login');
             return;
         }
         
         return $this->render('cart/index', [
-            'title' => 'Carrito de Compras - Café-VT',
-            'css' => ['carro']
+            'title' => 'Carrito de Compras - Ethos Coffee',
+            'description' => 'Tu carrito de compras',
+            'css' => ['cart']
         ]);
     }
     
@@ -94,51 +71,35 @@ class CartController extends BaseController
      */
     public function getItems()
     {
-        // Log detallado de la sesión
-        error_log('=== DEBUG CARRITO ===');
-        error_log('Sesión completa: ' . print_r($_SESSION, true));
-        error_log('Método de la petición: ' . $_SERVER['REQUEST_METHOD']);
-        error_log('URL solicitada: ' . $_SERVER['REQUEST_URI']);
-        error_log('===================');
-
-        try {
         if (!isset($_SESSION['correo'])) {
-                error_log('Usuario no autenticado - No existe $_SESSION[correo]');
-                $this->jsonResponse(['success' => false, 'message' => 'Usuario no autenticado'], 401);
+            $this->response->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
             return;
         }
         
+        try {
             $userEmail = $_SESSION['correo'];
-            error_log("CartController::getItems() - Obteniendo carrito para usuario: " . $userEmail);
-            
             $items = $this->cartService->getItems($userEmail);
             $total = $this->cartService->getTotal($userEmail);
             
-            error_log("CartController::getItems() - Productos procesados: " . count($items));
-            
-            $response = [
+            $this->response->json([
                 'success' => true,
                 'carrito' => array_map(function($item) {
                     return [
-                    'producto_ID' => $item->getProductId(),
-                    'nombre_producto' => $item->getProductName(),
-                    'cantidad' => $item->getQuantity(),
-                    'precio' => $item->getProductPrice(),
+                        'producto_ID' => $item->getProductId(),
+                        'nombre_producto' => $item->getProductName(),
+                        'cantidad' => $item->getQuantity(),
+                        'precio' => $item->getProductPrice(),
                         'subtotal' => $item->getSubtotal()
-                ];
+                    ];
                 }, $items),
                 'total' => $total,
                 'message' => count($items) > 0 ? 'Carrito obtenido exitosamente' : 'El carrito está vacío'
-            ];
-            
-            error_log("CartController::getItems() - Respuesta: " . json_encode($response));
-            $this->jsonResponse($response);
-            
+            ]);
         } catch (\Exception $e) {
-            error_log("CartController::getItems() - Error: " . $e->getMessage());
-            error_log("CartController::getItems() - Stack trace: " . $e->getTraceAsString());
-            
-            $this->jsonResponse([
+            $this->response->json([
                 'success' => false,
                 'message' => 'Error al obtener el carrito: ' . $e->getMessage()
             ], 500);
@@ -146,60 +107,55 @@ class CartController extends BaseController
     }
     
     /**
-     * Añade un producto al carrito (para AJAX)
+     * Agrega un producto al carrito (para AJAX)
      */
     public function addItem()
     {
+        if (!isset($_SESSION['correo'])) {
+            $this->response->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+            return;
+        }
+        
         try {
-            // Verificar si el usuario está autenticado
-            if (!isset($_SESSION['correo'])) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Debes iniciar sesión para agregar productos al carrito']);
-            }
-
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = $this->request->getBody();
             
             if (!isset($data['producto_ID']) || !isset($data['cantidad'])) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Datos incompletos']);
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'Datos incompletos'
+                ], 400);
+                return;
             }
-
-            $productoId = $data['producto_ID'];
-            $cantidad = (int)$data['cantidad'];
-            $actualizar = isset($data['actualizar']) ? $data['actualizar'] : false;
-
-            if ($cantidad < 1) {
-                return $this->jsonResponse(['success' => false, 'message' => 'La cantidad debe ser mayor a 0']);
-            }
-
-            // Verificar stock disponible
-            $producto = $this->productRepository->findById($productoId);
-            if (!$producto) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Producto no encontrado']);
-            }
-
-            if ($producto->getStock() < $cantidad) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Stock insuficiente']);
-            }
-
-            // Crear el comando
-            $command = new AddToCartCommand(
+            
+            // Crear y ejecutar el comando
+            $command = new \App\Shop\Commands\AddToCartCommand(
                 $this->cartService,
                 $_SESSION['correo'],
-                $productoId,
-                $cantidad,
-                $actualizar
+                $data['producto_ID'],
+                $data['cantidad'],
+                $data['actualizar'] ?? false
             );
-
-            // Ejecutar el comando
-            $result = $this->commandInvoker->executeCommand($command);
-
-            if ($result) {
-                return $this->jsonResponse(['success' => true, 'message' => 'Producto agregado al carrito']);
+            
+            if ($this->commandInvoker->executeCommand($command)) {
+                $this->response->json([
+                    'success' => true,
+                    'message' => 'Producto agregado al carrito'
+                ]);
             } else {
-                return $this->jsonResponse(['success' => false, 'message' => 'Error al agregar el producto al carrito']);
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'Error al agregar el producto al carrito'
+                ], 500);
             }
         } catch (\Exception $e) {
-            error_log("Error en addItem: " . $e->getMessage());
-            return $this->jsonResponse(['success' => false, 'message' => 'Error al procesar la solicitud']);
+            error_log("Error en CartController::addItem: " . $e->getMessage());
+            $this->response->json([
+                'success' => false,
+                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
+            ], 500);
         }
     }
     
@@ -208,49 +164,51 @@ class CartController extends BaseController
      */
     public function removeItem()
     {
+        if (!isset($_SESSION['correo'])) {
+            $this->response->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+            return;
+        }
+        
         try {
-            if (!isset($_SESSION['correo'])) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Usuario no autenticado'], 401);
-            }
-            
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = $this->request->getBody();
             
             if (!isset($data['producto_ID'])) {
-                return $this->jsonResponse([
+                $this->response->json([
                     'success' => false,
                     'message' => 'ID de producto no válido'
                 ], 400);
+                return;
             }
+
+            // Obtener la cantidad actual del producto antes de eliminarlo
+            $cartItem = $this->cartService->getCartItem($_SESSION['correo'], $data['producto_ID']);
+            $quantity = $cartItem ? $cartItem['cantidad'] : 0;
             
-            $userEmail = $_SESSION['correo'];
-            $productId = (int)$data['producto_ID'];
-
-            // Obtener la cantidad actual del producto en el carrito
-            $cartItems = $this->cartService->getItems($userEmail);
-            $quantity = 0;
-            foreach ($cartItems as $item) {
-                if ($item->getProductId() == $productId) {
-                    $quantity = $item->getQuantity();
-                    break;
-                }
-            }
-
-            $command = new RemoveFromCartCommand($this->cartService, $userEmail, $productId, $quantity);
+            // Crear y ejecutar el comando
+            $command = new \App\Shop\Commands\RemoveFromCartCommand(
+                $this->cartService,
+                $_SESSION['correo'],
+                $data['producto_ID'],
+                $quantity
+            );
+            
             if ($this->commandInvoker->executeCommand($command)) {
-                return $this->jsonResponse([
+                $this->response->json([
                     'success' => true,
                     'message' => 'Producto eliminado del carrito'
                 ]);
+            } else {
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'Error al eliminar el producto del carrito'
+                ], 500);
             }
-
-            return $this->jsonResponse([
-                'success' => false,
-                'message' => 'Error al eliminar el producto'
-            ], 500);
-            
         } catch (\Exception $e) {
-            error_log("CartController::removeItem() - Error: " . $e->getMessage());
-            return $this->jsonResponse([
+            error_log("Error en CartController::removeItem: " . $e->getMessage());
+            $this->response->json([
                 'success' => false,
                 'message' => 'Error al eliminar el producto: ' . $e->getMessage()
             ], 500);
@@ -262,97 +220,101 @@ class CartController extends BaseController
      */
     public function checkout()
     {
-        error_log('CartController::checkout() - Inicio de solicitud');
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            error_log('CartController::checkout() - Método no permitido: ' . $_SERVER['REQUEST_METHOD']);
-            $this->jsonResponse(['success' => false, 'message' => 'Método no permitido.'], 405);
-            return;
-        }
-        
         if (!isset($_SESSION['correo'])) {
-            error_log('CartController::checkout() - Usuario no logueado');
-            $this->jsonResponse(['success' => false, 'message' => 'Usuario no logueado.'], 401);
+            $this->response->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
             return;
         }
         
         try {
             $userEmail = $_SESSION['correo'];
-            error_log('CartController::checkout() - Procesando compra para usuario: ' . $userEmail);
-            
-            // Verificar si el carrito tiene productos
             $cartItems = $this->cartService->getItems($userEmail);
+            
             if (empty($cartItems)) {
-                error_log('CartController::checkout() - Carrito vacío');
-                $this->jsonResponse(['success' => false, 'message' => 'El carrito está vacío.'], 400);
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'El carrito está vacío'
+                ], 400);
                 return;
             }
             
-            // Crear la compra
-            error_log('CartController::checkout() - Creando compra');
             $result = $this->purchaseService->createPurchase($userEmail);
             
             if ($result) {
-                error_log('CartController::checkout() - Compra realizada con éxito');
-                $this->jsonResponse(['success' => true, 'message' => 'Compra realizada con éxito.']);
+                $this->response->json([
+                    'success' => true,
+                    'message' => 'Compra realizada con éxito'
+                ]);
             } else {
-                error_log('CartController::checkout() - No se pudo procesar la compra');
-                $this->jsonResponse(['success' => false, 'message' => 'No se pudo procesar la compra.'], 400);
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'No se pudo procesar la compra'
+                ], 400);
             }
         } catch (\Exception $e) {
-            error_log('CartController::checkout() - Error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error al procesar la compra: ' . $e->getMessage()], 500);
+            $this->response->json([
+                'success' => false,
+                'message' => 'Error al procesar la compra: ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    public function undoLastAction() {
+    public function undoLastAction()
+    {
+        if (!isset($_SESSION['correo'])) {
+            $this->response->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+            return;
+        }
+        
         try {
-            if (!isset($_SESSION['correo'])) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Usuario no autenticado'], 401);
-            }
-
             if ($this->commandInvoker->undoLastCommand()) {
-                return $this->jsonResponse([
+                $this->response->json([
                     'success' => true,
                     'message' => 'Última acción deshecha'
                 ]);
+            } else {
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'No hay acciones para deshacer'
+                ], 400);
             }
-
-            return $this->jsonResponse([
-                'success' => false,
-                'message' => 'No hay acciones para deshacer'
-            ], 400);
-            
         } catch (\Exception $e) {
-            error_log("CartController::undoLastAction() - Error: " . $e->getMessage());
-            return $this->jsonResponse([
+            $this->response->json([
                 'success' => false,
                 'message' => 'Error al deshacer la acción: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function redoLastAction() {
+    public function redoLastAction()
+    {
+        if (!isset($_SESSION['correo'])) {
+            $this->response->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+            return;
+        }
+        
         try {
-            if (!isset($_SESSION['correo'])) {
-                return $this->jsonResponse(['success' => false, 'message' => 'Usuario no autenticado'], 401);
-            }
-
             if ($this->commandInvoker->redoLastCommand()) {
-                return $this->jsonResponse([
+                $this->response->json([
                     'success' => true,
                     'message' => 'Última acción rehecha'
                 ]);
+            } else {
+                $this->response->json([
+                    'success' => false,
+                    'message' => 'No hay acciones para rehacer'
+                ], 400);
             }
-
-            return $this->jsonResponse([
-                'success' => false,
-                'message' => 'No hay acciones para rehacer'
-            ], 400);
-            
         } catch (\Exception $e) {
-            error_log("CartController::redoLastAction() - Error: " . $e->getMessage());
-            return $this->jsonResponse([
+            $this->response->json([
                 'success' => false,
                 'message' => 'Error al rehacer la acción: ' . $e->getMessage()
             ], 500);

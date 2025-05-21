@@ -5,7 +5,7 @@ require_once BASE_PATH . '/app/helpers/AssetHelper.php';
 <header>
     <nav class="navbar">
         <div class="logo">
-            <h1>Café<span>VT</span></h1>
+            <h1>Ethos<span>Coffee</span></h1>
         </div>
         <ul class="main-menu">
             <li><a href="<?= AssetHelper::url() ?>">Inicio</a></li>

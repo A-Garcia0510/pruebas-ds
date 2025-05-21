@@ -1,9 +1,9 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Request;
-use App\Core\Response;
-use App\Core\App;
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Interfaces\ResponseInterface;
+use App\Core\Container;
 
 /**
  * Controlador base que todos los controladores deben extender
@@ -13,18 +13,34 @@ abstract class BaseController
     protected $request;
     protected $response;
     protected $config;
+    protected $container;
     
     /**
      * Constructor del controlador base
      * 
-     * @param Request $request
-     * @param Response $response
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     * @param Container $container
      */
-    public function __construct(Request $request, Response $response)
-    {
+    public function __construct(
+        RequestInterface $request, 
+        ResponseInterface $response,
+        Container $container
+    ) {
         $this->request = $request;
         $this->response = $response;
-        $this->config = App::$app->config;
+        $this->container = $container;
+        
+        try {
+            $this->config = $container->get('config');
+            if (!is_array($this->config)) {
+                throw new \Exception('La configuración debe ser un array');
+            }
+        } catch (\Exception $e) {
+            // Si no se puede obtener la configuración, usar un array vacío
+            $this->config = [];
+            error_log('Error al obtener la configuración: ' . $e->getMessage());
+        }
         
         // Log para depuración
         if (isset($this->config['app']['debug']) && $this->config['app']['debug']) {
@@ -125,22 +141,6 @@ abstract class BaseController
         // Si es una URL relativa sin barra inicial, agregarle la barra y el prefijo
         if ($url[0] !== '/') {
             $url = '/pruebas-ds/public/' . $url;
-        }
-        
-        // Si tenemos una URL base configurada, usarla
-        if (isset($this->config['app']['url']) && !empty($this->config['app']['url'])) {
-            // Quitar la barra inicial de la URL para evitar doble barra
-            if ($url[0] === '/') {
-                $url = substr($url, 1);
-            }
-            
-            // Asegurarse de que la URL base termina con barra
-            $baseUrl = $this->config['app']['url'];
-            if (substr($baseUrl, -1) !== '/') {
-                $baseUrl .= '/';
-            }
-            
-            $url = $baseUrl . $url;
         }
         
         // Log para depuración

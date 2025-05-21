@@ -293,41 +293,50 @@ h1::after {
 .action-buttons {
     margin-bottom: 20px;
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .action-buttons button {
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 10px 20px;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 1.1em;
+    background-color: #6c757d;
+    color: white;
 }
 
-.action-buttons button:disabled {
+.action-buttons button:disabled,
+.action-buttons button.disabled {
     opacity: 0.5;
     cursor: not-allowed;
-}
-
-#undoBtn {
     background-color: #6c757d;
-    color: white;
+    pointer-events: none;
 }
 
-#undoBtn:hover:not(:disabled) {
-    background-color: #5a6268;
+.action-buttons button.active {
+    background-color: #28a745;
+    opacity: 1;
+    cursor: pointer;
+    pointer-events: auto;
 }
 
-#redoBtn {
-    background-color: #6c757d;
-    color: white;
+.action-buttons button:hover:not(:disabled):not(.disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-#redoBtn:hover:not(:disabled) {
-    background-color: #5a6268;
+#undoBtn:hover:not(:disabled):not(.disabled) {
+    background-color: #218838;
+}
+
+#redoBtn:hover:not(:disabled):not(.disabled) {
+    background-color: #218838;
 }
 
 /* Estilos para la tabla del carrito */
@@ -544,43 +553,6 @@ h1::after {
     margin-top: 12px;
     padding-top: 12px;
     border-top: 2px solid #dee2e6;
-}
-
-/* Estilos para los botones de Deshacer/Rehacer */
-.action-buttons {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 12px;
-}
-
-.action-buttons button {
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    font-size: 1.1em;
-}
-
-.action-buttons button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: #6c757d;
-}
-
-#undoBtn, #redoBtn {
-    background-color: #6c757d;
-    color: white;
-}
-
-#undoBtn:hover:not(:disabled), #redoBtn:hover:not(:disabled) {
-    background-color: #5a6268;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Estilos para mensajes de error */

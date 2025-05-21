@@ -121,7 +121,14 @@ class CartService implements CartInterface
         }
     }
     
-    private function getCartItem(string $userEmail, int $productId): ?array
+    /**
+     * Obtiene un item específico del carrito
+     * 
+     * @param string $userEmail Email del usuario
+     * @param int $productId ID del producto
+     * @return array|null Datos del item o null si no existe
+     */
+    public function getCartItem(string $userEmail, int $productId): ?array
     {
         try {
             $conn = $this->db->getConnection();

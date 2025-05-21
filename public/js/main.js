@@ -8,9 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productosGrid = document.getElementById('productos');
     
     // Base URL para peticiones AJAX
-    const baseUrl = window.location.pathname.includes('/public/') 
-        ? window.location.pathname.split('/public/')[0] + '/public'
-        : '';
+    const baseUrl = window.location.origin + '/pruebas-ds/public';
     
     /**
      * Función para cargar productos según la categoría seleccionada
@@ -29,47 +27,95 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Hacer petición AJAX para obtener productos
-        fetch(`${baseUrl}/api/products?category=${category}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Limpiar grid de productos
-                    productosGrid.innerHTML = '';
-                    
-                    if (data.products.length === 0) {
-                        productosGrid.innerHTML = '<div class="empty-state">No se encontraron productos en esta categoría.</div>';
-                        return;
-                    }
-                    
-                    // Renderizar productos
-                    data.products.forEach(product => {
-                        const productCard = document.createElement('div');
-                        productCard.className = 'producto-tarjeta';
-                        productCard.dataset.id = product.id;
-                        
-                        productCard.innerHTML = `
-                            <div class="producto-info">
-                                <h2>${product.name}</h2>
-                                <p class="categoria">${product.category}</p>
-                                <p class="precio">$${formatNumber(product.price)}</p>
-                                <p class="stock">Disponible: ${product.stock} unidades</p>
-                                <div class="acciones">
-                                    <a href="${baseUrl}/products/detail/${product.id}" class="ver-detalle">Ver Detalle</a>
-                                    <button class="agregar" data-id="${product.id}">Agregar</button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        productosGrid.appendChild(productCard);
-                    });
-                } else {
-                    console.error('Error al cargar productos:', data.message);
-                    productosGrid.innerHTML = '<div class="error-state">Error al cargar productos. Por favor, intenta nuevamente.</div>';
+        fetch(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Limpiar grid de productos
+                productosGrid.innerHTML = '';
+                
+                if (data.products.length === 0) {
+                    productosGrid.innerHTML = '<div class="empty-state">No se encontraron productos en esta categoría.</div>';
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Error en la petición:', error);
+                
+                // Renderizar productos
+                data.products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'producto-tarjeta';
+                    productCard.dataset.id = product.id;
+                    
+                    productCard.innerHTML = `
+                        <div class="producto-info">
+                            <h2>${product.name}</h2>
+                            <p class="categoria">${product.category}</p>
+                            <p class="precio">$${formatNumber(product.price)}</p>
+                            <p class="stock">Disponible: ${product.stock} unidades</p>
+                            <div class="acciones">
+                                <a href="${baseUrl}/products/detail/${product.id}" class="ver-detalle">Ver Detalle</a>
+                                <button class="agregar" data-id="${product.id}">Agregar</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    productosGrid.appendChild(productCard);
+                });
+
+                // Agregar event listeners a los nuevos botones
+                document.querySelectorAll('.agregar').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = this.dataset.id;
+                        
+                        fetch(`${baseUrl}/cart/add`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ 
+                                producto_ID: productId, 
+                                cantidad: 1 
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`Error HTTP: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert('Producto agregado al carrito con éxito.');
+                            } else {
+                                alert('Error al agregar producto: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al agregar el producto al carrito.');
+                        });
+                    });
+                });
+            } else {
+                console.error('Error al cargar productos:', data.message);
                 productosGrid.innerHTML = '<div class="error-state">Error al cargar productos. Por favor, intenta nuevamente.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            productosGrid.innerHTML = '<div class="error-state">Error al cargar productos. Por favor, intenta nuevamente.</div>';
         });
     }
     
@@ -91,10 +137,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (category === 'todos') {
                 history.pushState(null, '', `${baseUrl}/products`);
             } else {
-                history.pushState(null, '', `${baseUrl}/products/category/${category}`);
+                history.pushState(null, '', `${baseUrl}/products/category/${encodeURIComponent(category)}`);
             }
             
             loadProductsByCategory(category);
         });
     });
+
+    // Cargar productos iniciales basados en la URL actual
+    const path = window.location.pathname;
+    if (path.includes('/category/')) {
+        const category = decodeURIComponent(path.split('/category/')[1]);
+        loadProductsByCategory(category);
+    } else {
+        loadProductsByCategory('todos');
+    }
 });

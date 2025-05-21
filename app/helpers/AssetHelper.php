@@ -64,6 +64,13 @@ class AssetHelper {
      */
     public static function url($path = '') {
         $path = ltrim($path, '/');
-        return self::getBaseUrl() . ($path ? "/$path" : '');
+        $baseUrl = self::getBaseUrl();
+        
+        // Si la URL base no incluye /pruebas-ds/public, agregarlo
+        if (strpos($baseUrl, '/pruebas-ds/public') === false) {
+            $baseUrl = rtrim($baseUrl, '/') . '/pruebas-ds/public';
+        }
+        
+        return $baseUrl . ($path ? "/$path" : '');
     }
 }

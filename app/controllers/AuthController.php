@@ -5,14 +5,30 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Auth\AuthFactory;
 use App\Auth\Models\User;
-use App\Core\Database\DatabaseConfiguration;
-use App\Core\Database\MySQLDatabase;
+use App\Core\Container;
+use App\Core\Database\DatabaseInterface;
 
 /**
  * Controlador para la autenticación de usuarios
  */
 class AuthController extends BaseController
 {
+    private $database;
+    private $authenticator;
+    private $userRepository;
+
+    public function __construct(
+        Request $request,
+        Response $response,
+        Container $container,
+        DatabaseInterface $database
+    ) {
+        parent::__construct($request, $response, $container);
+        $this->database = $database;
+        $this->authenticator = AuthFactory::createAuthenticator($database);
+        $this->userRepository = AuthFactory::createUserRepository($database);
+    }
+
     /**
      * Muestra la página de inicio de sesión
      * 
@@ -56,19 +72,7 @@ class AuthController extends BaseController
         }
 
         try {
-            // Configurar la base de datos
-            $dbConfig = new DatabaseConfiguration(
-                $this->config['database']['host'],
-                $this->config['database']['username'],
-                $this->config['database']['password'],
-                $this->config['database']['database']
-            );
-            $database = new MySQLDatabase($dbConfig);
-            
-            // Crear el autenticador
-            $authenticator = AuthFactory::createAuthenticator($database);
-            
-            if ($authenticator->authenticate($email, $password)) {
+            if ($this->authenticator->authenticate($email, $password)) {
                 // Guardar el correo en la sesión
                 $_SESSION['correo'] = $email;
                 $_SESSION['user_id'] = $_SESSION['usuario_id'];
@@ -76,7 +80,7 @@ class AuthController extends BaseController
                 // Log para depuración
                 error_log('Usuario autenticado - Correo guardado en sesión: ' . $email);
                 
-                // Redirigir al dashboard con la ruta correcta
+                // Redirigir al dashboard
                 return $this->redirect('/pruebas-ds/public/dashboard');
             }
             else {
@@ -135,20 +139,8 @@ class AuthController extends BaseController
         }
 
         try {
-            // Configurar la base de datos
-            $dbConfig = new DatabaseConfiguration(
-                $this->config['database']['host'],
-                $this->config['database']['username'],
-                $this->config['database']['password'],
-                $this->config['database']['database']
-            );
-            $database = new MySQLDatabase($dbConfig);
-            
-            // Crear el repositorio de usuarios
-            $userRepository = AuthFactory::createUserRepository($database);
-            
             // Verificar si el email ya existe
-            if ($userRepository->emailExists($email)) {
+            if ($this->userRepository->emailExists($email)) {
                 $_SESSION['error'] = 'El correo electrónico ya está registrado.';
                 return $this->redirect('/pruebas-ds/public/register');
             }
@@ -157,10 +149,9 @@ class AuthController extends BaseController
             $user = new User(null, $nombre, $apellidos, $email, $password);
             
             // Guardar usuario
-            if ($userRepository->save($user)) {
-                // Crear autenticador y autenticar al usuario
-                $authenticator = AuthFactory::createAuthenticator($database);
-                $authenticator->authenticate($email, $password);
+            if ($this->userRepository->save($user)) {
+                // Autenticar al usuario
+                $this->authenticator->authenticate($email, $password);
     
                 // Asegurar que las variables de sesión estén sincronizadas
                 $_SESSION['user_id'] = $_SESSION['usuario_id'];
@@ -192,6 +183,6 @@ class AuthController extends BaseController
         session_destroy();
         
         // Redirigir a la página de inicio
-        return $this->redirect('/pruebas-ds/public/');
+        return $this->redirect('/pruebas-ds/public');
     }
 }

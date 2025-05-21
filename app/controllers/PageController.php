@@ -1,9 +1,10 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Request;
-use App\Core\Response;
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Interfaces\ResponseInterface;
 use App\Shop\Repositories\ProductRepository;
+use App\Core\Container;
 
 /**
  * Controlador para páginas estáticas
@@ -15,13 +16,14 @@ class PageController extends BaseController
     /**
      * Constructor del controlador
      */
-    public function __construct(Request $request, Response $response)
-    {
-        parent::__construct($request, $response);
-        
-        // Inicializar el repositorio de productos
-        $db = \App\Core\App::$app->db;
-        $this->productRepository = new ProductRepository($db);
+    public function __construct(
+        RequestInterface $request, 
+        ResponseInterface $response,
+        ProductRepository $productRepository,
+        Container $container
+    ) {
+        parent::__construct($request, $response, $container);
+        $this->productRepository = $productRepository;
     }
     
     /**

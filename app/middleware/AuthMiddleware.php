@@ -51,8 +51,8 @@ class AuthMiddleware extends Middleware
             // Mensaje para informar al usuario
             $_SESSION['error'] = 'Debes iniciar sesión para acceder a esta página.';
             
-            // Redirigir al login
-            $response->redirect('/login');
+            // Redirigir al login usando la ruta base correcta
+            $response->redirect('/pruebas-ds/public/login');
             return;
         }
         

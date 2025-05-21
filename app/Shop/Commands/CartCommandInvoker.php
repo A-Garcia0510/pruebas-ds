@@ -8,9 +8,18 @@ class CartCommandInvoker {
     private $undoneCommands = [];
     private $sessionKey = 'cart_command_history';
     private $cartService;
+    private $undoStack;
+    private $redoStack;
 
+    /**
+     * Constructor del invocador de comandos
+     * 
+     * @param CartService $cartService Servicio del carrito
+     */
     public function __construct(CartService $cartService) {
         $this->cartService = $cartService;
+        $this->undoStack = new \SplStack();
+        $this->redoStack = new \SplStack();
         // Cargar el historial desde la sesión
         if (isset($_SESSION[$this->sessionKey])) {
             $history = $_SESSION[$this->sessionKey];

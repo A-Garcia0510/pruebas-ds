@@ -74,23 +74,50 @@ $title = $title ?? 'Carrito de Compras';
     // Función para actualizar el estado de los botones de deshacer/rehacer
     function updateUndoRedoButtons() {
         console.log('Actualizando estado de botones deshacer/rehacer...');
-        fetch('<?= AssetHelper::url('cart/history') ?>')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+        fetch('<?= AssetHelper::url('cart/history') ?>', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Estado de botones:', data);
+            if (data.success) {
+                const undoBtn = document.getElementById('undoBtn');
+                const redoBtn = document.getElementById('redoBtn');
+                
+                // Actualizar estado de los botones
+                undoBtn.disabled = !data.hasUndoActions;
+                redoBtn.disabled = !data.hasRedoActions;
+                
+                // Actualizar clases visuales
+                if (data.hasUndoActions) {
+                    undoBtn.classList.add('active');
+                    undoBtn.classList.remove('disabled');
+                } else {
+                    undoBtn.classList.remove('active');
+                    undoBtn.classList.add('disabled');
                 }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Estado de botones:', data);
-                if (data.success) {
-                    document.getElementById('undoBtn').disabled = !data.hasUndoActions;
-                    document.getElementById('redoBtn').disabled = !data.hasRedoActions;
+                
+                if (data.hasRedoActions) {
+                    redoBtn.classList.add('active');
+                    redoBtn.classList.remove('disabled');
+                } else {
+                    redoBtn.classList.remove('active');
+                    redoBtn.classList.add('disabled');
                 }
-            })
-            .catch(error => {
-                console.error('Error al actualizar botones:', error);
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Error al actualizar botones:', error);
+            mostrarError(true, 'Error al actualizar el estado de los botones');
+        });
     }
 
     // Función para obtener el carrito del usuario
@@ -317,16 +344,28 @@ $title = $title ?? 'Carrito de Compras';
         });
     }
 
+    // Inicializar la página
     document.addEventListener('DOMContentLoaded', function() {
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
 
         // Función para deshacer última acción
         undoBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            
             fetch('<?= AssetHelper::url('cart/undo') ?>', {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     obtenerCarrito();
@@ -343,10 +382,21 @@ $title = $title ?? 'Carrito de Compras';
 
         // Función para rehacer última acción
         redoBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            
             fetch('<?= AssetHelper::url('cart/redo') ?>', {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     obtenerCarrito();
