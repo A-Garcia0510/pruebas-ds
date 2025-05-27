@@ -6,10 +6,12 @@ use App\Core\Interfaces\ResponseInterface;
 use App\Shop\Repositories\ProductRepository;
 use App\Shop\Exceptions\ProductNotFoundException;
 use App\Core\Container;
+use App\Models\Review;
 
 class ProductController extends BaseController
 {
     protected $productRepository;
+    protected $reviewModel;
     
     /**
      * Constructor del controlador de productos
@@ -18,10 +20,12 @@ class ProductController extends BaseController
         RequestInterface $request, 
         ResponseInterface $response,
         ProductRepository $productRepository,
-        Container $container
+        Container $container,
+        Review $reviewModel
     ) {
         parent::__construct($request, $response, $container);
         $this->productRepository = $productRepository;
+        $this->reviewModel = $reviewModel;
     }
     
     /**
@@ -76,12 +80,18 @@ class ProductController extends BaseController
             // Verificar si el usuario está autenticado
             $isLoggedIn = isset($_SESSION['correo']);
             
+            // Obtener reseñas del producto
+            $reviews = $this->reviewModel->getByProduct($id);
+            $averageRating = $this->reviewModel->getAverageRating($id);
+            
             // Renderizar la vista de detalle de producto
             return $this->render('products/detail', [
                 'product' => $product,
                 'title' => $product->getName(),
                 'isLoggedIn' => $isLoggedIn,
-                'css' => ['detalleproducto']
+                'css' => ['detalleproducto'],
+                'reviews' => $reviews,
+                'averageRating' => $averageRating
             ]);
             
         } catch (ProductNotFoundException $e) {
@@ -133,7 +143,7 @@ class ProductController extends BaseController
     {
         try {
             // Obtener parámetros de la solicitud
-            $category = $this->request->get('category');
+            $category = $_GET['category'] ?? null;
             
             // Obtener productos según el filtro
             $products = [];
@@ -214,7 +224,7 @@ class ProductController extends BaseController
             );
             $db = new \App\Core\Database\MySQLDatabase($dbConfig);
             $cartService = new \App\Shop\Services\CartService($db, $this->productRepository);
-            $commandInvoker = new \App\Shop\Commands\CartCommandInvoker();
+            $commandInvoker = new \App\Shop\Commands\CartCommandInvoker($cartService);
 
             // Crear y ejecutar el comando
             $command = new \App\Shop\Commands\AddToCartCommand(
@@ -243,5 +253,232 @@ class ProductController extends BaseController
                 'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * API para agregar una reseña
+     */
+    public function addReview()
+    {
+        // Verificar si la solicitud es POST
+        if ($this->request->getMethod() !== 'POST') {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Método no permitido'
+            ]);
+        }
+
+        // Verificar si el usuario está autenticado
+        if (!isset($_SESSION['correo'])) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Debes iniciar sesión para dejar una reseña'
+            ]);
+        }
+
+        try {
+            // Obtener datos de la solicitud
+            $data = $this->request->getBody();
+            
+            if (!$data) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Datos inválidos'
+                ]);
+            }
+
+            // Validar datos requeridos
+            if (!isset($data['producto_id']) && !isset($data['producto_ID'])) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Falta el ID del producto'
+                ]);
+            }
+
+            // Normalizar los nombres de los campos
+            $productoId = $data['producto_id'] ?? $data['producto_ID'];
+            $contenido = $data['contenido'] ?? '';
+            $calificacion = $data['calificacion'] ?? 0;
+
+            if (empty($contenido) || empty($calificacion)) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Faltan datos requeridos'
+                ]);
+            }
+
+            // Crear la reseña
+            $this->reviewModel->create(
+                $productoId,
+                $_SESSION['user_id'],
+                $contenido,
+                $calificacion
+            );
+
+            return $this->jsonResponse([
+                'success' => true,
+                'message' => 'Reseña agregada exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Error en ProductController::addReview: " . $e->getMessage());
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Error al agregar la reseña: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * API para reportar una reseña
+     */
+    public function reportReview()
+    {
+        // Verificar si la solicitud es POST
+        if ($this->request->getMethod() !== 'POST') {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Método no permitido'
+            ]);
+        }
+
+        // Verificar si el usuario está autenticado
+        if (!isset($_SESSION['user_id'])) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Debes iniciar sesión para reportar una reseña'
+            ]);
+        }
+
+        try {
+            // Obtener datos de la solicitud
+            $data = $this->request->getBody();
+            
+            if (!$data) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Datos inválidos'
+                ]);
+            }
+
+            // Normalizar el ID de la reseña
+            $reviewId = $data['review_ID'] ?? $data['review_id'] ?? null;
+            $razon = $data['razon'] ?? '';
+
+            // Validar datos requeridos
+            if (empty($reviewId) || empty($razon)) {
+                return $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Faltan datos requeridos'
+                ]);
+            }
+
+            // Reportar la reseña
+            $this->reviewModel->report(
+                $reviewId,
+                $_SESSION['user_id'],
+                $razon
+            );
+
+            return $this->jsonResponse([
+                'success' => true,
+                'message' => 'Reseña reportada exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Error en ProductController::reportReview: " . $e->getMessage());
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Error al reportar la reseña: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Elimina una reseña.
+     * Requiere autenticación y que el usuario sea el autor de la reseña.
+     * 
+     * @return string JSON response
+     */
+    public function deleteReview()
+    {
+        // Verificar si la solicitud es AJAX y POST
+        if (!$this->request->isAjax() || $this->request->getMethod() !== 'POST') {
+            return $this->jsonResponse([
+                'success' => false, 
+                'message' => 'Método no permitido.'
+            ]);
+        }
+
+        // Verificar autenticación
+        if (!isset($_SESSION['user_id'])) {
+            return $this->jsonResponse([
+                'success' => false, 
+                'message' => 'No autenticado.'
+            ]);
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+            $body = $this->request->getBody();
+            
+            // Normalizar el ID de la reseña
+            $reviewId = $body['review_ID'] ?? $body['review_id'] ?? null;
+            
+            if (empty($reviewId)) {
+                return $this->jsonResponse([
+                    'success' => false, 
+                    'message' => 'ID de reseña no proporcionado.'
+                ]);
+            }
+
+            // Verificar si la reseña existe y pertenece al usuario
+            $review = $this->reviewModel->findReviewById($reviewId);
+
+            if (!$review) {
+                return $this->jsonResponse([
+                    'success' => false, 
+                    'message' => 'Reseña no encontrada.'
+                ]);
+            }
+
+            if ($review['usuario_ID'] != $userId) {
+                return $this->jsonResponse([
+                    'success' => false, 
+                    'message' => 'No tienes permiso para eliminar esta reseña.'
+                ]);
+            }
+
+            // Intentar eliminar la reseña
+            $deleted = $this->reviewModel->deleteReview($reviewId);
+
+            if ($deleted) {
+                return $this->jsonResponse([
+                    'success' => true, 
+                    'message' => 'Reseña eliminada exitosamente.'
+                ]);
+            } else {
+                return $this->jsonResponse([
+                    'success' => false, 
+                    'message' => 'No se pudo eliminar la reseña.'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            error_log('Error al eliminar reseña: ' . $e->getMessage());
+            return $this->jsonResponse([
+                'success' => false, 
+                'message' => 'Error al eliminar la reseña: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Método auxiliar para respuestas JSON
+     */
+    private function jsonResponse($data) {
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
     }
 }

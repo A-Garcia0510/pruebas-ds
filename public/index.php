@@ -1,11 +1,19 @@
 <?php
-// Modificar el archivo de rutas en public/index.php
+// Añadir logs al inicio para depuración de la ruta
+error_log("INDEX.PHP: REQUEST_URI = " . ($_SERVER['REQUEST_URI'] ?? '-'));
+error_log("INDEX.PHP: SCRIPT_NAME = " . ($_SERVER['SCRIPT_NAME'] ?? '-'));
+error_log("INDEX.PHP: SCRIPT_FILENAME = " . ($_SERVER['SCRIPT_FILENAME'] ?? '-'));
+error_log("INDEX.PHP: PHP_SELF = " . ($_SERVER['PHP_SELF'] ?? '-'));
 
 /**
  * Punto de entrada principal de la aplicación
  * 
  * Este archivo inicializa la aplicación y configura todas las rutas
  */
+
+// DEBUG: Mostrar el contenido de la sesión en cada petición
+if (session_status() === PHP_SESSION_NONE) session_start();
+error_log('DEBUG_SESSION: ' . print_r($_SESSION, true));
 
 // Definir la ruta base del proyecto
 define('BASE_PATH', dirname(__DIR__));
@@ -39,11 +47,24 @@ require_once BASE_PATH . '/vendor/autoload.php';
 // Cargar la configuración
 $config = require_once BASE_PATH . '/app/config/config.php';
 
-// Iniciar sesión
-session_start();
-
 // Inicializar la aplicación
 $app = new \App\Core\App($config);
+
+// Registrar el modelo Review en el contenedor
+$app->container->bind(\App\Models\Review::class, function($container) {
+    return new \App\Models\Review($container->get(\App\Core\Database\DatabaseInterface::class));
+});
+
+// Registrar el ProductController con todas sus dependencias
+$app->container->bind(\App\Controllers\ProductController::class, function($container) {
+    return new \App\Controllers\ProductController(
+        $container->get(\App\Core\Interfaces\RequestInterface::class),
+        $container->get(\App\Core\Interfaces\ResponseInterface::class),
+        $container->get(\App\Shop\Repositories\ProductRepository::class),
+        $container,
+        $container->get(\App\Models\Review::class)
+    );
+});
 
 // -----------------------------------------
 // Configurar rutas
@@ -117,6 +138,15 @@ $app->router->get('/cafe-personalizado/pedidos', [\App\Controllers\CustomCoffeeC
 $app->router->get('/custom-coffee/order/{id}', [\App\Controllers\CustomCoffeeController::class, 'orderDetails']);
 $app->router->get('/cafe-personalizado/pedido/{id}', [\App\Controllers\CustomCoffeeController::class, 'orderDetails']);
 
+// Rutas de reseñas
+$app->router->post('/api/products/review/add', [\App\Controllers\ProductController::class, 'addReview']);
+$app->router->post('/api/products/review/report', [\App\Controllers\ProductController::class, 'reportReview']);
+$app->router->post('/api/products/review/delete', [\App\Controllers\ProductController::class, 'deleteReview']);
+
+// Rutas de moderación de reseñas
+$app->router->get('/dashboard/moderation', [\App\Controllers\DashboardController::class, 'moderation']);
+$app->router->post('/api/dashboard/moderate-review', [\App\Controllers\DashboardController::class, 'moderateReview']);
+
 // Aplicar middleware de autenticación
 // Definir rutas protegidas
 $protectedRoutes = [
@@ -142,7 +172,13 @@ $protectedRoutes = [
     '/api/custom-coffee/save-recipe',
     '/api/custom-coffee/place-order',
     '/api/custom-coffee/delete-recipe',
-    '/api/custom-coffee/cancel'
+    '/api/custom-coffee/cancel',
+    // Rutas protegidas de moderación y reseñas
+    '/dashboard/moderation',
+    '/api/dashboard/moderate-review',
+    '/api/products/review/add',
+    '/api/products/review/report',
+    '/api/products/review/delete'
 ];
 
 // Verificar si la clase AuthMiddleware existe antes de usarla

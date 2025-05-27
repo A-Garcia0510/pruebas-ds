@@ -44,12 +44,24 @@ class CustomCoffeeOrder {
             }
 
             // Validar que el precio coincide
-            $precioReceta = round($receta['precio_total'], 2);
-            $precioRecibido = round($precioTotal, 2);
+            $precioReceta = floatval($receta['precio_total']);
+            $precioRecibido = floatval($precioTotal);
             
+            error_log("[CustomCoffeeOrder::crearPedido] Precios - Receta: $precioReceta, Recibido: $precioRecibido");
+            
+            // Convertir el precio recibido a decimal (dividir por 1000)
+            $precioRecibido = $precioRecibido / 1000;
+            
+            // Normalizar los precios a 2 decimales
+            $precioReceta = round($precioReceta, 2);
+            $precioRecibido = round($precioRecibido, 2);
+            
+            error_log("[CustomCoffeeOrder::crearPedido] Precios normalizados - Receta: $precioReceta, Recibido: $precioRecibido");
+            
+            // Comparación exacta después de normalizar
             if ($precioReceta !== $precioRecibido) {
                 error_log("[CustomCoffeeOrder::crearPedido] Error: Precio no coincide - Recibido: $precioRecibido, Receta: $precioReceta");
-                throw new \Exception("El precio total no coincide con la receta");
+                throw new \Exception("El precio total no coincide con la receta (Recibido: $precioRecibido, Receta: $precioReceta)");
             }
 
             $this->db->beginTransaction();

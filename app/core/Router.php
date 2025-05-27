@@ -38,6 +38,14 @@ class Router
         $this->post('/api/custom-coffee/save-recipe', [\App\Controllers\CustomCoffeeController::class, 'saveRecipe']);
         $this->post('/api/custom-coffee/delete-recipe/:id', [\App\Controllers\CustomCoffeeController::class, 'deleteRecipe']);
         $this->post('/api/custom-coffee/order/:id/cancel', [\App\Controllers\CustomCoffeeController::class, 'cancelOrder']);
+
+        // Rutas para el sistema de reseñas
+        $this->post('/api/products/review/add', [\App\Controllers\ProductController::class, 'addReview']);
+        $this->post('/api/products/review/report', [\App\Controllers\ProductController::class, 'reportReview']);
+        
+        // Rutas para moderación de reseñas
+        $this->get('/dashboard/moderation', [\App\Controllers\DashboardController::class, 'moderation']);
+        $this->post('/api/dashboard/moderate-review', [\App\Controllers\DashboardController::class, 'moderateReview']);
     }
     
     /**

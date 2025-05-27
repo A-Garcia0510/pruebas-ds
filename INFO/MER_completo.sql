@@ -5,7 +5,7 @@ CREATE TABLE `Usuario` (
   `apellidos` VARCHAR(50),
   `correo` VARCHAR(50),
   `contraseña` VARCHAR(255), 
-  `ROL` ENUM("Estudiante", "Profesor", "Empleado"),
+  `ROL` ENUM("Estudiante", "Empleado", "Administrador"),
   `fecha_registro` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `ultimo_acceso` TIMESTAMP NULL,
   `estado` ENUM('activo', 'inactivo') DEFAULT 'activo',
@@ -106,6 +106,51 @@ CREATE TABLE `custom_coffee_order_details` (
   `precio_unitario` DECIMAL(10,2) NOT NULL,
   FOREIGN KEY (`orden_ID`) REFERENCES `custom_coffee_orders`(`orden_ID`),
   FOREIGN KEY (`componente_ID`) REFERENCES `custom_coffee_components`(`componente_ID`)
+);
+
+-- Nuevas tablas para el sistema de reseñas y moderación
+CREATE TABLE `product_reviews` (
+  `review_ID` INT PRIMARY KEY AUTO_INCREMENT,
+  `producto_ID` INT NOT NULL,
+  `usuario_ID` INT NOT NULL,
+  `contenido` TEXT NOT NULL,
+  `calificacion` INT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+  `estado` ENUM('pendiente', 'aprobada', 'rechazada') DEFAULT 'pendiente',
+  `fecha_creacion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `fecha_modificacion` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`producto_ID`) REFERENCES `Producto`(`producto_ID`),
+  FOREIGN KEY (`usuario_ID`) REFERENCES `Usuario`(`usuario_ID`)
+);
+
+CREATE TABLE `review_ratings` (
+  `rating_ID` INT PRIMARY KEY AUTO_INCREMENT,
+  `review_ID` INT NOT NULL,
+  `calificacion` INT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+  `comentario` TEXT,
+  `fecha` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`review_ID`) REFERENCES `product_reviews`(`review_ID`)
+);
+
+CREATE TABLE `review_reports` (
+  `reporte_ID` INT PRIMARY KEY AUTO_INCREMENT,
+  `review_ID` INT NOT NULL,
+  `usuario_ID` INT NOT NULL,
+  `razon` TEXT NOT NULL,
+  `estado` ENUM('pendiente', 'resuelto', 'desestimado') DEFAULT 'pendiente',
+  `fecha` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`review_ID`) REFERENCES `product_reviews`(`review_ID`),
+  FOREIGN KEY (`usuario_ID`) REFERENCES `Usuario`(`usuario_ID`)
+);
+
+CREATE TABLE `review_moderation_log` (
+  `log_ID` INT PRIMARY KEY AUTO_INCREMENT,
+  `review_ID` INT NOT NULL,
+  `moderador_ID` INT NOT NULL,
+  `accion` ENUM('aprobar', 'rechazar', 'reportar', 'desestimar') NOT NULL,
+  `comentario` TEXT,
+  `fecha` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`review_ID`) REFERENCES `product_reviews`(`review_ID`),
+  FOREIGN KEY (`moderador_ID`) REFERENCES `Usuario`(`usuario_ID`)
 );
 
 -- Triggers
@@ -214,21 +259,75 @@ BEGIN
 END //
 DELIMITER ;
 
+-- Triggers para el sistema de reseñas
+
+-- Trigger para actualizar fecha_modificacion en product_reviews
+DELIMITER //
+CREATE TRIGGER `after_review_update`
+AFTER UPDATE ON `product_reviews`
+FOR EACH ROW
+BEGIN
+    IF NEW.estado != OLD.estado THEN
+        UPDATE `product_reviews` 
+        SET fecha_modificacion = CURRENT_TIMESTAMP 
+        WHERE review_ID = NEW.review_ID;
+    END IF;
+END //
+DELIMITER ;
+
+-- Trigger para verificar que un usuario solo pueda calificar una reseña una vez
+DELIMITER //
+CREATE TRIGGER `before_rating_insert`
+BEFORE INSERT ON `review_ratings`
+FOR EACH ROW
+BEGIN
+    DECLARE rating_exists INT;
+    
+    SELECT COUNT(*) INTO rating_exists
+    FROM `review_ratings`
+    WHERE review_ID = NEW.review_ID;
+    
+    IF rating_exists > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Esta reseña ya ha sido calificada';
+    END IF;
+END //
+DELIMITER ;
+
+-- Trigger para verificar que un usuario no pueda reportar su propia reseña
+DELIMITER //
+CREATE TRIGGER `before_report_insert`
+BEFORE INSERT ON `review_reports`
+FOR EACH ROW
+BEGIN
+    DECLARE review_author INT;
+    
+    SELECT usuario_ID INTO review_author
+    FROM `product_reviews`
+    WHERE review_ID = NEW.review_ID;
+    
+    IF review_author = NEW.usuario_ID THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No puedes reportar tu propia reseña';
+    END IF;
+END //
+DELIMITER ;
+
 -- Datos iniciales para componentes de café
 INSERT INTO `custom_coffee_components` (`nombre`, `tipo`, `precio`, `stock`, `descripcion`) VALUES
 -- Bases
-('Espresso', 'base', 1500.00, 100, 'Café espresso puro'),
-('Americano', 'base', 1800.00, 100, 'Espresso con agua caliente'),
-('Cappuccino', 'base', 2000.00, 100, 'Espresso con leche espumada'),
+('Espresso', 'base', 1500, 100, 'Café espresso puro'),
+('Americano', 'base', 1800, 100, 'Espresso con agua caliente'),
+('Cappuccino', 'base', 2000, 100, 'Espresso con leche espumada'),
 -- Leches
-('Leche Entera', 'leche', 500.00, 100, 'Leche de vaca entera'),
-('Leche Descremada', 'leche', 500.00, 100, 'Leche de vaca descremada'),
-('Leche de Almendras', 'leche', 800.00, 50, 'Leche vegetal de almendras'),
+('Leche Entera', 'leche', 500, 100, 'Leche de vaca entera'),
+('Leche Descremada', 'leche', 500, 100, 'Leche de vaca descremada'),
+('Leche de Almendras', 'leche', 800, 50, 'Leche vegetal de almendras'),
 -- Endulzantes
-('Azúcar', 'endulzante', 0.00, 1000, 'Azúcar blanca'),
-('Stevia', 'endulzante', 200.00, 100, 'Endulzante natural'),
-('Miel', 'endulzante', 300.00, 50, 'Miel de abeja natural'),
+('Azúcar', 'endulzante', 0, 1000, 'Azúcar blanca'),
+('Stevia', 'endulzante', 200, 100, 'Endulzante natural'),
+('Miel', 'endulzante', 300, 50, 'Miel de abeja natural'),
 -- Toppings
-('Crema Batida', 'topping', 500.00, 50, 'Crema batida fresca'),
-('Chocolate', 'topping', 400.00, 100, 'Polvo de chocolate'),
-('Canela', 'topping', 200.00, 100, 'Polvo de canela'); 
+('Crema Batida', 'topping', 500, 50, 'Crema batida fresca'),
+('Chocolate', 'topping', 400, 100, 'Polvo de chocolate'),
+('Canela', 'topping', 200, 100, 'Polvo de canela'); 

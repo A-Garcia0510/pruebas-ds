@@ -1,0 +1,316 @@
+/* Estilos mejorados para la sección de Reseñas en detalle de producto */
+.product-reviews-section {
+    max-width: 700px;
+    margin: 2rem auto 0 auto;
+    padding: 1.2rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-family: 'Arial', sans-serif;
+}
+
+.product-reviews-section h2 {
+    color: #212529; /* Color más oscuro para el título */
+    font-size: 2.8rem; /* Tamaño de fuente más grande */
+    margin-bottom: 2.5rem; /* Espacio inferior aumentado */
+    text-align: center; /* Centrar */
+    border-bottom: 3px solid #ffc107; /* Línea separadora amarilla */
+    padding-bottom: 1.5rem; /* Espacio */
+    text-transform: uppercase; /* Texto en mayúsculas */
+    letter-spacing: 1.5px; /* Espaciado entre letras */
+}
+
+.add-review-form {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.add-review-form h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block; /* Cada label en su línea */
+    margin-bottom: 0.8rem; /* Espacio */
+    font-weight: bold; /* Negrita */
+    color: #495057; /* Color */
+    font-size: 1.1rem; /* Tamaño de fuente */
+}
+
+.form-group select, .form-group textarea {
+    width: 100%; /* Ancho completo */
+    padding: 1rem; /* Padding aumentado */
+    border: 1px solid #ced4da; /* Borde */
+    border-radius: 5px; /* Bordes más redondeados */
+    font-size: 1.1rem; /* Tamaño de fuente aumentado */
+    box-sizing: border-box; /* Incluir padding y borde en el ancho */
+}
+
+textarea {
+    resize: vertical; /* Permitir redimensionar verticalmente */
+    min-height: 100px; /* Altura mínima */
+}
+
+.btn-primary {
+    background-color: #28a745; /* Color verde para botón primario (éxito) */
+    color: white; /* Texto blanco */
+    padding: 1rem 2.5rem; /* Padding */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    font-size: 1.2rem; /* Tamaño */
+    cursor: pointer; /* Cursor */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transición y transformación */
+    display: block; /* Botón en su propia línea */
+    width: 100%; /* Ancho completo */
+    max-width: 300px; /* Ancho máximo */
+    margin: 0 auto; /* Centrar botón */
+}
+
+.btn-primary:hover {
+    background-color: #218838; /* Color oscuro al pasar ratón */
+    transform: translateY(-2px); /* Efecto hover sutil */
+}
+
+.btn-primary:active {
+    transform: translateY(0); /* Quitar efecto al hacer click */
+}
+
+.reviews-list {
+    margin-top: 3rem; /* Espacio superior */
+}
+
+.review-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.review-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.reviewer-name {
+    font-weight: bold; /* Negrita */
+    color: #495057; /* Color */
+    margin-right: 1rem; /* Espacio a la derecha */
+    font-size: 1.1rem; /* Tamaño de fuente */
+}
+
+.review-date {
+    color: #6c757d; /* Color gris */
+    font-size: 0.95rem; /* Tamaño */
+}
+
+.review-actions {
+    display: flex; /* Alinear botones */
+    gap: 0.8rem; /* Espacio entre botones */
+    margin-top: 0.8rem; /* Espacio arriba si envuelve */
+}
+
+.review-actions button {
+     padding: 0.5rem 1rem; /* Padding en botones */
+    border: 1px solid #ced4da; /* Borde */
+    border-radius: 5px; /* Bordes redondeados */
+    background-color: #e9ecef; /* Fondo */
+    cursor: pointer; /* Cursor */
+    font-size: 0.9rem; /* Tamaño */
+    transition: background-color 0.2s ease, opacity 0.2s ease; /* Transición */
+}
+
+.review-actions button:hover:not(:disabled) {
+    background-color: #d0d4db; /* Fondo al pasar ratón */
+}
+
+.review-actions button:disabled {
+    opacity: 0.5; /* Opacidad para botones deshabilitados */
+    cursor: not-allowed; /* Cursor */
+}
+
+.delete-review-btn {
+    color: #dc3545; /* Color rojo */
+    border-color: #dc3545; /* Borde rojo */
+    background-color: #fff; /* Fondo blanco */
+}
+
+.delete-review-btn:hover:not(:disabled) {
+    background-color: #dc3545; /* Fondo rojo al pasar ratón */
+    color: white; /* Texto blanco */
+}
+
+.report-review-btn {
+     color: #ffc107; /* Color amarillo */
+     border-color: #ffc107; /* Borde amarillo */
+     background-color: #fff; /* Fondo blanco */
+}
+
+.report-review-btn:hover:not(:disabled) {
+     background-color: #ffc107; /* Fondo amarillo al pasar ratón */
+     color: #343a40; /* Texto oscuro */
+}
+
+.review-rating {
+    margin-bottom: 1rem; /* Espacio aumentado */
+}
+
+.review-rating .star {
+    color: #ffc107; /* Estrellas amarillas */
+    font-size: 1.1rem;
+}
+
+.review-rating .star.filled {
+    color: #ffc107; /* Estrellas llenas */
+}
+
+.review-content p {
+    margin: 0; /* Sin margen */
+    line-height: 1.7; /* Interlineado aumentado */
+    color: #343a40; /* Color */
+    font-size: 1rem; /* Tamaño de fuente */
+}
+
+.no-reviews {
+    text-align: center; /* Centrar texto */
+    color: #6c757d; /* Color gris */
+    padding: 1rem;
+    background-color: #e9ecef; /* Fondo */
+    border-radius: 8px; /* Bordes redondeados */
+    font-size: 1.1rem; /* Tamaño aumentado */
+    margin-bottom: 2rem; /* Espacio inferior */
+}
+
+/* Estilos del Modal (pueden estar en un archivo CSS global si prefieres) */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Posición fija */
+    z-index: 1000; /* Siempre encima */
+    left: 0; /* Izquierda 0 */
+    top: 0; /* Arriba 0 */
+    width: 100%; /* Ancho completo */
+    height: 100%; /* Alto completo */
+    overflow: auto; /* Permitir scroll si es necesario */
+    background-color: rgba(0,0,0,0.5); /* Fondo semi-transparente más oscuro */
+    justify-content: center; /* Centrar contenido horizontalmente */
+    align-items: center; /* Centrar contenido verticalmente */
+    backdrop-filter: blur(5px); /* Efecto de desenfoque */
+}
+
+.modal.show {
+    display: flex; /* Mostrar como flex para centrar */
+}
+
+.modal-content {
+    background-color: #fefefe; /* Fondo blanco */
+    margin: auto; /* Márgenes automáticos */
+    padding: 30px; /* Padding aumentado */
+    border: 1px solid #ddd; /* Borde */
+    width: 90%; /* Ancho del contenido */
+    max-width: 500px; /* Ancho máximo */
+    border-radius: 10px; /* Bordes redondeados */
+    position: relative; /* Para posicionar el botón de cierre */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4); /* Sombra */
+    animation: animatetop 0.4s; /* Animación de entrada */
+}
+
+/* Animación del Modal */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0} 
+    to {top: 0; opacity: 1}
+}
+
+.close-button {
+    color: #aaa; /* Color del botón de cierre */
+    float: right; /* Alinear a la derecha */
+    font-size: 30px; /* Tamaño de fuente */
+    font-weight: bold; /* Negrita */
+    position: absolute; /* Posición absoluta */
+    top: 15px; /* Separación superior */
+    right: 20px; /* Separación derecha */
+    transition: color 0.3s ease; /* Transición de color */
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #777; /* Color al pasar ratón/foco */
+    text-decoration: none; /* Sin subrayado */
+    cursor: pointer; /* Cursor */
+}
+
+.modal-content h2 {
+    margin-top: 0; /* Sin margen superior */
+    margin-bottom: 2rem; /* Espacio inferior */
+    color: #343a40; /* Color */
+    text-align: center; /* Centrar título del modal */
+}
+
+.btn-danger {
+     background-color: #dc3545; /* Color rojo */
+    color: white; /* Texto blanco */
+    padding: 1rem 2rem; /* Padding */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    font-size: 1.1rem; /* Tamaño */
+    cursor: pointer; /* Cursor */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transición y transformación */
+    display: block; /* Botón en su propia línea */
+    width: 100%; /* Ancho completo */
+    max-width: 200px; /* Ancho máximo */
+    margin: 2rem auto 0 auto; /* Centrar botón y espacio superior */
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Color oscuro al pasar ratón */
+    transform: translateY(-2px); /* Efecto hover sutil */
+}
+
+.btn-danger:active {
+     transform: translateY(0); /* Quitar efecto al hacer click */
+}
+
+@media (max-width: 768px) {
+    .product-reviews-section {
+        padding: 1.5rem;
+    }
+    .product-reviews-section h2 {
+        font-size: 2rem;
+    }
+    .add-review-form {
+        padding: 1.5rem;
+    }
+    .add-review-form h3 {
+        font-size: 1.6rem;
+    }
+    .review-item {
+        padding: 1.5rem;
+    }
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .review-actions {
+        margin-top: 1rem;
+    }
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    .close-button {
+        font-size: 24px;
+        top: 10px;
+        right: 10px;
+    }
+     .btn-primary, .btn-danger {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        max-width: 100%;
+    }
+} 

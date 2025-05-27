@@ -138,7 +138,7 @@ class CustomCoffeeRecipe {
         }
 
         $detalles = $this->db->fetchAll(
-            "SELECT d.*, c.nombre, c.tipo, c.cantidad_unidad, c.unidad
+            "SELECT d.*, c.nombre, c.tipo, c.unidad
              FROM custom_coffee_recipe_details d
              JOIN custom_coffee_components c ON d.componente_ID = c.componente_ID
              WHERE d.receta_ID = ?",

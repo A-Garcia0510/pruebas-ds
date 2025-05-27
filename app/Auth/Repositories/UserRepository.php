@@ -34,7 +34,8 @@ class UserRepository implements UserRepositoryInterface
             $userData['nombre'],
             $userData['apellidos'],
             $userData['correo'],
-            $userData['contraseña']
+            $userData['contraseña'],
+            $userData['ROL']
         );
     }
     

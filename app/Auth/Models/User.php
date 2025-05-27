@@ -9,14 +9,16 @@ class User
     private $apellidos;
     private $email;
     private $password;
+    private $rol;
     
-    public function __construct(?int $id = null, ?string $nombre = null, ?string $apellidos = null, ?string $email = null, ?string $password = null)
+    public function __construct(?int $id = null, ?string $nombre = null, ?string $apellidos = null, ?string $email = null, ?string $password = null, ?string $rol = null)
     {
         $this->id = $id;
         $this->nombre = $nombre;
         $this->apellidos = $apellidos;
         $this->email = $email;
         $this->password = $password;
+        $this->rol = $rol;
     }
     
     public function getId(): ?int
@@ -71,6 +73,17 @@ class User
     public function setPassword(string $password): self
     {
         $this->password = $password;
+        return $this;
+    }
+    
+    public function getRol(): ?string
+    {
+        return $this->rol;
+    }
+    
+    public function setRol(string $rol): self
+    {
+        $this->rol = $rol;
         return $this;
     }
     

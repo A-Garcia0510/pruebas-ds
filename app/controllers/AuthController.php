@@ -82,9 +82,15 @@ class AuthController extends BaseController
                 // Guardar datos en la sesión
                 $_SESSION['correo'] = $email;
                 $_SESSION['user_id'] = $user->getId();
+                $_SESSION['user_role'] = $user->getRol();
+                
+                // Asegurarnos de que no exista usuario_id
+                if (isset($_SESSION['usuario_id'])) {
+                    unset($_SESSION['usuario_id']);
+                }
                 
                 // Log para depuración
-                error_log('Usuario autenticado - ID: ' . $user->getId() . ', Correo: ' . $email);
+                error_log('Usuario autenticado - ID: ' . $user->getId() . ', Correo: ' . $email . ', Rol: ' . $user->getRol());
                 
                 // Redirigir al dashboard
                 return $this->redirect('/pruebas-ds/public/dashboard');
@@ -168,9 +174,15 @@ class AuthController extends BaseController
                 // Guardar datos en la sesión
                 $_SESSION['correo'] = $email;
                 $_SESSION['user_id'] = $savedUser->getId();
+                $_SESSION['user_role'] = $savedUser->getRol();
     
+                // Asegurarnos de que no exista usuario_id
+                if (isset($_SESSION['usuario_id'])) {
+                    unset($_SESSION['usuario_id']);
+                }
+                
                 // Log para depuración
-                error_log('Usuario registrado y autenticado - ID: ' . $savedUser->getId() . ', Correo: ' . $email);
+                error_log('Usuario registrado y autenticado - ID: ' . $savedUser->getId() . ', Correo: ' . $email . ', Rol: ' . $savedUser->getRol());
     
                 return $this->redirect('/pruebas-ds/public/dashboard');
             }

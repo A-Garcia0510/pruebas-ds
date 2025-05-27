@@ -49,12 +49,10 @@ class Request implements RequestInterface
         }
         
         // Depuración
-        if (App::$app->config['app']['debug'] ?? false) {
-            error_log("RequestURI: " . $_SERVER['REQUEST_URI']);
-            error_log("ScriptName: " . $scriptName);
-            error_log("ScriptDir: " . $scriptDir);
-            error_log("Path procesado: " . $path);
-        }
+        error_log("RequestURI: " . $_SERVER['REQUEST_URI']);
+        error_log("ScriptName: " . $scriptName);
+        error_log("ScriptDir: " . $scriptDir);
+        error_log("Path procesado: " . $path);
         
         return $path;
     }

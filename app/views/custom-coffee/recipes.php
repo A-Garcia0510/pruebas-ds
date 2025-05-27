@@ -50,7 +50,7 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
                         </div>
 
                         <div class="precio">
-                            <span>Precio Total</span>
+                            <span>Precio Total (IVA Incluido)</span>
                             <span class="amount">$<?= number_format($receta['precio_total'], 0, ',', '.') ?> CLP</span>
                         </div>
                     </div>
@@ -88,14 +88,15 @@ async function realizarPedido(recetaId, precioTotal) {
 
         // Validar que los parámetros sean números válidos
         recetaId = parseInt(recetaId);
-        // Asegurar que el precio sea un número con 2 decimales
+        // Asegurar que el precio sea un número
         precioTotal = parseFloat(precioTotal);
-
+        
         console.log('Parámetros procesados:', { 
             recetaId, 
             precioTotal,
             recetaIdType: typeof recetaId,
-            precioTotalType: typeof precioTotal
+            precioTotalType: typeof precioTotal,
+            precioTotalRaw: precioTotal
         });
 
         if (isNaN(recetaId) || recetaId <= 0) {
