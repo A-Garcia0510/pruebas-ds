@@ -100,6 +100,23 @@ $app->router->get('/dashboard', [\App\Controllers\DashboardController::class, 'i
 $app->router->get('/dashboard/', [\App\Controllers\DashboardController::class, 'index']);
 $app->router->get('/panel', [\App\Controllers\DashboardController::class, 'index']);
 
+// Rutas de café personalizado
+$app->router->get('/custom-coffee', [\App\Controllers\CustomCoffeeController::class, 'index']);
+$app->router->get('/cafe-personalizado', [\App\Controllers\CustomCoffeeController::class, 'index']);
+$app->router->get('/custom-coffee/builder', [\App\Controllers\CustomCoffeeController::class, 'builder']);
+$app->router->get('/cafe-personalizado/constructor', [\App\Controllers\CustomCoffeeController::class, 'index']);
+$app->router->get('/custom-coffee/recipes', [\App\Controllers\CustomCoffeeController::class, 'recipes']);
+$app->router->get('/cafe-personalizado/recetas', [\App\Controllers\CustomCoffeeController::class, 'recipes']);
+$app->router->get('/api/custom-coffee/get-components', [\App\Controllers\CustomCoffeeController::class, 'getComponentes']);
+$app->router->post('/api/custom-coffee/save-recipe', [\App\Controllers\CustomCoffeeController::class, 'saveRecipe']);
+$app->router->post('/api/custom-coffee/place-order', [\App\Controllers\CustomCoffeeController::class, 'placeOrder']);
+$app->router->post('/api/custom-coffee/delete-recipe/:id', [\App\Controllers\CustomCoffeeController::class, 'deleteRecipe']);
+$app->router->post('/api/custom-coffee/cancel/:id', [\App\Controllers\CustomCoffeeController::class, 'cancel']);
+$app->router->get('/custom-coffee/orders', [\App\Controllers\CustomCoffeeController::class, 'orders']);
+$app->router->get('/cafe-personalizado/pedidos', [\App\Controllers\CustomCoffeeController::class, 'orders']);
+$app->router->get('/custom-coffee/order/{id}', [\App\Controllers\CustomCoffeeController::class, 'orderDetails']);
+$app->router->get('/cafe-personalizado/pedido/{id}', [\App\Controllers\CustomCoffeeController::class, 'orderDetails']);
+
 // Aplicar middleware de autenticación
 // Definir rutas protegidas
 $protectedRoutes = [
@@ -114,8 +131,18 @@ $protectedRoutes = [
     '/carrito',
     '/cart/items',
     '/cart/remove',
-    '/cart/checkout'
-    // Agrega aquí otras rutas que requieran autenticación
+    '/cart/checkout',
+    // Rutas protegidas del café personalizado
+    '/custom-coffee/recipes',
+    '/cafe-personalizado/recetas',
+    '/custom-coffee/orders',
+    '/cafe-personalizado/pedidos',
+    '/custom-coffee/order',
+    '/cafe-personalizado/pedido',
+    '/api/custom-coffee/save-recipe',
+    '/api/custom-coffee/place-order',
+    '/api/custom-coffee/delete-recipe',
+    '/api/custom-coffee/cancel'
 ];
 
 // Verificar si la clase AuthMiddleware existe antes de usarla

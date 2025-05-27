@@ -66,7 +66,12 @@ class AssetHelper {
         $path = ltrim($path, '/');
         $baseUrl = self::getBaseUrl();
         
-        // Si la URL base no incluye /pruebas-ds/public, agregarlo
+        // Si estamos en el directorio public, no agregar /pruebas-ds/public
+        if (strpos($_SERVER['SCRIPT_NAME'], '/public/') !== false) {
+            return $baseUrl . ($path ? "/$path" : '');
+        }
+        
+        // Si no estamos en public, agregar /pruebas-ds/public
         if (strpos($baseUrl, '/pruebas-ds/public') === false) {
             $baseUrl = rtrim($baseUrl, '/') . '/pruebas-ds/public';
         }

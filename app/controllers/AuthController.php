@@ -73,12 +73,18 @@ class AuthController extends BaseController
 
         try {
             if ($this->authenticator->authenticate($email, $password)) {
-                // Guardar el correo en la sesión
+                // Obtener el ID del usuario
+                $user = $this->userRepository->findByEmail($email);
+                if (!$user) {
+                    throw new \Exception("Error: No se pudo obtener la información del usuario.");
+                }
+
+                // Guardar datos en la sesión
                 $_SESSION['correo'] = $email;
-                $_SESSION['user_id'] = $_SESSION['usuario_id'];
+                $_SESSION['user_id'] = $user->getId();
                 
                 // Log para depuración
-                error_log('Usuario autenticado - Correo guardado en sesión: ' . $email);
+                error_log('Usuario autenticado - ID: ' . $user->getId() . ', Correo: ' . $email);
                 
                 // Redirigir al dashboard
                 return $this->redirect('/pruebas-ds/public/dashboard');
@@ -150,12 +156,21 @@ class AuthController extends BaseController
             
             // Guardar usuario
             if ($this->userRepository->save($user)) {
+                // Obtener el usuario guardado para obtener su ID
+                $savedUser = $this->userRepository->findByEmail($email);
+                if (!$savedUser) {
+                    throw new \Exception("Error: No se pudo obtener la información del usuario después de guardarlo.");
+                }
+
                 // Autenticar al usuario
                 $this->authenticator->authenticate($email, $password);
     
-                // Asegurar que las variables de sesión estén sincronizadas
-                $_SESSION['user_id'] = $_SESSION['usuario_id'];
-                $_SESSION['email'] = $_SESSION['correo'];
+                // Guardar datos en la sesión
+                $_SESSION['correo'] = $email;
+                $_SESSION['user_id'] = $savedUser->getId();
+    
+                // Log para depuración
+                error_log('Usuario registrado y autenticado - ID: ' . $savedUser->getId() . ', Correo: ' . $email);
     
                 return $this->redirect('/pruebas-ds/public/dashboard');
             }

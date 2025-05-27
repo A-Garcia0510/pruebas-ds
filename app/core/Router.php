@@ -24,6 +24,20 @@ class Router
         $this->request = $request;
         $this->response = $response;
         $this->container = $container;
+
+        // Definir rutas de Custom Coffee
+        $this->get('/custom-coffee', [\App\Controllers\CustomCoffeeController::class, 'index']);
+        $this->get('/custom-coffee/builder', [\App\Controllers\CustomCoffeeController::class, 'index']);
+        $this->get('/custom-coffee/recipes', [\App\Controllers\CustomCoffeeController::class, 'recipes']);
+        $this->get('/custom-coffee/orders', [\App\Controllers\CustomCoffeeController::class, 'orders']);
+        $this->get('/custom-coffee/order-details/:id', [\App\Controllers\CustomCoffeeController::class, 'orderDetails']);
+        
+        // API endpoints - Usar array para mejor manejo de dependencias
+        $this->post('/api/custom-coffee/place-order', [\App\Controllers\CustomCoffeeController::class, 'placeOrder']);
+        $this->get('/api/custom-coffee/get-components', [\App\Controllers\CustomCoffeeController::class, 'getComponentes']);
+        $this->post('/api/custom-coffee/save-recipe', [\App\Controllers\CustomCoffeeController::class, 'saveRecipe']);
+        $this->post('/api/custom-coffee/delete-recipe/:id', [\App\Controllers\CustomCoffeeController::class, 'deleteRecipe']);
+        $this->post('/api/custom-coffee/order/:id/cancel', [\App\Controllers\CustomCoffeeController::class, 'cancelOrder']);
     }
     
     /**
@@ -72,36 +86,40 @@ class Router
         $path = $this->normalizePath($path);
         
         // Debug log
-        if (App::$app->config['app']['debug'] ?? false) {
-            error_log("Router::resolve() - Resolviendo ruta: $method $path");
-        }
+        error_log("Router::resolve() - Iniciando resolución de ruta");
+        error_log("Router::resolve() - Método: $method");
+        error_log("Router::resolve() - Path: $path");
+        error_log("Router::resolve() - Rutas disponibles: " . print_r($this->routes[$method] ?? [], true));
         
         // Revisar rutas exactas primero
         if (isset($this->routes[$method][$path])) {
+            error_log("Router::resolve() - Ruta exacta encontrada: $path");
             $callback = $this->routes[$method][$path];
             return $this->executeCallback($callback, []);
         }
         
         // Revisar rutas con parámetros
         foreach ($this->routes[$method] as $route => $callback) {
-            if (strpos($route, '{') !== false) {
+            // Verificar si la ruta tiene parámetros (ya sea :id o {id})
+            if (strpos($route, ':') !== false || strpos($route, '{') !== false) {
+                error_log("Router::resolve() - Evaluando ruta con parámetros: $route");
                 $routeRegex = $this->convertRouteToRegex($route);
+                error_log("Router::resolve() - Regex generado: $routeRegex");
                 
                 if (preg_match($routeRegex, $path, $matches)) {
+                    error_log("Router::resolve() - Coincidencia encontrada para: $route");
                     // Extraer parámetros
                     $params = $this->extractParams($route, $matches);
-                    
-                    // Log para depuración
-                    if (App::$app->config['app']['debug'] ?? false) {
-                        error_log("Router::resolve() - Ruta con parámetros encontrada: $route");
-                        error_log("Router::resolve() - Parámetros: " . print_r($params, true));
-                    }
+                    error_log("Router::resolve() - Parámetros extraídos: " . print_r($params, true));
                     
                     return $this->executeCallback($callback, $params);
+                } else {
+                    error_log("Router::resolve() - No hubo coincidencia para: $route");
                 }
             }
         }
         
+        error_log("Router::resolve() - No se encontró ninguna ruta coincidente");
         // Intentar con o sin slash final
         $altPath = ($path === '/') ? $path : rtrim($path, '/');
             
@@ -135,8 +153,8 @@ class Router
         // Escapar caracteres especiales
         $route = preg_quote($route, '/');
         
-        // Reemplazar parámetros con patrones regex
-        $route = preg_replace('/\\\{([a-zA-Z0-9_]+)\\\}/', '([^\/]+)', $route);
+        // Reemplazar parámetros con patrones regex (tanto :id como {id})
+        $route = preg_replace('/\\\:([a-zA-Z0-9_]+)|\\\{([a-zA-Z0-9_]+)\\\}/', '([^\/]+)', $route);
         
         return '/^' . $route . '$/';
     }
@@ -151,7 +169,8 @@ class Router
     protected function extractParams($route, $matches)
     {
         $params = [];
-        preg_match_all('/\{([a-zA-Z0-9_]+)\}/', $route, $paramNames);
+        // Buscar tanto :id como {id}
+        preg_match_all('/[:\{]([a-zA-Z0-9_]+)[\}]?/', $route, $paramNames);
         
         // El primer elemento de $matches es la coincidencia completa
         array_shift($matches);
@@ -175,20 +194,35 @@ class Router
         if (is_array($callback)) {
             [$controllerClass, $method] = $callback;
             
+            // Log para depuración
+            error_log("Router::executeCallback() - Ejecutando: $controllerClass::$method");
+            error_log("Router::executeCallback() - Parámetros: " . print_r($params, true));
+            error_log("Router::executeCallback() - Método HTTP: " . $this->request->getMethod());
+            error_log("Router::executeCallback() - Headers: " . print_r($this->request->getHeaders(), true));
+            
             // Usar el contenedor para crear el controlador
             $controller = $this->container->resolve($controllerClass);
             
-            // Log para depuración
-            if (App::$app->config['app']['debug'] ?? false) {
-                error_log("Router::executeCallback() - Ejecutando método: $controllerClass::$method");
-                error_log("Router::executeCallback() - Parámetros: " . print_r($params, true));
+            // Obtener los parámetros del método usando reflexión
+            $reflection = new \ReflectionMethod($controller, $method);
+            $methodParams = $reflection->getParameters();
+            
+            // Preparar los argumentos en el orden correcto
+            $args = [];
+            foreach ($methodParams as $param) {
+                $paramName = $param->getName();
+                if (isset($params[$paramName])) {
+                    $args[] = $params[$paramName];
+                } else if ($param->isOptional()) {
+                    $args[] = $param->getDefaultValue();
+                } else {
+                    error_log("Router::executeCallback() - Error: Parámetro requerido no proporcionado: $paramName");
+                    throw new \Exception("Parámetro requerido no proporcionado: $paramName");
+                }
             }
             
-            if (empty($params)) {
-                return $controller->$method();
-            } else {
-                return call_user_func_array([$controller, $method], $params);
-            }
+            error_log("Router::executeCallback() - Argumentos finales: " . print_r($args, true));
+            return $reflection->invokeArgs($controller, $args);
         }
         
         return call_user_func_array($callback, [$this->request, $this->response]);

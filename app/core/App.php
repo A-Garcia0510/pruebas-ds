@@ -17,6 +17,12 @@ use App\Core\Database\DatabaseInterface;
 use App\Core\Database\DatabaseConfiguration;
 use App\Controllers\DashboardController;
 use App\Controllers\AuthController;
+use App\Controllers\CustomCoffeeController;
+use App\Models\CustomCoffee\CustomCoffeeComponent;
+use App\Models\CustomCoffee\CustomCoffeeRecipe;
+use App\Models\CustomCoffee\CustomCoffeeOrder;
+use App\Models\CustomCoffee\CoffeeBuilder;
+use App\Models\CustomCoffee\CoffeeDirector;
 
 /**
  * Clase principal de la aplicación
@@ -55,6 +61,30 @@ class App
         
         $this->container->singleton(Response::class, function($container) {
             return new Response();
+        });
+        
+        // Registrar modelos del café personalizado
+        $this->container->bind(CustomCoffeeComponent::class, function($container) {
+            return new CustomCoffeeComponent($container->resolve(DatabaseInterface::class));
+        });
+
+        $this->container->bind(CustomCoffeeRecipe::class, function($container) {
+            return new CustomCoffeeRecipe($container->resolve(DatabaseInterface::class));
+        });
+
+        $this->container->bind(CustomCoffeeOrder::class, function($container) {
+            return new CustomCoffeeOrder(
+                $container->resolve(DatabaseInterface::class),
+                $container->resolve(CustomCoffeeComponent::class)
+            );
+        });
+
+        $this->container->bind(CoffeeBuilder::class, function($container) {
+            return new CoffeeBuilder($container->resolve(DatabaseInterface::class));
+        });
+
+        $this->container->bind(CoffeeDirector::class, function($container) {
+            return new CoffeeDirector($container->resolve(CoffeeBuilder::class));
         });
         
         // Inicializar la base de datos primero
@@ -155,6 +185,29 @@ class App
                 $container,
                 $container->resolve(DatabaseInterface::class)
             );
+        });
+
+        // Registrar CustomCoffeeController
+        $this->container->bind(CustomCoffeeController::class, function($container) {
+            return new CustomCoffeeController(
+                $container->resolve(RequestInterface::class),
+                $container->resolve(ResponseInterface::class),
+                $container,
+                $container->resolve(CustomCoffeeComponent::class),
+                $container->resolve(CustomCoffeeRecipe::class),
+                $container->resolve(CustomCoffeeOrder::class),
+                $container->resolve(CoffeeBuilder::class),
+                $container->resolve(CoffeeDirector::class)
+            );
+        });
+        
+        // Registrar CoffeeBuilder y CoffeeDirector
+        $this->container->bind(CoffeeBuilder::class, function($container) {
+            return new CoffeeBuilder($container->resolve(DatabaseInterface::class));
+        });
+
+        $this->container->bind(CoffeeDirector::class, function($container) {
+            return new CoffeeDirector($container->resolve(CoffeeBuilder::class));
         });
         
         // Resolver dependencias

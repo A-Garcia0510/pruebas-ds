@@ -168,12 +168,23 @@ class Request implements RequestInterface
             return $body;
         }
         
-        if (isset($_SERVER['CONTENT_TYPE']) && 
-            strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
-            $json = file_get_contents('php://input');
-            $body = json_decode($json, true) ?? [];
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        error_log("[Request] Content-Type: " . $contentType);
+        
+        if (strpos($contentType, 'application/json') !== false) {
+            $rawInput = file_get_contents('php://input');
+            error_log("[Request] Raw input: " . $rawInput);
+            
+            $body = json_decode($rawInput, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("[Request] JSON decode error: " . json_last_error_msg());
+                error_log("[Request] Raw input was: " . $rawInput);
+                return [];
+            }
+            error_log("[Request] Decoded JSON body: " . print_r($body, true));
         } else {
             $body = $_POST;
+            error_log("[Request] POST body: " . print_r($body, true));
         }
         
         return $body;

@@ -1,0 +1,699 @@
+:root {
+    --primary-color: #5D4037;
+    --secondary-color: #8D6E63;
+    --light-color: #EFEBE9;
+    --accent-color: #4CAF50;
+    --text-color: #3E2723;
+    --background-color: #FFF8E1;
+    --danger-color: #D32F2F;
+    --success-color: #388E3C;
+    --warning-color: #FFA000;
+    --border-radius: 10px;
+    --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.page-title {
+    text-align: center;
+    padding: 3rem 0;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    margin-bottom: 3rem;
+    box-shadow: var(--box-shadow);
+}
+
+.page-title h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.page-title p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.coffee-builder-container {
+    display: flex;
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto 2rem auto;
+    padding: 0 1rem;
+}
+
+.components-panel {
+    flex: 2.5;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.component-section {
+    margin-bottom: 0.5rem;
+}
+
+.component-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.component-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.2rem;
+}
+
+.component-options.horizontal-scroll {
+    display: flex;
+    flex-direction: row;
+    gap: 0.8rem;
+    overflow-x: auto;
+    padding: 0.7rem 0.3rem 1.1rem 0.3rem;
+    background: #f5eee6;
+    border-radius: 12px;
+    margin-bottom: 0.2rem;
+}
+
+.component-options.horizontal-scroll::-webkit-scrollbar {
+    height: 8px;
+    background: var(--background-color);
+}
+.component-options.horizontal-scroll::-webkit-scrollbar-thumb {
+    background: var(--light-color);
+    border-radius: 4px;
+}
+
+.component-card {
+    min-width: 230px;
+    max-width: 260px;
+    flex: 0 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 1.2rem 1rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: box-shadow 0.2s, transform 0.2s, background 0.2s, border 0.2s;
+    border: 1px solid #f0edea;
+    margin: 0 2px;
+}
+
+.component-card:hover {
+    box-shadow: 0 12px 32px rgba(93,64,55,0.18);
+    transform: translateY(-4px) scale(1.025);
+    border: none;
+    background: #fbeedc;
+}
+
+.component-card h4 {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+}
+
+.component-card .precio {
+    color: var(--accent-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.component-card .stock {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.select-btn {
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 0.3rem;
+}
+.select-btn.selected, .select-btn:hover {
+    background: var(--primary-color);
+}
+.select-btn:disabled {
+    background: #ccc;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.2rem;
+}
+.quantity-controls button {
+    background: var(--secondary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.quantity-controls button:disabled {
+    background: #ccc;
+    color: #fff;
+    cursor: not-allowed;
+}
+.quantity-controls input {
+    width: 38px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    padding: 0.2rem 0;
+    background: #f9f9f9;
+}
+
+.summary-panel {
+    flex: 1.1;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+    padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 340px;
+    max-width: 400px;
+}
+
+.coffee-preview h3 {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.selected-components {
+    margin-bottom: 1.2rem;
+}
+.selected-components h4 {
+    color: var(--secondary-color);
+    font-size: 1.05rem;
+    margin-bottom: 0.2rem;
+}
+
+.price-summary {
+    background: var(--light-color);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.2rem;
+    font-size: 1.1rem;
+}
+.price-summary .subtotal,
+.price-summary .iva,
+.price-summary .total {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.price-summary .total {
+    font-weight: bold;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.btn, .primary-btn {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn:hover, .primary-btn:hover {
+    background: var(--accent-color);
+}
+.btn:disabled, .primary-btn:disabled {
+    background: #ccc;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.login-required {
+    background: #fff3e0;
+    color: var(--primary-color);
+    border: 1px solid #ffe0b2;
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background: rgba(0,0,0,0.25);
+}
+.modal-content {
+    background: #fff;
+    margin: 8% auto;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.modal-content h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.2rem;
+}
+.form-group label {
+    color: var(--secondary-color);
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .coffee-builder-container {
+        max-width: 1000px;
+        padding: 0 0.5rem;
+    }
+    .component-card {
+        min-width: 180px;
+        max-width: 220px;
+    }
+    .summary-panel {
+        min-width: 260px;
+        max-width: 320px;
+    }
+}
+
+@media (max-width: 900px) {
+    .coffee-builder-container {
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+    .summary-panel {
+        min-width: unset;
+        max-width: unset;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .component-options {
+        grid-template-columns: 1fr;
+    }
+    .summary-panel {
+        padding: 1rem;
+    }
+    .modal-content {
+        padding: 1rem 0.5rem;
+    }
+    .component-card {
+        min-width: 170px;
+        max-width: 220px;
+    }
+}
+
+/* Contenedor de recetas */
+.recipes-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem 2rem;
+}
+
+/* Grid de recetas */
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Tarjeta de receta */
+.recipe-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Encabezado de la receta */
+.recipe-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem;
+    position: relative;
+}
+
+.recipe-header h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.recipe-header .fecha {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    display: block;
+}
+
+/* Contenido de la receta */
+.recipe-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Sección de componentes */
+.componentes {
+    background: var(--light-color);
+    padding: 1.2rem;
+    border-radius: var(--border-radius);
+}
+
+.componentes h4 {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.componentes ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.componentes li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 5px;
+    transition: var(--transition);
+}
+
+.componentes li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.component-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.component-quantity {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Precio total */
+.precio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: var(--border-radius);
+    margin-top: auto;
+}
+
+.precio span:first-child {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.precio .amount {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+/* Acciones de la receta */
+.recipe-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--light-color);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.recipe-actions button {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.order-btn {
+    background: var(--accent-color);
+    color: white;
+}
+
+.order-btn:hover {
+    background: var(--success-color);
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: var(--danger-color);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #B71C1C;
+    transform: translateY(-2px);
+}
+
+/* Estado vacío */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.empty-state p {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 2rem;
+}
+
+.empty-state .btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.empty-state .btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+/* Botones de acción */
+.action-buttons {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.action-buttons .btn {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.action-buttons .btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Requisito de inicio de sesión */
+.login-required {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.login-required p {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.login-required a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.login-required a:hover {
+    color: var(--success-color);
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recipes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recipe-card {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .page-title {
+        padding: 2rem 1rem;
+    }
+
+    .page-title h1 {
+        font-size: 2rem;
+    }
+
+    .recipe-actions {
+        flex-direction: column;
+    }
+
+    .recipe-actions button {
+        width: 100%;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recipe-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Estados de los botones */
+.recipe-actions button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1rem;
+    background: var(--text-color);
+    color: white;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+[data-tooltip]:hover:before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+} 
