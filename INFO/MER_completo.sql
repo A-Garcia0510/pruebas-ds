@@ -291,13 +291,11 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS `after_review_update`;
 DELIMITER //
 CREATE TRIGGER `after_review_update`
-AFTER UPDATE ON `product_reviews`
+BEFORE UPDATE ON `product_reviews`
 FOR EACH ROW
 BEGIN
     IF NEW.estado != OLD.estado THEN
-        UPDATE `product_reviews` 
-        SET fecha_modificacion = CURRENT_TIMESTAMP 
-        WHERE review_ID = NEW.review_ID;
+        SET NEW.fecha_modificacion = CURRENT_TIMESTAMP;
     END IF;
 END //
 DELIMITER ;
