@@ -133,6 +133,13 @@ body {
     margin-bottom: 0.5rem;
 }
 
+.component-card .medida {
+    color: #666;
+    font-size: 0.9em;
+    margin: 5px 0;
+    font-style: italic;
+}
+
 .select-btn {
     background: var(--accent-color);
     color: #fff;
@@ -696,4 +703,19 @@ body {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(-5px);
+}
+
+.component-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 200px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.component-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 } 

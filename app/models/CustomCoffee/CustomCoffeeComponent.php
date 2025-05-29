@@ -55,11 +55,25 @@ class CustomCoffeeComponent {
      * @return bool
      */
     public function actualizarStock(int $id, int $cantidad): bool {
+        // Primero obtener el stock actual
+        $componente = $this->db->fetchOne(
+            "SELECT stock FROM custom_coffee_components WHERE componente_ID = ?",
+            [$id]
+        );
+        
+        if (!$componente || $componente['stock'] < $cantidad) {
+            return false;
+        }
+        
+        // Calcular el nuevo stock
+        $nuevoStock = $componente['stock'] - $cantidad;
+        
+        // Actualizar con el valor calculado
         return $this->db->update(
             'custom_coffee_components',
-            ['stock' => 'stock - ?'],
-            'componente_ID = ? AND stock >= ?',
-            [$cantidad, $id, $cantidad]
+            ['stock' => $nuevoStock],
+            'componente_ID = ?',
+            [$id]
         );
     }
 
@@ -134,5 +148,34 @@ class CustomCoffeeComponent {
         }
 
         return true;
+    }
+
+    /**
+     * Obtiene la medida sugerida de un componente
+     * @param int $id ID del componente
+     * @return array|null Array con la medida sugerida y unidad
+     */
+    public function getMedidaSugerida(int $id): ?array {
+        $componente = $this->db->fetchOne(
+            "SELECT medida_sugerida, unidad FROM custom_coffee_components WHERE componente_ID = ? AND estado = 'activo'",
+            [$id]
+        );
+        return $componente ? [
+            'medida' => (float)$componente['medida_sugerida'],
+            'unidad' => $componente['unidad']
+        ] : null;
+    }
+
+    /**
+     * Obtiene todos los componentes con sus medidas sugeridas
+     * @return array
+     */
+    public function getComponentesConMedidas(): array {
+        return $this->db->fetchAll(
+            "SELECT componente_ID, nombre, tipo, precio, stock, unidad, medida_sugerida, descripcion 
+             FROM custom_coffee_components 
+             WHERE estado = 'activo' 
+             ORDER BY tipo, nombre"
+        );
     }
 } 

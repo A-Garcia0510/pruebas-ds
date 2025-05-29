@@ -67,6 +67,28 @@ class CustomCoffeeOrder {
             $this->db->beginTransaction();
 
             try {
+                // Obtener los componentes de la receta y validar stock
+                $componentes = $this->db->fetchAll(
+                    "SELECT r.componente_ID, r.cantidad, c.precio, c.nombre, c.stock
+                     FROM custom_coffee_recipe_details r
+                     JOIN custom_coffee_components c ON r.componente_ID = c.componente_ID
+                     WHERE r.receta_ID = ? AND c.estado = 'activo'",
+                    [$recetaId]
+                );
+
+                if (empty($componentes)) {
+                    error_log("[CustomCoffeeOrder::crearPedido] Error: No se encontraron componentes para la receta $recetaId");
+                    throw new \Exception("No se encontraron componentes para la receta");
+                }
+
+                // Validar stock antes de crear el pedido
+                foreach ($componentes as $componente) {
+                    if ($componente['stock'] < $componente['cantidad']) {
+                        error_log("[CustomCoffeeOrder::crearPedido] Error: Stock insuficiente para {$componente['nombre']} (ID: {$componente['componente_ID']}) - Stock: {$componente['stock']}, Requerido: {$componente['cantidad']}");
+                        throw new \Exception("Stock insuficiente para {$componente['nombre']}");
+                    }
+                }
+
                 // Crear el pedido
                 $pedidoId = $this->db->insert('custom_coffee_orders', [
                     'usuario_ID' => $usuarioId,
@@ -82,28 +104,6 @@ class CustomCoffeeOrder {
                 }
 
                 error_log("[CustomCoffeeOrder::crearPedido] Pedido creado con ID: $pedidoId");
-
-                // Obtener los componentes de la receta
-                $componentes = $this->db->fetchAll(
-                    "SELECT r.componente_ID, r.cantidad, c.precio, c.nombre, c.stock
-                     FROM custom_coffee_recipe_details r
-                     JOIN custom_coffee_components c ON r.componente_ID = c.componente_ID
-                     WHERE r.receta_ID = ? AND c.estado = 'activo'",
-                    [$recetaId]
-                );
-
-                if (empty($componentes)) {
-                    error_log("[CustomCoffeeOrder::crearPedido] Error: No se encontraron componentes para la receta $recetaId");
-                    throw new \Exception("No se encontraron componentes para la receta");
-                }
-
-                // Validar stock antes de actualizar
-                foreach ($componentes as $componente) {
-                    if ($componente['stock'] < $componente['cantidad']) {
-                        error_log("[CustomCoffeeOrder::crearPedido] Error: Stock insuficiente para {$componente['nombre']} (ID: {$componente['componente_ID']}) - Stock: {$componente['stock']}, Requerido: {$componente['cantidad']}");
-                        throw new \Exception("Stock insuficiente para {$componente['nombre']}");
-                    }
-                }
 
                 // Insertar los detalles del pedido
                 foreach ($componentes as $componente) {
@@ -332,23 +332,14 @@ class CustomCoffeeOrder {
                 throw new \Exception("Pedido no encontrado o no se puede cancelar");
             }
 
-            // Restaurar el stock de cada componente
-            foreach ($pedido['detalles'] as $detalle) {
-                $this->db->update(
-                    'custom_coffee_components',
-                    ['stock' => 'stock + ' . $detalle['cantidad']],
-                    'componente_ID = ?',
-                    [$detalle['componente_ID']]
-                );
-            }
-
-            // Actualizar estado del pedido
+            // Actualizar estado del pedido (el trigger se encargará de restaurar el stock)
             $this->actualizarEstado($pedidoId, 'cancelado');
 
             $this->db->commit();
             return true;
         } catch (\Exception $e) {
             $this->db->rollback();
+            error_log("[CustomCoffeeOrder::cancelarPedido] Error: " . $e->getMessage());
             return false;
         }
     }

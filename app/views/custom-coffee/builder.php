@@ -26,7 +26,8 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
             <div class="component-options horizontal-scroll">
                 <?php foreach ($componentes['base'] as $base): ?>
                     <div class="component-card" data-id="<?= $base['componente_ID'] ?>" data-tipo="base">
-                        <h4><?= htmlspecialchars($base['nombre']) ?><?php if (!empty($base['cantidad_unidad'])): ?> (<?= htmlspecialchars($base['cantidad_unidad']) ?>)<?php elseif (!empty($base['unidad'])): ?> (<?= htmlspecialchars($base['unidad']) ?>)<?php endif; ?></h4>
+                        <h4><?= htmlspecialchars($base['nombre']) ?></h4>
+                        <p class="medida">Medida sugerida: <?= number_format($base['medida_sugerida'], 1) ?> <?= htmlspecialchars($base['unidad']) ?></p>
                         <p class="precio">$<?= number_format($base['precio'], 0, ',', '.') ?></p>
                         <p class="stock">Stock: <?= $base['stock'] ?></p>
                         <button class="select-btn" <?= $base['stock'] <= 0 ? 'disabled' : '' ?>>
@@ -42,7 +43,8 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
             <div class="component-options horizontal-scroll">
                 <?php foreach ($componentes['leche'] as $leche): ?>
                     <div class="component-card" data-id="<?= $leche['componente_ID'] ?>" data-tipo="leche">
-                        <h4><?= htmlspecialchars($leche['nombre']) ?><?php if (!empty($leche['cantidad_unidad'])): ?> (<?= htmlspecialchars($leche['cantidad_unidad']) ?>)<?php elseif (!empty($leche['unidad'])): ?> (<?= htmlspecialchars($leche['unidad']) ?>)<?php endif; ?></h4>
+                        <h4><?= htmlspecialchars($leche['nombre']) ?></h4>
+                        <p class="medida">Medida sugerida: <?= number_format($leche['medida_sugerida'], 1) ?> <?= htmlspecialchars($leche['unidad']) ?></p>
                         <p class="precio">$<?= number_format($leche['precio'], 0, ',', '.') ?></p>
                         <p class="stock">Stock: <?= $leche['stock'] ?></p>
                         <div class="quantity-controls">
@@ -60,7 +62,8 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
             <div class="component-options horizontal-scroll">
                 <?php foreach ($componentes['endulzante'] as $endulzante): ?>
                     <div class="component-card" data-id="<?= $endulzante['componente_ID'] ?>" data-tipo="endulzante">
-                        <h4><?= htmlspecialchars($endulzante['nombre']) ?><?php if (!empty($endulzante['cantidad_unidad'])): ?> (<?= htmlspecialchars($endulzante['cantidad_unidad']) ?>)<?php elseif (!empty($endulzante['unidad'])): ?> (<?= htmlspecialchars($endulzante['unidad']) ?>)<?php endif; ?></h4>
+                        <h4><?= htmlspecialchars($endulzante['nombre']) ?></h4>
+                        <p class="medida">Medida sugerida: <?= number_format($endulzante['medida_sugerida'], 1) ?> <?= htmlspecialchars($endulzante['unidad']) ?></p>
                         <p class="precio">$<?= number_format($endulzante['precio'], 0, ',', '.') ?></p>
                         <p class="stock">Stock: <?= $endulzante['stock'] ?></p>
                         <div class="quantity-controls">
@@ -78,7 +81,8 @@ require_once BASE_PATH . '/app/helpers/ViewHelper.php';
             <div class="component-options horizontal-scroll">
                 <?php foreach ($componentes['topping'] as $topping): ?>
                     <div class="component-card" data-id="<?= $topping['componente_ID'] ?>" data-tipo="topping">
-                        <h4><?= htmlspecialchars($topping['nombre']) ?><?php if (!empty($topping['cantidad_unidad'])): ?> (<?= htmlspecialchars($topping['cantidad_unidad']) ?>)<?php elseif (!empty($topping['unidad'])): ?> (<?= htmlspecialchars($topping['unidad']) ?>)<?php endif; ?></h4>
+                        <h4><?= htmlspecialchars($topping['nombre']) ?></h4>
+                        <p class="medida">Medida sugerida: <?= number_format($topping['medida_sugerida'], 1) ?> <?= htmlspecialchars($topping['unidad']) ?></p>
                         <p class="precio">$<?= number_format($topping['precio'], 0, ',', '.') ?></p>
                         <p class="stock">Stock: <?= $topping['stock'] ?></p>
                         <div class="quantity-controls">

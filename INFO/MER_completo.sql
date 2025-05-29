@@ -62,6 +62,7 @@ CREATE TABLE `custom_coffee_components` (
   `precio` DECIMAL(10,2) NOT NULL,
   `stock` INT NOT NULL DEFAULT 0,
   `unidad` VARCHAR(20) NOT NULL,
+  `medida_sugerida` DECIMAL(10,2) NOT NULL COMMENT 'Medida sugerida en la unidad especificada',
   `descripcion` TEXT,
   `estado` ENUM('activo', 'inactivo') DEFAULT 'activo',
   `fecha_creacion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -156,6 +157,7 @@ CREATE TABLE `review_moderation_log` (
 -- Triggers
 
 -- Trigger para actualizar el último acceso del usuario
+DROP TRIGGER IF EXISTS `after_usuario_login`;
 DELIMITER //
 CREATE TRIGGER `after_usuario_login`
 AFTER UPDATE ON `Usuario`
@@ -170,6 +172,7 @@ END //
 DELIMITER ;
 
 -- Trigger para verificar stock antes de crear un pedido con receta
+DROP TRIGGER IF EXISTS `before_order_recipe_insert`;
 DELIMITER //
 CREATE TRIGGER `before_order_recipe_insert`
 BEFORE INSERT ON `custom_coffee_orders`
@@ -177,22 +180,25 @@ FOR EACH ROW
 BEGIN
     DECLARE stock_insuficiente BOOLEAN;
     
-    SELECT EXISTS (
-        SELECT 1
-        FROM custom_coffee_components c
-        INNER JOIN custom_coffee_recipe_details d ON c.componente_ID = d.componente_ID
-        WHERE d.receta_ID = NEW.receta_ID
-        AND c.stock < d.cantidad
-    ) INTO stock_insuficiente;
-    
-    IF stock_insuficiente THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Stock insuficiente para uno o más componentes';
+    IF NEW.receta_ID IS NOT NULL THEN
+        SELECT EXISTS (
+            SELECT 1
+            FROM custom_coffee_components c
+            INNER JOIN custom_coffee_recipe_details d ON c.componente_ID = d.componente_ID
+            WHERE d.receta_ID = NEW.receta_ID
+            AND c.stock < d.cantidad
+        ) INTO stock_insuficiente;
+        
+        IF stock_insuficiente THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Stock insuficiente para uno o más componentes';
+        END IF;
     END IF;
 END //
 DELIMITER ;
 
 -- Trigger para verificar stock antes de crear un pedido directo
+DROP TRIGGER IF EXISTS `before_order_direct_insert`;
 DELIMITER //
 CREATE TRIGGER `before_order_direct_insert`
 BEFORE INSERT ON `custom_coffee_order_details`
@@ -212,34 +218,54 @@ END //
 DELIMITER ;
 
 -- Trigger para actualizar stock después de crear un pedido con receta
+DROP TRIGGER IF EXISTS `after_order_recipe_insert`;
 DELIMITER //
 CREATE TRIGGER `after_order_recipe_insert`
 AFTER INSERT ON `custom_coffee_orders`
 FOR EACH ROW
 BEGIN
     IF NEW.receta_ID IS NOT NULL THEN
+        -- Actualizar stock usando una subconsulta para obtener el stock actual
         UPDATE custom_coffee_components c
         INNER JOIN custom_coffee_recipe_details d ON c.componente_ID = d.componente_ID
-        SET c.stock = c.stock - d.cantidad
+        SET c.stock = (
+            SELECT stock - d.cantidad 
+            FROM custom_coffee_components 
+            WHERE componente_ID = c.componente_ID
+        )
         WHERE d.receta_ID = NEW.receta_ID;
     END IF;
 END //
 DELIMITER ;
 
 -- Trigger para actualizar stock después de crear un pedido directo
+DROP TRIGGER IF EXISTS `after_order_direct_insert`;
 DELIMITER //
 CREATE TRIGGER `after_order_direct_insert`
 AFTER INSERT ON `custom_coffee_order_details`
 FOR EACH ROW
 BEGIN
-    UPDATE custom_coffee_components
-    SET stock = stock - NEW.cantidad
-    WHERE componente_ID = NEW.componente_ID
-    AND stock >= NEW.cantidad;
+    DECLARE es_pedido_receta BOOLEAN;
+    
+    -- Verificar si el pedido usa una receta
+    SELECT EXISTS (
+        SELECT 1 FROM custom_coffee_orders 
+        WHERE orden_ID = NEW.orden_ID 
+        AND receta_ID IS NOT NULL
+    ) INTO es_pedido_receta;
+    
+    -- Solo actualizar stock si NO es un pedido con receta
+    IF NOT es_pedido_receta THEN
+        UPDATE custom_coffee_components
+        SET stock = stock - NEW.cantidad
+        WHERE componente_ID = NEW.componente_ID
+        AND stock >= NEW.cantidad;
+    END IF;
 END //
 DELIMITER ;
 
 -- Trigger para verificar pedidos activos antes de eliminar una receta
+DROP TRIGGER IF EXISTS `before_recipe_delete`;
 DELIMITER //
 CREATE TRIGGER `before_recipe_delete`
 BEFORE DELETE ON `custom_coffee_recipes`
@@ -262,6 +288,7 @@ DELIMITER ;
 -- Triggers para el sistema de reseñas
 
 -- Trigger para actualizar fecha_modificacion en product_reviews
+DROP TRIGGER IF EXISTS `after_review_update`;
 DELIMITER //
 CREATE TRIGGER `after_review_update`
 AFTER UPDATE ON `product_reviews`
@@ -276,6 +303,7 @@ END //
 DELIMITER ;
 
 -- Trigger para verificar que un usuario solo pueda calificar una reseña una vez
+DROP TRIGGER IF EXISTS `before_rating_insert`;
 DELIMITER //
 CREATE TRIGGER `before_rating_insert`
 BEFORE INSERT ON `review_ratings`
@@ -295,6 +323,7 @@ END //
 DELIMITER ;
 
 -- Trigger para verificar que un usuario no pueda reportar su propia reseña
+DROP TRIGGER IF EXISTS `before_report_insert`;
 DELIMITER //
 CREATE TRIGGER `before_report_insert`
 BEFORE INSERT ON `review_reports`
@@ -313,21 +342,104 @@ BEGIN
 END //
 DELIMITER ;
 
--- Datos iniciales para componentes de café
-INSERT INTO `custom_coffee_components` (`nombre`, `tipo`, `precio`, `stock`, `descripcion`) VALUES
+-- Trigger para restaurar stock cuando se cancela un pedido
+DROP TRIGGER IF EXISTS `after_order_cancel`;
+DELIMITER //
+CREATE TRIGGER `after_order_cancel`
+AFTER UPDATE ON `custom_coffee_orders`
+FOR EACH ROW
+BEGIN
+    IF NEW.estado = 'cancelado' AND OLD.estado != 'cancelado' THEN
+        -- Si el pedido usa una receta, restaurar stock basado en la receta
+        IF NEW.receta_ID IS NOT NULL THEN
+            UPDATE custom_coffee_components c
+            INNER JOIN custom_coffee_recipe_details d ON c.componente_ID = d.componente_ID
+            SET c.stock = c.stock + d.cantidad
+            WHERE d.receta_ID = NEW.receta_ID;
+        -- Si es un pedido directo, restaurar stock basado en los detalles
+        ELSE
+            UPDATE custom_coffee_components c
+            INNER JOIN custom_coffee_order_details d ON c.componente_ID = d.componente_ID
+            SET c.stock = c.stock + d.cantidad
+            WHERE d.orden_ID = NEW.orden_ID;
+        END IF;
+    END IF;
+END //
+DELIMITER ;
+
+-- Datos iniciales para componentes de café con medidas sugeridas
+INSERT INTO `custom_coffee_components` (`nombre`, `tipo`, `precio`, `stock`, `unidad`, `medida_sugerida`, `descripcion`) VALUES
 -- Bases
-('Espresso', 'base', 1500, 100, 'Café espresso puro'),
-('Americano', 'base', 1800, 100, 'Espresso con agua caliente'),
-('Cappuccino', 'base', 2000, 100, 'Espresso con leche espumada'),
+('Espresso', 'base', 1500, 100, 'ml', 30.00, 'Café espresso puro - 30ml por taza'),
+('Americano', 'base', 1800, 100, 'ml', 250.00, 'Espresso con agua caliente - 250ml por taza'),
+('Cappuccino', 'base', 2000, 100, 'ml', 180.00, 'Espresso con leche espumada - 180ml por taza'),
 -- Leches
-('Leche Entera', 'leche', 500, 100, 'Leche de vaca entera'),
-('Leche Descremada', 'leche', 500, 100, 'Leche de vaca descremada'),
-('Leche de Almendras', 'leche', 800, 50, 'Leche vegetal de almendras'),
+('Leche Entera', 'leche', 500, 100, 'ml', 120.00, 'Leche de vaca entera - 120ml por taza'),
+('Leche Descremada', 'leche', 500, 100, 'ml', 120.00, 'Leche de vaca descremada - 120ml por taza'),
+('Leche de Almendras', 'leche', 800, 50, 'ml', 120.00, 'Leche vegetal de almendras - 120ml por taza'),
 -- Endulzantes
-('Azúcar', 'endulzante', 0, 1000, 'Azúcar blanca'),
-('Stevia', 'endulzante', 200, 100, 'Endulzante natural'),
-('Miel', 'endulzante', 300, 50, 'Miel de abeja natural'),
+('Azúcar', 'endulzante', 0, 1000, 'g', 10.00, 'Azúcar blanca - 10g por taza'),
+('Stevia', 'endulzante', 200, 100, 'g', 2.00, 'Endulzante natural - 2g por taza'),
+('Miel', 'endulzante', 300, 50, 'ml', 15.00, 'Miel de abeja natural - 15ml por taza'),
 -- Toppings
-('Crema Batida', 'topping', 500, 50, 'Crema batida fresca'),
-('Chocolate', 'topping', 400, 100, 'Polvo de chocolate'),
-('Canela', 'topping', 200, 100, 'Polvo de canela'); 
+('Crema Batida', 'topping', 500, 50, 'g', 30.00, 'Crema batida fresca - 30g por taza'),
+('Chocolate', 'topping', 400, 100, 'g', 10.00, 'Polvo de chocolate - 10g por taza'),
+('Canela', 'topping', 200, 100, 'g', 5.00, 'Polvo de canela - 5g por taza');
+
+
+--esto si tienes datos anteriores OJOOOO
+-- Agregar nuevas columnas para medidas
+ALTER TABLE `custom_coffee_components`
+ADD COLUMN `unidad` VARCHAR(20) NOT NULL DEFAULT 'ml' AFTER `stock`,
+ADD COLUMN `medida_sugerida` DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER `unidad`;
+
+-- Actualizar registros con las medidas correctas
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'ml',
+    `medida_sugerida` = 30.00
+WHERE `nombre` = 'Espresso' AND `tipo` = 'base';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'ml',
+    `medida_sugerida` = 250.00
+WHERE `nombre` = 'Americano' AND `tipo` = 'base';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'ml',
+    `medida_sugerida` = 180.00
+WHERE `nombre` = 'Cappuccino' AND `tipo` = 'base';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'ml',
+    `medida_sugerida` = 120.00
+WHERE `nombre` IN ('Leche Entera', 'Leche Descremada', 'Leche de Almendras') AND `tipo` = 'leche';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'g',
+    `medida_sugerida` = 10.00
+WHERE `nombre` = 'Azúcar' AND `tipo` = 'endulzante';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'g',
+    `medida_sugerida` = 2.00
+WHERE `nombre` = 'Stevia' AND `tipo` = 'endulzante';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'ml',
+    `medida_sugerida` = 15.00
+WHERE `nombre` = 'Miel' AND `tipo` = 'endulzante';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'g',
+    `medida_sugerida` = 30.00
+WHERE `nombre` = 'Crema Batida' AND `tipo` = 'topping';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'g',
+    `medida_sugerida` = 10.00
+WHERE `nombre` = 'Chocolate' AND `tipo` = 'topping';
+
+UPDATE `custom_coffee_components` SET 
+    `unidad` = 'g',
+    `medida_sugerida` = 5.00
+WHERE `nombre` = 'Canela' AND `tipo` = 'topping'; 
