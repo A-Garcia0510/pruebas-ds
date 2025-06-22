@@ -72,17 +72,19 @@ CREATE TABLE IF NOT EXISTS `loyalty_transactions` (
 ) COMMENT='Registro de todas las transacciones de puntos del sistema';
 
 -- Tabla de recompensas disponibles
+-- Tabla de recompensas disponibles
 CREATE TABLE IF NOT EXISTS `loyalty_rewards` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID único de recompensa',
-  `name` VARCHAR(100) NOT NULL COMMENT 'Nombre de la recompensa',
-  `description` TEXT COMMENT 'Descripción detallada',
-  `points_cost` INT NOT NULL COMMENT 'Costo en puntos para canjear',
-  `discount_percent` DECIMAL(5,2) NOT NULL COMMENT 'Porcentaje de descuento que otorga',
-  `tier_required` ENUM('cafe_bronze', 'cafe_plata', 'cafe_oro', 'cafe_diamante') DEFAULT 'cafe_bronze' COMMENT 'Nivel mínimo requerido',
-  `max_uses_per_user` INT DEFAULT 1 COMMENT 'Máximo de usos por usuario',
-  `active` BOOLEAN DEFAULT TRUE COMMENT 'Si la recompensa está activa',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación'
-) COMMENT='Catálogo de recompensas disponibles para canjear';
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT,
+  `points_cost` INT NOT NULL,
+  `discount_percent` DECIMAL(5,2) NOT NULL,
+  `tier_required` ENUM('cafe_bronze', 'cafe_plata', 'cafe_oro', 'cafe_diamante') DEFAULT 'cafe_bronze',
+  `max_uses_per_user` INT DEFAULT 1,
+  `active` BOOLEAN DEFAULT TRUE,
+  `expiry_date` DATE NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Tabla de canjes de recompensas
 CREATE TABLE IF NOT EXISTS `loyalty_redemptions` (

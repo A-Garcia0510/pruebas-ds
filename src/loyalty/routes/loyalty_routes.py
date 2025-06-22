@@ -3,14 +3,15 @@ Rutas para el sistema de fidelización
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status, Query
-from typing import List, Optional
-from datetime import datetime
+from typing import List, Optional, Dict, Any
+from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from models.loyalty_models import LoyaltyUser, LoyaltyUserCreate, LoyaltyUserUpdate, LoyaltyUserOut
 from models.reward_models import Reward
 from models.transaction_models import Transaction
 from services.loyalty_service import LoyaltyService
+from services.reward_service import RewardService
 from utils.database import get_db, execute_query, execute_single_query
 
 router = APIRouter()
@@ -247,7 +248,7 @@ async def earn_points_api(request: EarnPointsRequest):
         user = await loyalty_service.get_user_by_id(request.user_id)
         if not user:
             # Crear usuario si no existe
-            user = await loyalty_service.create_user(request.user_id)
+            user = await loyalty_service.create_user(LoyaltyUserCreate(user_id=request.user_id))
             print(f"🔍 DEBUG: Usuario creado - ID: {request.user_id}")
         
         # Otorgar puntos

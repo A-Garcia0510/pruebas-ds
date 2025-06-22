@@ -82,8 +82,13 @@ class CartController extends BaseController
         try {
             $userEmail = $_SESSION['correo'];
             $items = $this->cartService->getItems($userEmail);
-            $total = $this->cartService->getTotal($userEmail);
+            $subtotal = $this->cartService->getTotal($userEmail);
             
+            // Calcular IVA y Total
+            $ivaRate = 0.19; // 19%
+            $iva = $subtotal * $ivaRate;
+            $total = $subtotal + $iva;
+
             $this->response->json([
                 'success' => true,
                 'carrito' => array_map(function($item) {
@@ -95,7 +100,11 @@ class CartController extends BaseController
                         'subtotal' => $item->getSubtotal()
                     ];
                 }, $items),
-                'total' => $total,
+                'summary' => [
+                    'subtotal' => $subtotal,
+                    'iva' => $iva,
+                    'total' => $total
+                ],
                 'message' => count($items) > 0 ? 'Carrito obtenido exitosamente' : 'El carrito está vacío'
             ]);
         } catch (\Exception $e) {
