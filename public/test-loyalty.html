@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Sistema de Fidelización - Café VT</title>
+    <link rel="stylesheet" href="/public/css/common.css">
+    <link rel="stylesheet" href="/public/css/loyalty.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .test-error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .test-success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-vial"></i> Prueba del Sistema de Fidelización</h1>
+        <p>Esta página permite probar las funcionalidades del sistema de fidelización.</p>
+
+        <!-- Prueba de conexión a la API -->
+        <div class="test-section">
+            <h3><i class="fas fa-plug"></i> Prueba de Conexión</h3>
+            <button class="test-button" onclick="testApiConnection()">Probar Conexión API</button>
+            <button class="test-button" onclick="testApiStatus()">Verificar Estado API</button>
+            <div id="connection-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Prueba de autenticación -->
+        <div class="test-section">
+            <h3><i class="fas fa-user"></i> Prueba de Autenticación</h3>
+            <button class="test-button" onclick="testAuthentication()">Obtener Usuario Actual</button>
+            <div id="auth-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Prueba de perfil de fidelización -->
+        <div class="test-section">
+            <h3><i class="fas fa-star"></i> Prueba de Perfil de Fidelización</h3>
+            <input type="number" id="user-id" placeholder="ID de usuario" value="1" style="padding: 0.5rem; margin-right: 0.5rem;">
+            <button class="test-button" onclick="testUserProfile()">Obtener Perfil</button>
+            <div id="profile-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Prueba de recompensas -->
+        <div class="test-section">
+            <h3><i class="fas fa-gift"></i> Prueba de Recompensas</h3>
+            <button class="test-button" onclick="testRewards()">Obtener Recompensas</button>
+            <div id="rewards-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Prueba de transacciones -->
+        <div class="test-section">
+            <h3><i class="fas fa-history"></i> Prueba de Transacciones</h3>
+            <button class="test-button" onclick="testTransactions()">Obtener Transacciones</button>
+            <div id="transactions-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Prueba de ganancia de puntos -->
+        <div class="test-section">
+            <h3><i class="fas fa-plus-circle"></i> Prueba de Ganancia de Puntos</h3>
+            <input type="number" id="points-amount" placeholder="Cantidad de puntos" value="100" style="padding: 0.5rem; margin-right: 0.5rem;">
+            <button class="test-button" onclick="testEarnPoints()">Ganar Puntos</button>
+            <div id="earn-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Prueba de generación de referido -->
+        <div class="test-section">
+            <h3><i class="fas fa-share-alt"></i> Prueba de Referidos</h3>
+            <button class="test-button" onclick="testGenerateReferral()">Generar Código de Referido</button>
+            <div id="referral-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Resultados generales -->
+        <div class="test-section">
+            <h3><i class="fas fa-chart-bar"></i> Resumen de Pruebas</h3>
+            <div id="summary" class="test-result">
+                <p><strong>Estado:</strong> <span id="overall-status">Sin ejecutar</span></p>
+                <p><strong>Pruebas exitosas:</strong> <span id="success-count">0</span></p>
+                <p><strong>Pruebas fallidas:</strong> <span id="error-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/public/js/loyalty-api.js"></script>
+    <script>
+        const loyaltyAPI = new LoyaltyAPI();
+        let successCount = 0;
+        let errorCount = 0;
+
+        function updateSummary() {
+            document.getElementById('success-count').textContent = successCount;
+            document.getElementById('error-count').textContent = errorCount;
+            document.getElementById('overall-status').textContent = 
+                errorCount === 0 ? 'Todas las pruebas exitosas' : 'Algunas pruebas fallaron';
+        }
+
+        function showResult(elementId, content, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = content;
+            element.className = `test-result ${isError ? 'test-error' : 'test-success'}`;
+            element.style.display = 'block';
+            
+            if (isError) {
+                errorCount++;
+            } else {
+                successCount++;
+            }
+            updateSummary();
+        }
+
+        async function testApiConnection() {
+            try {
+                const response = await loyaltyAPI.healthCheck();
+                showResult('connection-result', 
+                    `<strong>✅ Conexión exitosa</strong><br>
+                     Estado: ${response.status || 'OK'}<br>
+                     Timestamp: ${new Date().toLocaleString()}`);
+            } catch (error) {
+                showResult('connection-result', 
+                    `<strong>❌ Error de conexión</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testApiStatus() {
+            try {
+                const response = await loyaltyAPI.checkApiStatus();
+                showResult('connection-result', 
+                    `<strong>✅ Estado de API</strong><br>
+                     Disponible: ${response.data.available ? 'Sí' : 'No'}<br>
+                     URL: ${response.data.base_url}<br>
+                     Timestamp: ${response.data.timestamp}`);
+            } catch (error) {
+                showResult('connection-result', 
+                    `<strong>❌ Error al verificar estado</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testAuthentication() {
+            try {
+                const response = await loyaltyAPI.getCurrentUserId();
+                showResult('auth-result', 
+                    `<strong>✅ Usuario autenticado</strong><br>
+                     ID: ${response.data.user_id}<br>
+                     Usuario: ${response.data.username}<br>
+                     Email: ${response.data.email}`);
+            } catch (error) {
+                showResult('auth-result', 
+                    `<strong>❌ Error de autenticación</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testUserProfile() {
+            try {
+                const userId = document.getElementById('user-id').value;
+                const response = await loyaltyAPI.getUserProfile(userId);
+                showResult('profile-result', 
+                    `<strong>✅ Perfil obtenido</strong><br>
+                     Puntos actuales: ${response.current_points || 0}<br>
+                     Nivel: ${response.current_tier || 'N/A'}<br>
+                     Total acumulado: ${response.total_points || 0}`);
+            } catch (error) {
+                showResult('profile-result', 
+                    `<strong>❌ Error al obtener perfil</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testRewards() {
+            try {
+                const response = await loyaltyAPI.getRewards();
+                const rewardsCount = response.length || 0;
+                showResult('rewards-result', 
+                    `<strong>✅ Recompensas obtenidas</strong><br>
+                     Total de recompensas: ${rewardsCount}<br>
+                     ${rewardsCount > 0 ? 'Primera recompensa: ' + response[0].name : 'No hay recompensas'}`);
+            } catch (error) {
+                showResult('rewards-result', 
+                    `<strong>❌ Error al obtener recompensas</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testTransactions() {
+            try {
+                const userId = document.getElementById('user-id').value;
+                const response = await loyaltyAPI.getUserTransactions(userId);
+                const transactionsCount = response.length || 0;
+                showResult('transactions-result', 
+                    `<strong>✅ Transacciones obtenidas</strong><br>
+                     Total de transacciones: ${transactionsCount}`);
+            } catch (error) {
+                showResult('transactions-result', 
+                    `<strong>❌ Error al obtener transacciones</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testEarnPoints() {
+            try {
+                const points = document.getElementById('points-amount').value;
+                const data = {
+                    points_amount: parseInt(points),
+                    description: 'Prueba de ganancia de puntos',
+                    order_id: 'TEST-' + Date.now()
+                };
+                const response = await loyaltyAPI.earnPoints(data);
+                showResult('earn-result', 
+                    `<strong>✅ Puntos ganados</strong><br>
+                     Puntos: ${points}<br>
+                     Descripción: ${data.description}`);
+            } catch (error) {
+                showResult('earn-result', 
+                    `<strong>❌ Error al ganar puntos</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        async function testGenerateReferral() {
+            try {
+                const response = await loyaltyAPI.generateReferralCode();
+                showResult('referral-result', 
+                    `<strong>✅ Código de referido generado</strong><br>
+                     Código: ${response.data.referral_code || 'N/A'}<br>
+                     Puntos por referido: ${response.data.points_per_referral || 0}`);
+            } catch (error) {
+                showResult('referral-result', 
+                    `<strong>❌ Error al generar referido</strong><br>
+                     Error: ${error.message}`, true);
+            }
+        }
+
+        // Ejecutar prueba de conexión automáticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            testApiConnection();
+        });
+    </script>
+</body>
+</html> 

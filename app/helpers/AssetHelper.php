@@ -27,13 +27,34 @@ class AssetHelper {
     }
     
     /**
+     * Obtiene la URL base para los assets (JS/CSS) de forma robusta
+     */
+    public static function assetBaseUrl() {
+        $baseUrl = self::getBaseUrl();
+        // Si termina en /public, no agregar nada
+        if (preg_match('#/public$#', $baseUrl)) {
+            return $baseUrl;
+        }
+        // Si termina en /pruebas-ds, agregar /public
+        if (preg_match('#/pruebas-ds$#', $baseUrl)) {
+            return $baseUrl . '/public';
+        }
+        // Si no contiene /pruebas-ds, agregarlo todo
+        if (strpos($baseUrl, '/pruebas-ds') === false) {
+            return rtrim($baseUrl, '/') . '/pruebas-ds/public';
+        }
+        // Si contiene /pruebas-ds pero no termina en /pruebas-ds ni /public
+        return $baseUrl . '/public';
+    }
+    
+    /**
      * Obtiene la URL completa para un archivo CSS
      * 
      * @param string $filename Nombre del archivo CSS sin extensión
      * @return string URL completa al archivo CSS
      */
     public static function css($filename) {
-        return self::getBaseUrl() . '/css/' . $filename . '.css?' . time();
+        return self::assetBaseUrl() . '/css/' . $filename . '.css?' . time();
     }
     
     /**
@@ -43,7 +64,7 @@ class AssetHelper {
      * @return string URL completa al archivo JS
      */
     public static function js($filename) {
-        return self::getBaseUrl() . '/js/' . $filename . '.js?' . time();
+        return self::assetBaseUrl() . '/js/' . $filename . '.js?' . time();
     }
     
     /**

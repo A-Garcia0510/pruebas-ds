@@ -88,27 +88,21 @@ async function realizarPedido(recetaId, precioTotal) {
 
         // Validar que los parámetros sean números válidos
         recetaId = parseInt(recetaId);
-        // Asegurar que el precio sea un número
         precioTotal = parseFloat(precioTotal);
         
         console.log('Parámetros procesados:', { 
             recetaId, 
             precioTotal,
             recetaIdType: typeof recetaId,
-            precioTotalType: typeof precioTotal,
-            precioTotalRaw: precioTotal
+            precioTotalType: typeof precioTotal
         });
 
         if (isNaN(recetaId) || recetaId <= 0) {
-            console.error('ID de receta inválido:', recetaId);
-            alert('Error: ID de receta inválido');
-            return;
+            throw new Error('ID de receta inválido');
         }
 
         if (isNaN(precioTotal) || precioTotal <= 0) {
-            console.error('Precio total inválido:', precioTotal);
-            alert('Error: Precio total inválido');
-            return;
+            throw new Error('Precio total inválido');
         }
 
         if (!confirm('¿Deseas realizar un pedido con esta receta?')) {
@@ -121,14 +115,6 @@ async function realizarPedido(recetaId, precioTotal) {
         };
         
         console.log('Datos a enviar:', requestData);
-        console.log('Tipos de datos:', {
-            receta_id: typeof requestData.receta_id,
-            precio_total: typeof requestData.precio_total
-        });
-
-        const requestBody = JSON.stringify(requestData);
-        console.log('Request body:', requestBody);
-        console.log('URL de la petición:', `${baseUrl}/api/custom-coffee/place-order`);
 
         const response = await fetch(`${baseUrl}/api/custom-coffee/place-order`, {
             method: 'POST',
@@ -138,11 +124,16 @@ async function realizarPedido(recetaId, precioTotal) {
                 'X-Requested-With': 'XMLHttpRequest'
             },
             credentials: 'same-origin',
-            body: requestBody
+            body: JSON.stringify(requestData)
         });
 
         console.log('Status de la respuesta:', response.status);
-        console.log('Headers de la respuesta:', Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error HTTP:', response.status, errorText);
+            throw new Error(`Error del servidor: ${response.status}`);
+        }
 
         const responseText = await response.text();
         console.log('Respuesta raw:', responseText);
@@ -150,11 +141,12 @@ async function realizarPedido(recetaId, precioTotal) {
         let data;
         try {
             data = JSON.parse(responseText);
-            console.log('Datos de la respuesta:', data);
         } catch (e) {
             console.error('Error al parsear JSON:', e);
             throw new Error('Error al procesar la respuesta del servidor');
         }
+
+        console.log('Datos de la respuesta:', data);
 
         if (data.success) {
             alert('Pedido realizado con éxito');
@@ -164,7 +156,6 @@ async function realizarPedido(recetaId, precioTotal) {
         }
     } catch (error) {
         console.error('Error completo:', error);
-        console.error('Stack trace:', error.stack);
         alert(error.message || 'Error al realizar el pedido');
     }
 }

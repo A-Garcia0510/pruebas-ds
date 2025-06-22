@@ -25,6 +25,16 @@
     <?php endif; ?>
 </head>
 <body>
+    <script>
+        // Debug: Log del usuario actual
+        console.log('🔍 DEBUG: Layout main.php - $_SESSION[user_id]:', <?= json_encode($_SESSION['user_id'] ?? 'null') ?>);
+        console.log('🔍 DEBUG: Layout main.php - $_SESSION[correo]:', <?= json_encode($_SESSION['correo'] ?? 'null') ?>);
+        
+        window.currentUserId = <?= $_SESSION['user_id'] ?? 'null' ?>;
+        
+        // Debug: Log de la variable JavaScript
+        console.log('🔍 DEBUG: Layout main.php - window.currentUserId:', window.currentUserId);
+    </script>
     <!-- Incluir header -->
     <?php require_once BASE_PATH . '/app/views/partials/header.php'; ?>
 

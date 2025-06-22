@@ -12,6 +12,24 @@ class CustomCoffeeOrder {
         $this->componentModel = $componentModel;
     }
 
+    // --- Métodos de Transacción ---
+    public function beginTransaction() {
+        $this->db->beginTransaction();
+    }
+
+    public function commit() {
+        $this->db->commit();
+    }
+
+    public function rollBack() {
+        $this->db->rollBack();
+    }
+
+    public function inTransaction(): bool {
+        return $this->db->inTransaction();
+    }
+    // --- Fin Métodos de Transacción ---
+
     /**
      * Crea un nuevo pedido de café personalizado
      * @param int $usuarioId ID del usuario
@@ -64,7 +82,8 @@ class CustomCoffeeOrder {
                 throw new \Exception("El precio total no coincide con la receta (Recibido: $precioRecibido, Receta: $precioReceta)");
             }
 
-            $this->db->beginTransaction();
+            // La transacción se manejará desde el controlador
+            // $this->db->beginTransaction();
 
             try {
                 // Obtener los componentes de la receta y validar stock
@@ -120,12 +139,14 @@ class CustomCoffeeOrder {
                     }
                 }
 
-                $this->db->commit();
+                // La transacción se manejará desde el controlador
+                // $this->db->commit();
                 error_log("[CustomCoffeeOrder::crearPedido] Pedido creado exitosamente - ID: $pedidoId");
                 return $pedidoId;
 
             } catch (\Exception $e) {
-                $this->db->rollback();
+                // El rollback se manejará desde el controlador
+                // $this->db->rollback();
                 error_log("[CustomCoffeeOrder::crearPedido] Error en la transacción: " . $e->getMessage());
                 throw $e;
             }
@@ -146,7 +167,8 @@ class CustomCoffeeOrder {
      */
     public function crearPedidoDirecto(int $usuarioId, array $componentes, float $precioTotal): ?int {
         try {
-            $this->db->beginTransaction();
+            // La transacción se manejará desde el controlador
+            // $this->db->beginTransaction();
 
             // Validar stock antes de crear el pedido
             foreach ($componentes as $componente) {
@@ -193,11 +215,13 @@ class CustomCoffeeOrder {
                 );
             }
 
-            $this->db->commit();
+            // La transacción se manejará desde el controlador
+            // $this->db->commit();
             return $pedidoId;
 
         } catch (\Exception $e) {
-            $this->db->rollBack();
+            // El rollback se manejará desde el controlador
+            // $this->db->rollBack();
             error_log("Error en crearPedidoDirecto: " . $e->getMessage());
             throw $e;
         }

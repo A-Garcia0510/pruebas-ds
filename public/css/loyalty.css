@@ -1,0 +1,2682 @@
+/* =====================================================
+   SISTEMA DE FIDELIZACIÓN - ESTILOS CSS
+   Café-VT - Interfaz de Usuario
+   ===================================================== */
+
+/* Variables CSS para colores temáticos */
+:root {
+    /* Colores de niveles */
+    --cafe-bronze: #cd7f32;
+    --cafe-plata: #c0c0c0;
+    --cafe-oro: #ffd700;
+    --cafe-diamante: #b9f2ff;
+    
+    /* Colores de fondo */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --bg-dark: #2c3e50;
+    
+    /* Colores de texto */
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --text-light: #ffffff;
+    
+    /* Colores de estado */
+    --success: #28a745;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --info: #17a2b8;
+    
+    /* Sombras */
+    --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+    --shadow-heavy: 0 8px 16px rgba(0,0,0,0.2);
+    
+    /* Bordes */
+    --border-radius: 12px;
+    --border-radius-small: 6px;
+}
+
+/* =====================================================
+   LAYOUT PRINCIPAL
+   ===================================================== */
+
+.loyalty-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.loyalty-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2rem;
+}
+
+.loyalty-main-content {
+    grid-column: span 12;
+}
+
+@media (min-width: 1024px) {
+    .loyalty-main-content {
+        grid-column: span 8;
+    }
+    .loyalty-sidebar {
+        grid-column: span 4;
+    }
+}
+
+.loyalty-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.loyalty-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, var(--cafe-bronze), var(--cafe-oro));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.loyalty-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* =====================================================
+   TARJETA DE FIDELIZACIÓN PRINCIPAL
+   ===================================================== */
+
+.loyalty-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.loyalty-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.loyalty-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.loyalty-card-header .icon {
+    font-size: 1.5rem;
+    color: #8a5cf6;
+    background-color: #f3e8ff;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+}
+
+.loyalty-card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* =====================================================
+   NIVELES DE FIDELIZACIÓN
+   ===================================================== */
+
+.loyalty-tier {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.tier-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.tier-badge.bronze {
+    background: linear-gradient(135deg, var(--cafe-bronze), #b8860b);
+    color: var(--text-light);
+}
+
+.tier-badge.silver {
+    background: linear-gradient(135deg, var(--cafe-plata), #a8a8a8);
+    color: var(--text-primary);
+}
+
+.tier-badge.gold {
+    background: linear-gradient(135deg, var(--cafe-oro), #ffb347);
+    color: var(--text-primary);
+}
+
+.tier-badge.diamond {
+    background: linear-gradient(135deg, var(--cafe-diamante), #87ceeb);
+    color: var(--text-primary);
+    animation: diamond-shine 2s infinite;
+}
+
+@keyframes diamond-shine {
+    0%, 100% { box-shadow: 0 0 5px var(--cafe-diamante); }
+    50% { box-shadow: 0 0 20px var(--cafe-diamante), 0 0 30px var(--cafe-diamante); }
+}
+
+/* =====================================================
+   PUNTOS Y CONTADORES
+   ===================================================== */
+
+.points-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.points-display .points-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #8a5cf6;
+    line-height: 1;
+}
+
+.points-display .points-label {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.tier-display .tier-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #4f46e5;
+    text-align: right;
+}
+
+.tier-display .tier-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: right;
+}
+
+/* =====================================================
+   BARRAS DE PROGRESO
+   ===================================================== */
+
+.progress-card .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.progress-card .progress-bar {
+    width: 100%;
+    height: 12px;
+    background-color: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-card .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8a5cf6, #d946ef);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.progress-card .progress-text {
+    margin-top: 0.75rem;
+    text-align: center;
+    color: #4b5565;
+}
+
+/* =====================================================
+   GRID DE RECOMPENSAS
+   ===================================================== */
+
+.featured-rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.reward-card.featured {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+.reward-card.featured:hover {
+    border-color: #8a5cf6;
+}
+.reward-card .reward-image {
+    height: 120px;
+    background-color: #f3f4f6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.reward-card .reward-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.reward-card .reward-info {
+    padding: 1rem;
+    flex-grow: 1;
+}
+.reward-card .reward-info h4 {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+.reward-card .reward-info p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+.reward-card .reward-actions {
+    padding: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+.reward-card .reward-cost {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+.reward-card .reward-cost .icon {
+    color: #f59e0b;
+}
+
+/* =====================================================
+   BOTONES Y ACCIONES
+   ===================================================== */
+
+.loyalty-button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.loyalty-button.primary {
+    background: linear-gradient(135deg, var(--cafe-oro), #ffb347);
+    color: var(--text-primary);
+}
+
+.loyalty-button.secondary {
+    background: linear-gradient(135deg, var(--cafe-plata), #a8a8a8);
+    color: var(--text-primary);
+}
+
+.loyalty-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* =====================================================
+   NOTIFICACIONES Y TOOLTIPS
+   ===================================================== */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-small);
+    color: var(--text-light);
+    font-weight: bold;
+    z-index: 1000;
+    animation: slide-in 0.3s ease;
+    max-width: 300px;
+}
+
+.notification.success {
+    background: var(--success);
+}
+
+.notification.warning {
+    background: var(--warning);
+    color: var(--text-primary);
+}
+
+.notification.error {
+    background: var(--danger);
+}
+
+@keyframes slide-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    text-align: center;
+    border-radius: var(--border-radius-small);
+    padding: 0.5rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.8rem;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* =====================================================
+   ANIMACIONES ESPECIALES
+   ===================================================== */
+
+.points-earned {
+    animation: points-earned-animation 1s ease-out;
+}
+
+@keyframes points-earned-animation {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.level-up {
+    animation: level-up-animation 1s ease-out;
+}
+
+@keyframes level-up-animation {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.1) rotate(5deg); }
+    50% { transform: scale(1.2) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1); }
+}
+
+/* =====================================================
+   DISEÑO RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+    .loyalty-container {
+        padding: 1rem;
+    }
+    
+    .loyalty-title {
+        font-size: 2rem;
+    }
+    
+    .loyalty-card {
+        padding: 1.5rem;
+    }
+    
+    .points-display {
+        font-size: 2.5rem;
+    }
+    
+    .rewards-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .loyalty-title {
+        font-size: 1.8rem;
+    }
+    
+    .loyalty-card {
+        padding: 1rem;
+    }
+    
+    .points-display {
+        font-size: 2rem;
+    }
+    
+    .tier-badge {
+        font-size: 0.9rem;
+        padding: 0.4rem 1rem;
+    }
+}
+
+/* =====================================================
+   ESTADOS DE CARGA
+   ===================================================== */
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--cafe-oro);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Sidebar: Beneficios y Acciones */
+.loyalty-sidebar .loyalty-card {
+    margin-bottom: 2rem;
+}
+
+.benefits-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.benefits-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: #374151;
+}
+.benefits-list .icon {
+    color: #10b981;
+}
+
+.quick-actions-list a {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s ease;
+}
+.quick-actions-list a:hover {
+    background-color: #f3f4f6;
+    color: #8a5cf6;
+}
+.quick-actions-list .icon {
+    margin-right: 0.75rem;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* =====================================================
+   Catálogo de Recompensas y Otras Páginas
+   ===================================================== */
+
+.rewards-catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.rewards-catalog-header .user-points {
+    background: #f3e8ff;
+    color: #8a5cf6;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.rewards-catalog-filters {
+    display: flex;
+    gap: 1rem;
+}
+
+.rewards-catalog-filters select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.reward-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.reward-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.reward-card-disabled {
+    opacity: 0.6;
+    background-color: #f9f9f9;
+}
+
+.reward-card-disabled .btn-redeem {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.reward-card-header {
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.reward-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.tier-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.tier-cafe_bronze { background-color: #cd7f32; }
+.tier-cafe_plata { background-color: #c0c0c0; }
+.tier-cafe_oro { background-color: #ffd700; color: #333; }
+.tier-cafe_diamante { background-color: #b9f2ff; color: #004d61; }
+
+.reward-card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+}
+
+.reward-description {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0;
+}
+
+.reward-card-footer {
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fafafa;
+    border-top: 1px solid #f0f0f0;
+}
+
+.reward-cost {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #007bff;
+}
+
+.btn-redeem .spinner-border-sm {
+    margin-right: 0.5rem;
+}
+
+/* =====================================================
+   Historial de Transacciones
+   ===================================================== */
+
+.timeline {
+    position: relative;
+    padding: 2rem 0;
+    list-style: none;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    height: 100%;
+    width: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+.timeline-item {
+    margin: 0 0 2rem 60px;
+    position: relative;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.timeline-item .timeline-icon {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #4b5563;
+}
+
+.timeline-item.type-earn .timeline-icon {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.timeline-item.type-redeem .timeline-icon {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.timeline-item.type-bonus .timeline-icon {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+.timeline-item.type-referral .timeline-icon {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.timeline-content {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid #8a5cf6;
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.12);
+}
+
+.timeline-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.timeline-points {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.timeline-points.earn {
+    color: #16a34a;
+    font-weight: 700;
+}
+.timeline-points.redeem {
+    color: #dc2626;
+    font-weight: 700;
+}
+.timeline-points.bonus {
+    color: #8b5cf6;
+    font-weight: 700;
+}
+.timeline-points.referral {
+    color: #3b82f6;
+    font-weight: 700;
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* =============================
+   PERFIL DE USUARIO FIDELIZACIÓN
+   ============================= */
+.loyalty-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+.loyalty-profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #8a5cf6;
+    border: 3px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(138,92,246,0.08);
+}
+.loyalty-profile-info {
+    flex: 1;
+}
+.loyalty-profile-info h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+.loyalty-profile-tier {
+    display: inline-block;
+    padding: 0.3rem 1.1rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.loyalty-profile-points {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #8a5cf6;
+    margin-bottom: 0.5rem;
+}
+.loyalty-profile-progress {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.loyalty-progress-bar {
+    background: #e5e7eb;
+    border-radius: 10px;
+    height: 16px;
+    width: 100%;
+    overflow: hidden;
+}
+.loyalty-progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #8a5cf6 60%, #22d3ee 100%);
+    border-radius: 10px;
+    transition: width 0.5s;
+}
+.loyalty-profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin: 2rem 0 2.5rem 0;
+    flex-wrap: wrap;
+}
+.loyalty-stat-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    padding: 1.2rem 2rem;
+    min-width: 180px;
+    flex: 1 1 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.loyalty-stat-card .stat-label {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+}
+.loyalty-stat-card .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #8a5cf6;
+}
+.loyalty-benefits-section {
+    margin-top: 2.5rem;
+}
+.loyalty-benefits-section h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.loyalty-benefits-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+.loyalty-benefit-card {
+    background: #f3e8ff;
+    border-radius: 10px;
+    padding: 1.1rem 1.5rem;
+    min-width: 180px;
+    flex: 1 1 180px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.05rem;
+    color: #6d28d9;
+    box-shadow: 0 2px 8px rgba(138,92,246,0.07);
+}
+.loyalty-benefit-card i {
+    font-size: 1.5rem;
+    color: #8a5cf6;
+}
+@media (max-width: 700px) {
+    .loyalty-profile-header { flex-direction: column; gap: 1rem; }
+    .loyalty-profile-stats { flex-direction: column; gap: 1rem; }
+    .loyalty-benefits-list { flex-direction: column; gap: 1rem; }
+}
+
+/* =====================================================
+   Mejoras para Historial de Transacciones
+   ===================================================== */
+
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 15px;
+    }
+    
+    .timeline-item {
+        margin-left: 50px;
+    }
+    
+    .timeline-item .timeline-icon {
+        left: -35px;
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .timeline-content {
+        padding: 1rem;
+    }
+    
+    .timeline-content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* =====================================================
+   SISTEMA DE REFERIDOS
+   ===================================================== */
+
+.referral-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.referral-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #8a5cf6, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.referral-header p {
+    font-size: 1.1rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.referral-code-section {
+    background: linear-gradient(135deg, #f3e8ff, #e0f2fe);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(138,92,246,0.1);
+}
+
+.referral-code-display {
+    background: #fff;
+    border: 2px dashed #8a5cf6;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #8a5cf6;
+    letter-spacing: 2px;
+}
+
+.referral-code-display .code {
+    font-family: 'Courier New', monospace;
+    background: #f3f4f6;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.copy-btn {
+    background: #8a5cf6;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.copy-btn:hover {
+    background: #7c3aed;
+    transform: translateY(-2px);
+}
+
+.copy-btn.copied {
+    background: #16a34a;
+}
+
+.referral-use-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.referral-use-section h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #374151;
+}
+
+.referral-form {
+    display: flex;
+    gap: 1rem;
+    max-width: 500px;
+}
+
+.referral-form input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.referral-form input:focus {
+    outline: none;
+    border-color: #8a5cf6;
+}
+
+.referral-form button {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.referral-form button:hover {
+    background: #2563eb;
+}
+
+.referrals-list-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.referrals-list-section h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #374151;
+}
+
+.referral-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid #f3f4f6;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.referral-item:hover {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+.referral-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.referral-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8a5cf6;
+    font-weight: 600;
+}
+
+.referral-details h4 {
+    margin: 0;
+    font-weight: 600;
+    color: #374151;
+}
+
+.referral-details p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.referral-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-badge.pending {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.referral-points {
+    font-weight: 600;
+    color: #8a5cf6;
+}
+
+.referral-info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.referral-info-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.referral-info-card .icon {
+    font-size: 2rem;
+    color: #8a5cf6;
+    margin-bottom: 0.5rem;
+}
+
+.referral-info-card h4 {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.referral-info-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .referral-form {
+        flex-direction: column;
+    }
+    
+    .referral-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .referral-info-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =====================================================
+   VISTA DE RECOMPENSAS MEJORADA
+   ===================================================== */
+
+/* Header de Recompensas */
+.rewards-header {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.rewards-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.rewards-title-section {
+    flex: 1;
+    min-width: 300px;
+}
+
+.rewards-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--primary-color);
+}
+
+.rewards-subtitle {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+.user-points-card {
+    background-color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+}
+
+.points-icon {
+    font-size: 2.5rem;
+    color: #ffc107;
+}
+
+.points-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.points-label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+}
+
+.points-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Filtros */
+.rewards-filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    background-color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.filter-group .form-select {
+    min-width: 180px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+/* Grid de Recompensas */
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.reward-card-new {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    position: relative;
+}
+
+.reward-card-new:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+}
+
+.reward-card-tier-banner {
+    height: 10px;
+    background-color: #ccc;
+}
+.reward-card-new.tier-bronze .reward-card-tier-banner { background: #cd7f32; }
+.reward-card-new.tier-plata .reward-card-tier-banner { background: #c0c0c0; }
+.reward-card-new.tier-oro .reward-card-tier-banner { background: #ffd700; }
+.reward-card-new.tier-diamante .reward-card-tier-banner { background: #b9f2ff; }
+
+.reward-card-content {
+    padding: 1.5rem;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.reward-icon-container {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem auto;
+    background-color: var(--light-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+}
+
+.reward-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.reward-description {
+    font-size: 0.95rem;
+    color: #666;
+    min-height: 40px;
+}
+
+.reward-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.reward-cost {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.btn-redeem {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-redeem:hover {
+    background: #388e3c;
+    transform: scale(1.05);
+}
+
+.reward-card-new.disabled {
+    opacity: 0.7;
+    background-color: #f9f9f9;
+}
+
+.reward-card-new.disabled .btn-redeem {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+.reward-card-new.disabled .btn-redeem:hover {
+    transform: none;
+}
+
+/* Loader y Mensajes */
+.rewards-loader, .rewards-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: white;
+    border-radius: 15px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--light-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .transactions-main {
+        grid-template-columns: 1fr;
+    }
+    
+    .transactions-sidebar {
+        order: -1;
+    }
+    
+    .transactions-header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .transactions-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .transactions-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filters-section {
+        flex-direction: column;
+    }
+    
+    .search-section {
+        align-items: stretch;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .transactions-header-row,
+    .transaction-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .transaction-item {
+        padding: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .transaction-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .transaction-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        min-width: auto;
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .transactions-title {
+        font-size: 2rem;
+    }
+    
+    .transactions-stats {
+        flex-direction: column;
+    }
+    
+    .stat-card {
+        width: 100%;
+    }
+}
+
+/* =====================================================
+   VISTA DASHBOARD FIDELIZACIÓN
+   ===================================================== */
+
+.loyalty-dashboard-header {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, var(--primary-color), #3E2723);
+    color: white;
+}
+
+.header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    border: 3px solid white;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-info h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.user-info p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.points-summary-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 180px;
+}
+
+.points-summary-card .points-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.points-summary-card .points-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.loyalty-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.dashboard-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboard-sidebar-col {
+     display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card .card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-card .card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-header-link {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-card .card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+/* Tarjeta de Progreso */
+#progress-card p {
+    margin-bottom: 1rem;
+}
+
+.progress-bar-container {
+    background-color: #eee;
+    border-radius: 10px;
+    height: 15px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, var(--accent-color), #66bb6a);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-bar-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    color: var(--secondary-color);
+}
+
+/* Tarjeta de Beneficios */
+.benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.benefits-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.benefits-list li i {
+    color: var(--accent-color);
+}
+
+/* Tarjeta de Acciones Rápidas */
+.quick-actions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.quick-actions-list a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.quick-actions-list a:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-3px);
+}
+
+.quick-actions-list a i {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Tarjeta Recompensas Destacadas */
+.featured-rewards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.featured-reward-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+.featured-reward-item .reward-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+}
+.featured-reward-item .reward-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.featured-reward-item .reward-details strong {
+    font-size: 0.95rem;
+}
+.featured-reward-item .reward-details span {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+/* =====================================================
+   VISTA PERFIL FIDELIZACIÓN
+   ===================================================== */
+
+.profile-header-new {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #795548);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.profile-info h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+
+.profile-tier-points {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.points-display {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.points-display i {
+    color: #f9a825; /* Gold color for points icon */
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.profile-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.profile-sidebar-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (max-width: 992px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Estadísticas --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-item i {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-item .stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-item .stat-label {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+}
+
+/* --- Timeline de Actividad --- */
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.timeline-item-new {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+.timeline-item-new:last-child {
+    border-bottom: none;
+}
+.timeline-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    background-color: #eee;
+    color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.timeline-details {
+    flex-grow: 1;
+}
+.timeline-details .description {
+    font-weight: 600;
+    margin: 0;
+    color: var(--primary-color);
+}
+.timeline-details .date {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    margin: 0;
+}
+.timeline-points {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+.timeline-points.positive {
+    color: var(--accent-color);
+}
+.timeline-points.negative {
+    color: #e53935; /* Red for negative points */
+}
+
+/* =====================================================
+   VISTA MEJORADA DE TRANSACCIONES (REFACTORIZADO)
+   ===================================================== */
+.transactions-list-new {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 1rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+}
+
+.transaction-group {
+    margin-bottom: 1.5rem;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+}
+
+.transaction-group:last-child {
+    margin-bottom: 0;
+}
+
+.transaction-group-date {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-item:hover {
+    background-color: #f8f9fa;
+}
+
+.transaction-icon-col .transaction-icon {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.transaction-details-col {
+    flex-grow: 1;
+}
+
+.transaction-details-col .description {
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: var(--primary-color);
+}
+
+.transaction-details-col .date {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+.transaction-points-col .points {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Colores por tipo de transacción */
+.transaction-item.earn .transaction-icon { background-color: #4CAF50; }
+.transaction-item.earn .points { color: #4CAF50; background-color: #e8f5e9; }
+
+.transaction-item.redeem .transaction-icon { background-color: #ff5722; }
+.transaction-item.redeem .points { color: #ff5722; background-color: #fbe9e7; }
+
+.transaction-item.bonus .transaction-icon { background-color: #FFC107; }
+.transaction-item.bonus .points { color: #FF8F00; background-color: #fff8e1; }
+
+.transaction-item.referral .transaction-icon { background-color: #2196F3; }
+.transaction-item.referral .points { color: #2196F3; background-color: #e3f2fd; }
+
+.transaction-item.adjustment .transaction-icon { background-color: #607D8B; }
+.transaction-item.adjustment .points { color: #607D8B; background-color: #eceff1; }
+
+.transaction-item.expiry .transaction-icon { background-color: #757575; }
+.transaction-item.expiry .points { color: #757575; background-color: #f5f5f5; }
+
+/* Eliminar estilos antiguos */
+.transactions-header,
+.transactions-controls,
+.transactions-main,
+.transactions-list,
+.transactions-sidebar {
+    display: none !important;
+}
+
+.loading-state, .empty-state, .error-state, .no-more-transactions {
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+.loading-state:before, .empty-state:before, .error-state:before, .no-more-transactions:before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+    color: #ddd;
+}
+.loading-state:before { content: "\f110"; animation: fa-spin 2s infinite linear; }
+.empty-state:before { content: "\f49e"; }
+.error-state:before { content: "\f071"; }
+.no-more-transactions:before { content: "\f560"; }
+
+.profile-info h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+
+.profile-tier-points .tier-badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Colores para cada Nivel/Rango */
+.tier-badge {
+    color: #fff !important; /* Asegurar texto blanco */
+    background-color: #A1887F; /* Un color por defecto */
+}
+.tier-badge.tier-bronze {
+    background: linear-gradient(135deg, #A1887F, #795548);
+}
+.tier-badge.tier-plata {
+    background: linear-gradient(135deg, #B0BEC5, #78909C);
+}
+.tier-badge.tier-oro {
+    background: linear-gradient(135deg, #FFD54F, #FFB300);
+}
+.tier-badge.tier-diamante {
+    background: linear-gradient(135deg, #4DD0E1, #00ACC1);
+}
+
+.rewards-stats-grid {
+    display: none; /* Ocultar en la vista de transacciones */
+}
+
+/* Nuevo grid para resumen de transacciones */
+.transactions-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 15px;
+    color: white;
+    overflow: hidden;
+    position: relative;
+}
+
+.summary-card .summary-icon {
+    font-size: 2rem;
+    margin-right: 1.5rem;
+    background: rgba(255,255,255,0.15);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-card .summary-info {
+    line-height: 1.2;
+}
+
+.summary-card .summary-label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.summary-card .summary-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Colores de las tarjetas de resumen */
+.summary-card.earned {
+    background: linear-gradient(135deg, #66BB6A, #388E3C);
+}
+.summary-card.redeemed {
+    background: linear-gradient(135deg, #EF5350, #D32F2F);
+}
+.summary-card.balance {
+    background: linear-gradient(135deg, #42A5F5, #1976D2);
+}
+
+.rewards-controls {
+    margin-top: 0; /* Ajuste para eliminar espacio extra */
+}
+
+.loyalty-page .stat-card .stat-card-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-top: 10px;
+    color: #333; /* Color de texto oscuro para contraste */
+}
+
+.loyalty-page .stat-card.tier .stat-card-value {
+     color: #fff; /* Texto blanco para tarjetas con fondo de color */
+}
+
+
+/* --- Estilos para Filtros (transacciones, recompensas) --- */
+.filters-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.filters-container .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.filters-container .filter-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.filters-container .filter-group .filter-control {
+    display: flex;
+    align-items: center;
+    background-color: #f4f6f8;
+    border-radius: 6px;
+    padding: 0 10px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.filters-container .filter-group .filter-control:focus-within {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.filters-container .filter-group .filter-control i {
+    color: #888;
+    margin-right: 8px;
+}
+
+.filters-container .filter-group input,
+.filters-container .filter-group select {
+    width: 100%;
+    padding: 10px 5px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.filters-container .filter-group.search-group {
+    flex-basis: 100%; /* Ocupa toda la línea en móvil */
+}
+
+@media (min-width: 768px) {
+    .filters-container .filter-group.search-group {
+       flex-basis: 40%;
+    }
+}
+
+/* --- Nuevos estilos para Grupos de Transacciones --- */
+.transaction-group {
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.transaction-group-date {
+    background-color: #f9f9f9;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1px solid #e9e9e9;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+/* --- Transaction item --- */
+.transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.3s;
+}
+.transaction-item:hover{
+    background-color: #fcfcfc;
+}
+
+/* =====================================================
+   RANGOS Y BENEFICIOS - DASHBOARD (OPTIMIZADO)
+   ===================================================== */
+
+.tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.tier-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.tier-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Efectos especiales para el rango actual */
+.tier-card.current-tier {
+    border-color: var(--cafe-oro);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.25);
+    background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+    animation: current-tier-pulse 2s infinite;
+}
+
+.tier-card.current-tier::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cafe-bronze), var(--cafe-plata), var(--cafe-oro), var(--cafe-diamante));
+    animation: rainbow-flow 3s linear infinite;
+}
+
+@keyframes current-tier-pulse {
+    0%, 100% { 
+        box-shadow: 0 4px 16px rgba(255, 215, 0, 0.25);
+    }
+    50% { 
+        box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+}
+
+@keyframes rainbow-flow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+.tier-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+}
+
+.tier-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--cafe-bronze), #b8860b);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+}
+
+.tier-card[data-tier="cafe_plata"] .tier-icon {
+    background: linear-gradient(135deg, var(--cafe-plata), #a8a8a8);
+}
+
+.tier-card[data-tier="cafe_oro"] .tier-icon {
+    background: linear-gradient(135deg, var(--cafe-oro), #ffb347);
+}
+
+.tier-card[data-tier="cafe_diamante"] .tier-icon {
+    background: linear-gradient(135deg, var(--cafe-diamante), #87ceeb);
+    animation: diamond-shine 2s infinite;
+}
+
+.tier-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.tier-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem 0;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.tier-requirements {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
+
+.current-tier-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 0.7rem;
+    box-shadow: 0 3px 8px rgba(255, 215, 0, 0.3);
+    animation: badge-bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes badge-bounce {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+.tier-card-body {
+    margin-top: 0.75rem;
+}
+
+.tier-benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tier-benefits-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #f5f5f5;
+    line-height: 1.3;
+}
+
+.tier-benefits-list li:last-child {
+    border-bottom: none;
+}
+
+.tier-benefits-list li i {
+    color: var(--success);
+    font-size: 0.7rem;
+    width: 12px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Estados de desbloqueo/bloqueo */
+.tier-card.locked {
+    opacity: 0.5;
+    filter: grayscale(0.4);
+}
+
+.tier-card.locked:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tier-locked-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+}
+
+.tier-card.unlocked {
+    opacity: 1;
+    filter: none;
+}
+
+/* Efectos especiales para cada rango */
+.tier-card[data-tier="cafe_bronze"] {
+    border-left: 3px solid var(--cafe-bronze);
+}
+
+.tier-card[data-tier="cafe_plata"] {
+    border-left: 3px solid var(--cafe-plata);
+}
+
+.tier-card[data-tier="cafe_oro"] {
+    border-left: 3px solid var(--cafe-oro);
+}
+
+.tier-card[data-tier="cafe_diamante"] {
+    border-left: 3px solid var(--cafe-diamante);
+}
+
+/* Responsive design optimizado */
+@media (max-width: 768px) {
+    .tiers-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .tier-card {
+        padding: 0.75rem;
+        min-height: 180px;
+    }
+    
+    .tier-card-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .tier-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .current-tier-badge {
+        top: -4px;
+        right: -4px;
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+    
+    .tier-benefits-list li {
+        font-size: 0.75rem;
+        padding: 0.25rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .tiers-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .tier-card {
+        padding: 0.75rem;
+        min-height: auto;
+    }
+}
+
+/* =====================================================
+   MEJORAS AL DASHBOARD EXISTENTE
+   ===================================================== */
+
+.card-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-top: 0.2rem;
+}
+
+.dashboard-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.dashboard-card .card-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.dashboard-card .card-header h3 i {
+    color: var(--cafe-oro);
+    font-size: 1rem;
+}
+
+/* =====================================================
+   ANIMACIONES ADICIONALES (OPTIMIZADAS)
+   ===================================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tier-card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.tier-card:nth-child(1) { animation-delay: 0.05s; }
+.tier-card:nth-child(2) { animation-delay: 0.1s; }
+.tier-card:nth-child(3) { animation-delay: 0.15s; }
+.tier-card:nth-child(4) { animation-delay: 0.2s; }
+
+/* =====================================================
+   EFECTOS DE HOVER MEJORADOS (COMPACTOS)
+   ===================================================== */
+
+.tier-card:hover .tier-icon {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.tier-card.current-tier:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+}
+
+.tier-card.current-tier:hover .current-tier-badge {
+    animation: badge-spin 0.5s ease-in-out;
+}
+
+@keyframes badge-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* =====================================================
+   ESTILOS PARA EL SUBTÍTULO DE LA TARJETA
+   ===================================================== */
+
+.card-header {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.card-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.card-header-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+} 

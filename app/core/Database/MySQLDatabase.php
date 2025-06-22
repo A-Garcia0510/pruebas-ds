@@ -32,10 +32,10 @@ class MySQLDatabase implements DatabaseInterface
         );
         
         if ($this->connection->connect_error) {
-            throw new DatabaseConnectionException($this->connection->connect_error);
+            throw new DatabaseConnectionException("Error de conexión: " . $this->connection->connect_error);
         }
         
-        $this->connection->set_charset("utf8");
+        $this->connection->set_charset("utf8mb4");
     }
     
     /**
@@ -236,5 +236,15 @@ class MySQLDatabase implements DatabaseInterface
     public function __destruct()
     {
         $this->closeConnection();
+    }
+
+    /**
+     * Indica si hay una transacción activa
+     *
+     * @return bool
+     */
+    public function inTransaction(): bool
+    {
+        return $this->inTransaction;
     }
 }

@@ -46,6 +46,17 @@ class Router
         // Rutas para moderación de reseñas
         $this->get('/dashboard/moderation', [\App\Controllers\DashboardController::class, 'moderation']);
         $this->post('/api/dashboard/moderate-review', [\App\Controllers\DashboardController::class, 'moderateReview']);
+
+        // Rutas para el sistema de fidelización
+        $this->get('/loyalty', [\App\Controllers\LoyaltyController::class, 'index']);
+        $this->get('/loyalty/rewards', [\App\Controllers\LoyaltyController::class, 'rewards']);
+        $this->get('/loyalty/profile', [\App\Controllers\LoyaltyController::class, 'profile']);
+        $this->get('/loyalty/transactions', [\App\Controllers\LoyaltyController::class, 'transactions']);
+        
+        // API endpoints para fidelización
+        $this->post('/api/loyalty/redeem', [\App\Controllers\LoyaltyController::class, 'redeem']);
+        $this->post('/api/loyalty/earn-points', [\App\Controllers\LoyaltyController::class, 'earnPoints']);
+        $this->post('/loyalty/redeem-coupon', [\App\Controllers\LoyaltyController::class, 'redeemCoupon']);
     }
     
     /**

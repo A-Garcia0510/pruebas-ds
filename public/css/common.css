@@ -65,6 +65,7 @@ header {
 
 .main-menu li {
     margin-left: 1.5rem;
+    position: relative;
 }
 
 .main-menu a {
@@ -76,6 +77,76 @@ header {
 
 .main-menu a:hover {
     color: var(--accent-color);
+}
+
+/* Menú desplegable de fidelización */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s;
+}
+
+.dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+}
+
+.dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu li {
+    margin: 0;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--light-color);
+    color: var(--accent-color);
+    transform: translateX(5px);
+}
+
+.dropdown-menu a:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.dropdown-menu a:last-child {
+    border-radius: 0 0 8px 8px;
 }
 
 .user-actions {
@@ -206,14 +277,14 @@ footer {
 }
 
 .social-links a {
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
     background-color: rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    color: white;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 50%;
     transition: background-color 0.3s;
 }
 
@@ -224,16 +295,16 @@ footer {
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
-        flex-direction: column;
         padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
     }
     
-    .logo {
-        margin-bottom: 1rem;
+    .logo h1 {
+        font-size: 1.5rem;
     }
     
     .main-menu {
-        margin-bottom: 1rem;
         flex-wrap: wrap;
         justify-content: center;
     }
@@ -247,6 +318,7 @@ footer {
     }
     
     .footer-info div {
-        margin-bottom: 1.5rem;
+        margin-right: 0;
+        margin-bottom: 1rem;
     }
 } 

@@ -1,0 +1,87 @@
+{
+    "testApiHealth": {
+        "success": true,
+        "message": "API respondiendo correctamente",
+        "data": {
+            "status": "healthy",
+            "service": "loyalty-system",
+            "components": {
+                "database": "connected",
+                "notification_service": "active",
+                "marketing_service": "active",
+                "analytics_service": "active"
+            },
+            "timestamp": "2025-06-19T22:08:57.004105"
+        }
+    },
+    "testUserProfile": {
+        "success": true,
+        "message": "Perfil obtenido para usuario 1",
+        "data": {
+            "user_id": 1,
+            "points": 0,
+            "tier": "cafe_bronze"
+        }
+    },
+    "testEarnPoints": {
+        "success": true,
+        "message": "Se otorgaron 50 puntos exitosamente",
+        "data": {
+            "success": true,
+            "data": {
+                "message": "Puntos ganados exitosamente"
+            }
+        }
+    },
+    "testTransactions": {
+        "success": true,
+        "message": "Historial de transacciones obtenido",
+        "data": {
+            "count": 2,
+            "transactions": {
+                "success": true,
+                "data": []
+            }
+        }
+    },
+    "testReferralSystem": {
+        "success": true,
+        "message": "Sistema de referidos funcionando",
+        "data": {
+            "referral_code": "REF000001",
+            "message": "C\u00f3digo generado exitosamente"
+        }
+    },
+    "testRewards": {
+        "success": true,
+        "message": "Recompensas obtenidas correctamente",
+        "data": {
+            "count": 2,
+            "rewards": {
+                "success": true,
+                "data": [
+                    {
+                        "id": 1,
+                        "name": "Caf\u00e9 Americano Gratis",
+                        "description": "Caf\u00e9 americano gratis para empezar el d\u00eda",
+                        "points_cost": 500,
+                        "discount_percent": 100,
+                        "tier_required": "cafe_bronze",
+                        "max_uses_per_user": 1,
+                        "category": "descuento"
+                    },
+                    {
+                        "id": 2,
+                        "name": "10% Descuento en tu Pr\u00f3ximo Caf\u00e9",
+                        "description": "10% de descuento en tu pr\u00f3xima compra",
+                        "points_cost": 200,
+                        "discount_percent": 10,
+                        "tier_required": "cafe_bronze",
+                        "max_uses_per_user": 3,
+                        "category": "descuento"
+                    }
+                ]
+            }
+        }
+    }
+}

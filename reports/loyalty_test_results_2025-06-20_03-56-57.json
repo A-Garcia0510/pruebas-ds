@@ -1,0 +1,85 @@
+{
+    "testApiHealth": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    },
+    "testDatabaseConnection": {
+        "success": true,
+        "message": "Conexi\u00f3n a base de datos exitosa",
+        "data": {
+            "connected": true
+        }
+    },
+    "testUserProfile": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    },
+    "testEarnPoints": {
+        "success": true,
+        "message": "Se otorgaron 50 puntos exitosamente",
+        "data": {
+            "success": true,
+            "data": {
+                "message": "Puntos ganados exitosamente"
+            }
+        }
+    },
+    "testTransactions": {
+        "success": true,
+        "message": "Historial de transacciones obtenido",
+        "data": {
+            "count": 2,
+            "transactions": {
+                "success": true,
+                "data": []
+            }
+        }
+    },
+    "testReferralSystem": {
+        "success": false,
+        "message": "Error en sistema de referidos",
+        "data": {
+            "success": true,
+            "data": {
+                "referral_code": "REF000001",
+                "user_id": 1
+            }
+        }
+    },
+    "testRewards": {
+        "success": true,
+        "message": "Recompensas obtenidas correctamente",
+        "data": {
+            "count": 2,
+            "rewards": {
+                "success": true,
+                "data": [
+                    {
+                        "id": 1,
+                        "name": "Caf\u00e9 Americano Gratis",
+                        "description": "Caf\u00e9 americano gratis para empezar el d\u00eda",
+                        "points_cost": 500,
+                        "discount_percent": 100,
+                        "tier_required": "cafe_bronze",
+                        "max_uses_per_user": 1,
+                        "category": "descuento"
+                    },
+                    {
+                        "id": 2,
+                        "name": "10% Descuento en tu Pr\u00f3ximo Caf\u00e9",
+                        "description": "10% de descuento en tu pr\u00f3xima compra",
+                        "points_cost": 200,
+                        "discount_percent": 10,
+                        "tier_required": "cafe_bronze",
+                        "max_uses_per_user": 3,
+                        "category": "descuento"
+                    }
+                ]
+            }
+        }
+    },
+    "testTierUpgrade": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    }
+}

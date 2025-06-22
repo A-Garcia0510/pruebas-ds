@@ -122,6 +122,14 @@ class PurchaseService implements PurchaseServiceInterface
                 throw new CheckoutException("Error al guardar la compra", 0, null, $cartItems);
             }
             
+            // Marcar la compra como completada para activar el trigger de puntos
+            $purchaseId = $purchase->getId();
+            if ($purchaseId) {
+                $stmtUpdate = $conn->prepare("UPDATE Compra SET estado = 'completado' WHERE compra_ID = ?");
+                $stmtUpdate->bind_param("i", $purchaseId);
+                $stmtUpdate->execute();
+            }
+            
             // Limpiar el carrito
             if (!$this->cartService->clear($userId)) {
                 throw new CheckoutException("Error al limpiar el carrito", 0, null, $cartItems);

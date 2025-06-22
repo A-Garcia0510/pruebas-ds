@@ -88,4 +88,6 @@ interface DatabaseInterface
      * @return bool
      */
     public function rollback();
+
+    public function inTransaction(): bool;
 }

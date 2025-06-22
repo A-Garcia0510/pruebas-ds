@@ -350,12 +350,52 @@ class CustomCoffeeController extends BaseController
             
             if ($pedidoId) {
                 error_log("[CustomCoffeeController::placeOrder] Pedido creado exitosamente - ID: $pedidoId");
-                return $this->json([
-                    'success' => true,
-                    'message' => 'Pedido realizado con éxito',
-                    'pedido_id' => $pedidoId
-                ]);
+                // Otorgar puntos de fidelización
+                try {
+                    error_log("[CustomCoffeeController::placeOrder] Llamando a LoyaltyController->awardPointsForPurchase con usuarioId=$usuarioId, precioTotal=$precioTotal, pedidoId=$pedidoId");
+                    $loyaltyController = $this->container->resolve(\App\Controllers\LoyaltyController::class);
+                    $loyaltyResponse = $loyaltyController->awardPointsForPurchase(
+                        $usuarioId,
+                        $precioTotal,
+                        "Compra de café personalizado #{$pedidoId}"
+                    );
+                    error_log("[CustomCoffeeController::placeOrder] Respuesta de LoyaltyController: " . print_r($loyaltyResponse, true));
+                    
+                    // Si todo va bien, confirmar la transacción
+                    $this->orderModel->commit();
+
+                    if ($loyaltyResponse['success']) {
+                        return $this->json([
+                            'success' => true,
+                            'message' => 'Pedido realizado con éxito y puntos de fidelización otorgados.',
+                            'pedido_id' => $pedidoId,
+                            'loyalty_points' => $loyaltyResponse['points_earned'] ?? 0,
+                            'loyalty_response' => $loyaltyResponse
+                        ]);
+                    } else {
+                        // La compra se realizó pero hubo error en fidelización
+                        return $this->json([
+                            'success' => true,
+                            'message' => 'Pedido realizado con éxito',
+                            'pedido_id' => $pedidoId,
+                            'loyalty_warning' => 'No se pudieron otorgar puntos de fidelización'
+                        ]);
+                    }
+
+                } catch (Exception $loyaltyException) {
+                    // Si la API de fidelización falla, el pedido se completa igual
+                    $this->orderModel->commit();
+                    error_log("[CustomCoffeeController::placeOrder] Error en la API de fidelización, pero pedido #{$pedidoId} completado: " . $loyaltyException->getMessage());
+                    return $this->json([
+                        'success' => true,
+                        'message' => 'Pedido realizado con éxito',
+                        'pedido_id' => $pedidoId,
+                        'loyalty_warning' => 'No se pudieron otorgar puntos de fidelización'
+                    ]);
+                }
+
             } else {
+                $this->orderModel->rollBack();
                 error_log("[CustomCoffeeController::placeOrder] Error al crear el pedido");
                 return $this->json([
                     'success' => false,
@@ -364,12 +404,16 @@ class CustomCoffeeController extends BaseController
             }
 
         } catch (\Exception $e) {
+            // Asegurarse de revertir si algo falla antes del commit
+            if ($this->orderModel->inTransaction()) {
+                $this->orderModel->rollBack();
+            }
             error_log("[CustomCoffeeController::placeOrder] Error: " . $e->getMessage());
             error_log("[CustomCoffeeController::placeOrder] Stack trace: " . $e->getTraceAsString());
             return $this->json([
                 'success' => false,
                 'message' => 'Error interno del servidor: ' . $e->getMessage()
-            ], 500);
+            ], $e->getCode() >= 400 ? $e->getCode() : 500);
         }
     }
 
@@ -477,12 +521,12 @@ class CustomCoffeeController extends BaseController
     /**
      * API para cancelar un pedido
      */
-    public function cancelOrder($id)
+    public function cancel($orderId)
     {
         if (!isset($_SESSION['correo'])) {
             return $this->json([
                 'success' => false,
-                'message' => 'Debes iniciar sesión para cancelar pedidos'
+                'message' => 'Usuario no autenticado'
             ], 401);
         }
 
@@ -490,24 +534,26 @@ class CustomCoffeeController extends BaseController
             $usuarioId = $_SESSION['user_id'];
             
             // Verificar que el pedido pertenece al usuario
-            if (!$this->orderModel->perteneceAUsuario($id, $usuarioId)) {
+            $pedido = $this->orderModel->getPedidoById($orderId);
+            if (!$pedido || $pedido['usuario_ID'] != $usuarioId) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'No tienes permiso para cancelar este pedido'
-                ], 403);
+                    'message' => 'Pedido no encontrado o no tienes permisos para cancelarlo'
+                ], 404);
             }
 
-            // Verificar que el pedido está en estado pendiente
-            $pedido = $this->orderModel->getPedidoById($id);
-            if (!$pedido || $pedido['estado'] !== 'pendiente') {
+            // Verificar que el pedido esté en estado pendiente
+            if ($pedido['estado'] !== 'pendiente') {
                 return $this->json([
                     'success' => false,
-                    'message' => 'Solo se pueden cancelar pedidos en estado pendiente'
+                    'message' => 'Solo se pueden cancelar pedidos pendientes'
                 ], 400);
             }
 
             // Cancelar el pedido
-            if ($this->orderModel->cancelarPedido($id)) {
+            $resultado = $this->orderModel->cancelarPedido($orderId);
+            
+            if ($resultado) {
                 return $this->json([
                     'success' => true,
                     'message' => 'Pedido cancelado exitosamente'
@@ -518,10 +564,12 @@ class CustomCoffeeController extends BaseController
                     'message' => 'Error al cancelar el pedido'
                 ], 500);
             }
+
         } catch (\Exception $e) {
+            error_log("Error cancelando pedido: " . $e->getMessage());
             return $this->json([
                 'success' => false,
-                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
+                'message' => 'Error interno del servidor'
             ], 500);
         }
     }
@@ -575,41 +623,6 @@ class CustomCoffeeController extends BaseController
             $_SESSION['message'] = 'Error al cargar los pedidos: ' . $e->getMessage();
             $_SESSION['message_type'] = 'error';
             return $this->redirect('/custom-coffee');
-        }
-    }
-
-    /**
-     * API para cancelar un pedido
-     */
-    public function cancel($orderId)
-    {
-        if (!isset($_SESSION['user_id'])) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Debes iniciar sesión para realizar esta acción'
-            ], 401);
-        }
-
-        try {
-            // Verificar que el pedido pertenece al usuario
-            if (!$this->orderModel->perteneceAUsuario($orderId, $_SESSION['user_id'])) {
-                throw new \Exception('No tienes permiso para cancelar este pedido');
-            }
-
-            // Intentar cancelar el pedido
-            if ($this->orderModel->cancelarPedido($orderId)) {
-                return $this->json([
-                    'success' => true,
-                    'message' => 'Pedido cancelado exitosamente'
-                ]);
-            } else {
-                throw new \Exception('No se pudo cancelar el pedido');
-            }
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
         }
     }
 } 

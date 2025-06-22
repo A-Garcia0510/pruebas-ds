@@ -149,13 +149,19 @@ class App
             );
         });
         
+        // Registrar Review model
+        $this->container->bind(\App\Models\Review::class, function($container) {
+            return new \App\Models\Review();
+        });
+
         // Registrar ProductController
         $this->container->bind(ProductController::class, function($container) {
             return new ProductController(
                 $container->resolve(RequestInterface::class),
                 $container->resolve(ResponseInterface::class),
                 $container->resolve(ProductRepository::class),
-                $container
+                $container,
+                $container->resolve(\App\Models\Review::class)
             );
         });
         
@@ -201,13 +207,14 @@ class App
             );
         });
         
-        // Registrar CoffeeBuilder y CoffeeDirector
-        $this->container->bind(CoffeeBuilder::class, function($container) {
-            return new CoffeeBuilder($container->resolve(DatabaseInterface::class));
-        });
-
-        $this->container->bind(CoffeeDirector::class, function($container) {
-            return new CoffeeDirector($container->resolve(CoffeeBuilder::class));
+        // Registrar LoyaltyController
+        $this->container->bind(\App\Controllers\LoyaltyController::class, function($container) {
+            return new \App\Controllers\LoyaltyController(
+                $container->resolve(RequestInterface::class),
+                $container->resolve(ResponseInterface::class),
+                $container,
+                $this->config['loyalty_api_url'] ?? 'http://127.0.0.1:8000'
+            );
         });
         
         // Resolver dependencias

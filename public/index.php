@@ -147,6 +147,24 @@ $app->router->post('/api/products/review/delete', [\App\Controllers\ProductContr
 $app->router->get('/dashboard/moderation', [\App\Controllers\DashboardController::class, 'moderation']);
 $app->router->post('/api/dashboard/moderate-review', [\App\Controllers\DashboardController::class, 'moderateReview']);
 
+// Rutas del sistema de fidelización
+$app->router->get('/loyalty', [\App\Controllers\LoyaltyController::class, 'index']);
+$app->router->get('/fidelizacion', [\App\Controllers\LoyaltyController::class, 'index']);
+$app->router->get('/loyalty/rewards', [\App\Controllers\LoyaltyController::class, 'rewards']);
+$app->router->get('/fidelizacion/recompensas', [\App\Controllers\LoyaltyController::class, 'rewards']);
+$app->router->get('/loyalty/profile', [\App\Controllers\LoyaltyController::class, 'profile']);
+$app->router->get('/fidelizacion/perfil', [\App\Controllers\LoyaltyController::class, 'profile']);
+$app->router->get('/loyalty/transactions', [\App\Controllers\LoyaltyController::class, 'transactions']);
+$app->router->get('/fidelizacion/transacciones', [\App\Controllers\LoyaltyController::class, 'transactions']);
+
+// API endpoints para fidelización
+$app->router->post('/api/loyalty/redeem', [\App\Controllers\LoyaltyController::class, 'redeem']);
+$app->router->get('/api/loyalty/profile/{id}', [\App\Controllers\LoyaltyController::class, 'getProfileApi']);
+$app->router->get('/api/loyalty/rewards', [\App\Controllers\LoyaltyController::class, 'getRewardsApi']);
+$app->router->get('/api/loyalty/transactions/{id}', [\App\Controllers\LoyaltyController::class, 'getTransactionsApi']);
+$app->router->get('/api/loyalty/current-user', [\App\Controllers\LoyaltyController::class, 'getCurrentUserId']);
+$app->router->get('/api/loyalty/status', [\App\Controllers\LoyaltyController::class, 'checkApiStatus']);
+
 // Aplicar middleware de autenticación
 // Definir rutas protegidas
 $protectedRoutes = [
@@ -178,7 +196,22 @@ $protectedRoutes = [
     '/api/dashboard/moderate-review',
     '/api/products/review/add',
     '/api/products/review/report',
-    '/api/products/review/delete'
+    '/api/products/review/delete',
+    // Rutas protegidas de fidelización
+    '/loyalty',
+    '/fidelizacion',
+    '/loyalty/rewards',
+    '/fidelizacion/recompensas',
+    '/loyalty/profile',
+    '/fidelizacion/perfil',
+    '/loyalty/transactions',
+    '/fidelizacion/transacciones',
+    '/api/loyalty/redeem',
+    '/api/loyalty/generate-referral',
+    '/api/loyalty/use-referral',
+    '/api/loyalty/profile',
+    '/api/loyalty/rewards',
+    '/api/loyalty/transactions'
 ];
 
 // Verificar si la clase AuthMiddleware existe antes de usarla

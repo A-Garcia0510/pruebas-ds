@@ -240,13 +240,61 @@ class CartController extends BaseController
                 return;
             }
             
+            // Obtener el total del carrito antes de procesar la compra
+            $totalAmount = $this->cartService->getTotal($userEmail);
+            
+            // Procesar la compra
             $result = $this->purchaseService->createPurchase($userEmail);
             
             if ($result) {
-                $this->response->json([
-                    'success' => true,
-                    'message' => 'Compra realizada con éxito'
-                ]);
+                // Obtener el ID del usuario para el sistema de fidelización
+                $userId = $this->getUserIdFromEmail($userEmail);
+                
+                if ($userId) {
+                    try {
+                        // Otorgar puntos por la compra
+                        $loyaltyController = $this->container->resolve(\App\Controllers\LoyaltyController::class);
+                        $loyaltyResponse = $loyaltyController->awardPointsForPurchase(
+                            $userId,
+                            $totalAmount,
+                            "Compra normal desde carrito - Total: $" . number_format($totalAmount, 0, ',', '.') . " CLP"
+                        );
+                        
+                        if ($loyaltyResponse['success']) {
+                            $this->response->json([
+                                'success' => true,
+                                'message' => 'Compra realizada con éxito. ¡Has ganado puntos de fidelización!',
+                                'loyalty_points' => $loyaltyResponse['points_earned'] ?? 0,
+                                'total_amount' => $totalAmount
+                            ]);
+                        } else {
+                            // La compra se realizó pero hubo error en fidelización
+                            $this->response->json([
+                                'success' => true,
+                                'message' => 'Compra realizada con éxito',
+                                'loyalty_warning' => 'No se pudieron otorgar puntos de fidelización',
+                                'total_amount' => $totalAmount
+                            ]);
+                        }
+                    } catch (\Exception $loyaltyError) {
+                        error_log("Error en sistema de fidelización: " . $loyaltyError->getMessage());
+                        // La compra se realizó pero hubo error en fidelización
+                        $this->response->json([
+                            'success' => true,
+                            'message' => 'Compra realizada con éxito',
+                            'loyalty_warning' => 'Error en sistema de fidelización',
+                            'total_amount' => $totalAmount
+                        ]);
+                    }
+                } else {
+                    // No se pudo obtener el ID del usuario
+                    $this->response->json([
+                        'success' => true,
+                        'message' => 'Compra realizada con éxito',
+                        'loyalty_warning' => 'No se pudo procesar fidelización',
+                        'total_amount' => $totalAmount
+                    ]);
+                }
             } else {
                 $this->response->json([
                     'success' => false,
@@ -258,6 +306,30 @@ class CartController extends BaseController
                 'success' => false,
                 'message' => 'Error al procesar la compra: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Obtiene el ID del usuario a partir del email
+     */
+    private function getUserIdFromEmail(string $email): ?int
+    {
+        try {
+            $conn = $this->container->get('database')->getConnection();
+            $stmt = $conn->prepare("SELECT usuario_ID FROM Usuario WHERE correo = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $userData = $result->fetch_assoc();
+                return (int) $userData['usuario_ID'];
+            }
+            
+            return null;
+        } catch (\Exception $e) {
+            error_log("Error obteniendo ID de usuario: " . $e->getMessage());
+            return null;
         }
     }
 

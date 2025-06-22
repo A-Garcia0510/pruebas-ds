@@ -42,9 +42,17 @@ $title = $title ?? 'Carrito de Compras';
         </table>
     </div>
 
-    <!-- Sección del Total -->
-    <div class="total-section">
-        <div id="total"></div>
+    <!-- Resumen del Carrito -->
+    <div class="cart-summary">
+        <h3><i class="fas fa-calculator"></i> Resumen</h3>
+        <div class="summary-item">
+            <span>Subtotal:</span>
+            <span id="subtotal">$0</span>
+    </div>
+        <div class="summary-item total">
+            <span>Total:</span>
+            <span id="total">$0</span>
+        </div>
     </div>
 
     <!-- Botones de Acción -->
@@ -56,27 +64,53 @@ $title = $title ?? 'Carrito de Compras';
             <i class="fas fa-shopping-cart"></i> Finalizar Compra
         </button>
     </div>
+
+    <div class="cart-summary">
+        <div class="summary-item">
+            <span>Subtotal:</span>
+            <span id="subtotal">$0</span>
+        </div>
+        <div class="summary-item total">
+            <span>Total:</span>
+            <span id="total">$0</span>
+        </div>
+        <button type="button" id="checkout-btn" class="btn btn-primary btn-lg w-100" disabled>
+            Finalizar Compra
+        </button>
+    </div>
 </div>
 
 <script>
-    // Mostrar/ocultar mensaje de error
-    function mostrarError(mostrar, mensaje = 'Se produjo un error al comunicarse con el servidor. Por favor, intenta nuevamente.') {
+    // Variables globales
+    let cartHistory = [];
+    let currentHistoryIndex = -1;
+
+    // Función para formatear precios en CLP
+    function formatearPrecioCLP(precio) {
+        return new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP',
+            minimumFractionDigits: 0
+        }).format(precio);
+    }
+
+    // Función para mostrar/ocultar errores
+    function mostrarError(mostrar, mensaje = '') {
         const errorDiv = document.getElementById('carrito-error');
+        if (mostrar) {
         errorDiv.textContent = mensaje;
-        errorDiv.style.display = mostrar ? 'block' : 'none';
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
     }
     
-    // Función para formatear números en formato CLP (con punto como separador de miles)
-    function formatearPrecioCLP(numero) {
-        return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-    
-    // Función para actualizar el estado de los botones de deshacer/rehacer
-    function updateUndoRedoButtons() {
-        console.log('Actualizando estado de botones deshacer/rehacer...');
-        fetch('<?= AssetHelper::url('cart/history') ?>', {
+    // Función para obtener el carrito
+    function obtenerCarrito() {
+        fetch('<?= AssetHelper::url('cart/items') ?>', {
             method: 'GET',
             headers: {
+                'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         })
@@ -87,215 +121,143 @@ $title = $title ?? 'Carrito de Compras';
             return response.json();
         })
         .then(data => {
-            console.log('Estado de botones:', data);
             if (data.success) {
-                const undoBtn = document.getElementById('undoBtn');
-                const redoBtn = document.getElementById('redoBtn');
-                
-                // Actualizar estado de los botones
-                undoBtn.disabled = !data.hasUndoActions;
-                redoBtn.disabled = !data.hasRedoActions;
-                
-                // Actualizar clases visuales
-                if (data.hasUndoActions) {
-                    undoBtn.classList.add('active');
-                    undoBtn.classList.remove('disabled');
+                renderizarCarrito(data.carrito);
+                actualizarResumen(data.total);
                 } else {
-                    undoBtn.classList.remove('active');
-                    undoBtn.classList.add('disabled');
-                }
-                
-                if (data.hasRedoActions) {
-                    redoBtn.classList.add('active');
-                    redoBtn.classList.remove('disabled');
-                } else {
-                    redoBtn.classList.remove('active');
-                    redoBtn.classList.add('disabled');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error al actualizar botones:', error);
-            mostrarError(true, 'Error al actualizar el estado de los botones');
-        });
-    }
-
-    // Función para obtener el carrito del usuario
-    function obtenerCarrito() {
-        console.log('Obteniendo carrito...');
-        mostrarError(false);
-        
-        fetch('<?= AssetHelper::url('cart/items') ?>')
-            .then(response => {
-                console.log('Respuesta recibida:', response.status, response.statusText);
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Datos recibidos:', data);
-                if (data.success) {
-                    mostrarCarrito(data.carrito || []); // Asegurar que carrito sea al menos un array vacío
-                    updateUndoRedoButtons(); // Actualizar estado de botones después de obtener el carrito
-                } else {
-                    mostrarCarrito([]); // Si no hay productos, mostramos el carrito vacío
-                    if (data.message) {
-                        console.warn('Mensaje del servidor:', data.message);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error al obtener carrito:', error);
-                document.getElementById('carrito').innerHTML = '<p>Error al cargar el carrito. Intenta recargar la página.</p>';
-                mostrarError(true, 'Error de comunicación con el servidor: ' + error.message);
-            });
-    }
-
-    // Función para mostrar los productos del carrito
-    function mostrarCarrito(carrito) {
-        const tbody = document.getElementById('cartItems');
-        tbody.innerHTML = '';
-        let total = 0;
-
-        if (!carrito || carrito.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos en el carrito.</td></tr>';
-            document.getElementById('total').innerHTML = '';
-            document.getElementById('checkoutBtn').disabled = true;
-            return;
-        }
-
-        carrito.forEach(producto => {
-            const subtotal = producto.precio * producto.cantidad;
-            total += subtotal;
-
-            const tr = document.createElement('tr');
-            tr.setAttribute('data-producto-id', producto.producto_ID);
-            tr.innerHTML = `
-                <td>
-                    <div class="d-flex align-items-center">
-                        <img src="<?= AssetHelper::url('img-p') ?>/${producto.nombre_producto.toLowerCase().replace(/ /g, '_')}.jpg" 
-                             alt="${producto.nombre_producto}" 
-                             class="me-3" 
-                             style="width: 50px; height: 50px; object-fit: cover;"
-                             onerror="this.src='<?= AssetHelper::url('img-p') ?>/default.jpg';">
-                        <span>${producto.nombre_producto}</span>
-                    </div>
-                </td>
-                <td>$${formatearPrecioCLP(producto.precio)}</td>
-                <td>
-                    <div class="quantity-controls">
-                        <button type="button" class="btn-quantity" onclick="actualizarCantidad(${producto.producto_ID}, ${producto.cantidad - 1})" 
-                                ${producto.cantidad <= 1 ? 'disabled' : ''}>
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="number" value="${producto.cantidad}" min="1" 
-                               onchange="actualizarCantidad(${producto.producto_ID}, parseInt(this.value) || 1)" 
-                               class="quantity-input">
-                        <button type="button" class="btn-quantity" onclick="actualizarCantidad(${producto.producto_ID}, ${producto.cantidad + 1})">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </td>
-                <td>$${formatearPrecioCLP(subtotal)}</td>
-                <td>
-                    <button class="delete-btn" onclick="eliminarDelCarrito(${producto.producto_ID})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        const iva = total * 0.19;
-        const totalConIVA = total + iva;
-
-        document.getElementById('total').innerHTML = `
-            <p>Subtotal: $${formatearPrecioCLP(total)}</p>
-            <p>IVA (19%): $${formatearPrecioCLP(iva)}</p>
-            <p class="total-final">Total: $${formatearPrecioCLP(totalConIVA)}</p>
-        `;
-
-        document.getElementById('checkoutBtn').disabled = false;
-    }
-
-    // Función para actualizar la cantidad de un producto
-    function actualizarCantidad(productoID, nuevaCantidad) {
-        if (nuevaCantidad < 1) {
-            eliminarDelCarrito(productoID);
-            return;
-        }
-
-        // Mostrar indicador de carga
-        const productoElement = document.querySelector(`tr[data-producto-id="${productoID}"]`);
-        if (productoElement) {
-            productoElement.style.opacity = '0.5';
-        }
-
-        fetch('<?= AssetHelper::url('cart/add') ?>', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                producto_ID: productoID, 
-                cantidad: nuevaCantidad,
-                actualizar: true
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                obtenerCarrito();
-                updateUndoRedoButtons(); // Actualizar estado de botones después de actualizar cantidad
-            } else {
-                mostrarError(true, data.message || 'Error al actualizar la cantidad');
-                if (productoElement) {
-                    productoElement.style.opacity = '1';
-                }
+                mostrarError(true, data.message || 'Error al obtener el carrito');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            mostrarError(true, 'Error al actualizar la cantidad');
-            if (productoElement) {
-                productoElement.style.opacity = '1';
-            }
+            mostrarError(true, 'Error de comunicación con el servidor');
         });
+                }
+
+    // Función para renderizar el carrito
+    function renderizarCarrito(items) {
+        const tbody = document.getElementById('cartItems');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const checkoutBtn2 = document.getElementById('checkout-btn');
+
+        if (!items || items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay productos en el carrito</td></tr>';
+            checkoutBtn.disabled = true;
+            checkoutBtn2.disabled = true;
+            return;
+        }
+
+        checkoutBtn.disabled = false;
+        checkoutBtn2.disabled = false;
+        
+        tbody.innerHTML = items.map(item => `
+            <tr data-product-id="${item.producto_ID}">
+                <td>
+                    <div class="product-info">
+                        <img src="<?= AssetHelper::url('IMG-P/') ?>${item.nombre_producto.toLowerCase().replace(/\s+/g, '_')}.jpg" 
+                             alt="${item.nombre_producto}" 
+                             onerror="this.src='<?= AssetHelper::url('img/carro.png') ?>'">
+                        <span>${item.nombre_producto}</span>
+                    </div>
+                </td>
+                <td class="price">${formatearPrecioCLP(item.precio)}</td>
+                <td>
+                    <div class="quantity-controls">
+                        <button type="button" class="btn-quantity" onclick="cambiarCantidad(${item.producto_ID}, ${item.cantidad - 1})">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="quantity">${item.cantidad}</span>
+                        <button type="button" class="btn-quantity" onclick="cambiarCantidad(${item.producto_ID}, ${item.cantidad + 1})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </td>
+                <td class="subtotal">${formatearPrecioCLP(item.subtotal)}</td>
+                <td>
+                    <button type="button" class="btn-remove" onclick="eliminarProducto(${item.producto_ID})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    // Función para eliminar un producto del carrito
-    function eliminarDelCarrito(productoID) {
-        console.log('Eliminando producto:', productoID);
-        mostrarError(false);
-        
-        fetch('<?= AssetHelper::url('cart/remove') ?>', {
+    // Función para actualizar el resumen
+    function actualizarResumen(total) {
+        document.getElementById('subtotal').textContent = formatearPrecioCLP(total);
+        document.getElementById('total').textContent = formatearPrecioCLP(total);
+    }
+
+    // Función para cambiar cantidad
+    function cambiarCantidad(productId, nuevaCantidad) {
+        if (nuevaCantidad <= 0) {
+            eliminarProducto(productId);
+            return;
+        }
+
+        fetch('<?= AssetHelper::url('cart/add') ?>', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ producto_ID: productoID })
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ 
+                producto_ID: productId,
+                cantidad: nuevaCantidad,
+                actualizar: true
+            })
         })
         .then(response => {
-            console.log('Respuesta recibida:', response.status, response.statusText);
             if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+                throw new Error(`Error HTTP: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Datos recibidos:', data);
             if (data.success) {
                 obtenerCarrito();
-                updateUndoRedoButtons(); // Actualizar estado de botones después de eliminar
             } else {
-                alert('Error al eliminar el producto del carrito: ' + (data.message || 'Error desconocido'));
-                mostrarError(true, 'Error al eliminar el producto: ' + (data.message || 'Error desconocido'));
+                mostrarError(true, data.message || 'Error al actualizar cantidad');
             }
         })
         .catch(error => {
-            console.error('Error al eliminar producto:', error);
-            mostrarError(true, 'Error de comunicación con el servidor: ' + error.message);
+            console.error('Error:', error);
+            mostrarError(true, 'Error al actualizar cantidad');
         });
     }
 
-    // Función para finalizar la compra
+    // Función para eliminar producto
+    function eliminarProducto(productId) {
+        fetch('<?= AssetHelper::url('cart/remove') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                producto_ID: productId
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                obtenerCarrito();
+            } else {
+                mostrarError(true, data.message || 'Error al eliminar producto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarError(true, 'Error al eliminar producto');
+        });
+    }
+
+    // Función para finalizar compra
     function finalizarCompra() {
         console.log('Finalizando compra...');
         mostrarError(false);
@@ -344,12 +306,41 @@ $title = $title ?? 'Carrito de Compras';
         });
     }
 
-    // Inicializar la página
+    // Función para actualizar botones de deshacer/rehacer
+    function updateUndoRedoButtons() {
+        fetch('<?= AssetHelper::url('cart/history') ?>', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const undoBtn = document.getElementById('undoBtn');
+                const redoBtn = document.getElementById('redoBtn');
+                
+                undoBtn.disabled = !data.hasUndoActions;
+                redoBtn.disabled = !data.hasRedoActions;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Event Listeners
     document.addEventListener('DOMContentLoaded', function() {
+        // Botones de deshacer/rehacer
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
 
-        // Función para deshacer última acción
         undoBtn.addEventListener('click', function() {
             if (this.disabled) return;
             
@@ -380,7 +371,6 @@ $title = $title ?? 'Carrito de Compras';
             });
         });
 
-        // Función para rehacer última acción
         redoBtn.addEventListener('click', function() {
             if (this.disabled) return;
             

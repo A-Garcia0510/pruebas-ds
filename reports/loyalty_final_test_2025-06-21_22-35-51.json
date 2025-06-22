@@ -1,0 +1,37 @@
+{
+    "testApiHealth": {
+        "success": true,
+        "message": "API respondiendo correctamente",
+        "data": {
+            "status": "healthy",
+            "service": "loyalty-system",
+            "components": {
+                "database": "connected",
+                "notification_service": "active",
+                "marketing_service": "active",
+                "analytics_service": "active"
+            },
+            "timestamp": "2025-06-21T16:35:51.341570"
+        }
+    },
+    "testUserProfile": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    },
+    "testEarnPoints": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    },
+    "testTransactions": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    },
+    "testReferralSystem": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    },
+    "testRewards": {
+        "success": false,
+        "message": "Error de la API (HTTP 404): Not Found"
+    }
+}

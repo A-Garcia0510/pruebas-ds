@@ -16,7 +16,29 @@ class Request implements RequestInterface
     {
         $this->body = $this->getRequestBody();
         $this->queryParams = $_GET;
-        $this->headers = getallheaders();
+        
+        // Manejar headers de forma segura
+        if (function_exists('getallheaders')) {
+            $this->headers = getallheaders();
+        } else {
+            // Fallback para CLI o cuando getallheaders no está disponible
+            $this->headers = [];
+            if (isset($_SERVER['HTTP_HOST'])) {
+                $this->headers['Host'] = $_SERVER['HTTP_HOST'];
+            }
+            if (isset($_SERVER['HTTP_USER_AGENT'])) {
+                $this->headers['User-Agent'] = $_SERVER['HTTP_USER_AGENT'];
+            }
+            if (isset($_SERVER['HTTP_ACCEPT'])) {
+                $this->headers['Accept'] = $_SERVER['HTTP_ACCEPT'];
+            }
+            if (isset($_SERVER['HTTP_CONTENT_TYPE'])) {
+                $this->headers['Content-Type'] = $_SERVER['HTTP_CONTENT_TYPE'];
+            }
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+                $this->headers['X-Requested-With'] = $_SERVER['HTTP_X_REQUESTED_WITH'];
+            }
+        }
     }
     
     /**
@@ -64,7 +86,7 @@ class Request implements RequestInterface
      */
     public function getMethod(): string
     {
-        return strtoupper($_SERVER['REQUEST_METHOD']);
+        return strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
     }
     
     /**
